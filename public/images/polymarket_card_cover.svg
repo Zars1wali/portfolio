@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" width="900" height="560">
+  <defs>
+    <linearGradient id="polyBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#050b14"/>
+      <stop offset="50%" style="stop-color:#0a1526"/>
+      <stop offset="100%" style="stop-color:#0d1f38"/>
+    </linearGradient>
+    <linearGradient id="chartGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#56e8d0;stop-opacity:0.4"/>
+      <stop offset="100%" style="stop-color:#56e8d0;stop-opacity:0.0"/>
+    </linearGradient>
+    <linearGradient id="polyGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#56e8d0"/>
+      <stop offset="50%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#34d399"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="560" rx="12" fill="url(#polyBg)"/>
+  <rect width="900" height="4" rx="2" fill="url(#polyGrad)"/>
+
+  <!-- Top Banner -->
+  <text x="30" y="42" font-family="'Courier New', monospace" font-size="13" font-weight="bold" fill="#56e8d0">// POLYMARKET HFT ARBITRAGE CORE (C++20)</text>
+  <text x="870" y="42" font-family="'Courier New', monospace" font-size="11" fill="#34d399" text-anchor="end">● TICK LATENCY: 0.34ms</text>
+  <line x1="30" y1="54" x2="870" y2="54" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+  <!-- Live Candlestick & Price Chart Area -->
+  <rect x="30" y="70" width="530" height="270" rx="8" fill="#08101d" stroke="rgba(86,232,208,0.2)" stroke-width="1"/>
+  <text x="45" y="95" font-family="'Courier New', monospace" font-size="11" font-weight="bold" fill="#e2e8f0">BTC-5M ORACLE LAG vs BINANCE SPOT</text>
+  <text x="430" y="95" font-family="'Courier New', monospace" font-size="10" fill="#a78bfa">EDGE: +16.2%</text>
+
+  <!-- Chart Grid Lines -->
+  <line x1="45" y1="120" x2="545" y2="120" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+  <line x1="45" y1="170" x2="545" y2="170" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+  <line x1="45" y1="220" x2="545" y2="220" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+  <line x1="45" y1="270" x2="545" y2="270" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+
+  <!-- Area Fill Under Curve -->
+  <path d="M 45 260 Q 120 250, 180 210 T 310 180 T 430 130 L 545 110 L 545 310 L 45 310 Z" fill="url(#chartGlow)"/>
+  
+  <!-- Price Trend Curve -->
+  <path d="M 45 260 Q 120 250, 180 210 T 310 180 T 430 130 L 545 110" fill="none" stroke="#56e8d0" stroke-width="3.5"/>
+
+  <!-- Signal Trigger Callout Point -->
+  <circle cx="430" cy="130" r="6" fill="#34d399"/>
+  <circle cx="430" cy="130" r="12" fill="none" stroke="#34d399" stroke-width="1.5" opacity="0.6"/>
+  <rect x="445" y="115" width="90" height="24" rx="4" fill="#064e3b" stroke="#34d399" stroke-width="1"/>
+  <text x="490" y="131" font-family="'Courier New', monospace" font-size="9" fill="#34d399" text-anchor="middle">FAK BUY @ 0.52</text>
+
+  <!-- Right Side Orderbook & Depth Panel -->
+  <rect x="580" y="70" width="290" height="270" rx="8" fill="#08101d" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+  <text x="595" y="95" font-family="'Courier New', monospace" font-size="11" font-weight="bold" fill="#e2e8f0">// ORDERBOOK DEPTH</text>
+
+  <!-- ASKS -->
+  <rect x="595" y="110" width="180" height="14" fill="rgba(239,68,68,0.15)"/>
+  <text x="600" y="121" font-family="'Courier New', monospace" font-size="10" fill="#ef4444">0.550 (NO)   1,250 USDC</text>
+
+  <rect x="595" y="130" width="220" height="14" fill="rgba(239,68,68,0.15)"/>
+  <text x="600" y="141" font-family="'Courier New', monospace" font-size="10" fill="#ef4444">0.540 (NO)   2,100 USDC</text>
+
+  <!-- SPREAD INDICATOR -->
+  <rect x="595" y="152" width="260" height="22" rx="4" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="725" y="167" font-family="'Courier New', monospace" font-size="10" fill="#a78bfa" text-anchor="middle">DUMP HEDGE SUM: 0.965 (-3.5%)</text>
+
+  <!-- BIDS -->
+  <rect x="595" y="182" width="200" height="14" fill="rgba(52,211,153,0.15)"/>
+  <text x="600" y="193" font-family="'Courier New', monospace" font-size="10" fill="#34d399">0.425 (YES)  1,800 USDC</text>
+
+  <rect x="595" y="202" width="150" height="14" fill="rgba(52,211,153,0.15)"/>
+  <text x="600" y="213" font-family="'Courier New', monospace" font-size="10" fill="#34d399">0.420 (YES)    950 USDC</text>
+
+  <!-- Bottom Execution Specs -->
+  <rect x="595" y="235" width="260" height="90" rx="6" fill="#050b14" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text x="605" y="255" font-family="'Courier New', monospace" font-size="9" fill="#94a3b8">Network: <tspan fill="#a78bfa">Polygon Mainnet (Chain 137)</tspan></text>
+  <text x="605" y="272" font-family="'Courier New', monospace" font-size="9" fill="#94a3b8">Crypto Signer: <tspan fill="#34d399">libsecp256k1 EIP-712</tspan></text>
+  <text x="605" y="289" font-family="'Courier New', monospace" font-size="9" fill="#94a3b8">JSON Parser: <tspan fill="#56e8d0">simdjson (1.1µs)</tspan></text>
+  <text x="605" y="306" font-family="'Courier New', monospace" font-size="9" fill="#94a3b8">Risk Engine: <tspan fill="#f59e0b">Adaptive Kelly Sizing</tspan></text>
+
+  <!-- Bottom Log Ticker -->
+  <rect x="30" y="360" width="840" height="175" rx="8" fill="#040810" stroke="rgba(86,232,208,0.2)" stroke-width="1"/>
+  <text x="45" y="385" font-family="'Courier New', monospace" font-size="11" font-weight="bold" fill="#56e8d0">// REAL-TIME HFT SYSTEM LOG STREAM</text>
+  
+  <text x="45" y="410" font-family="'Courier New', monospace" font-size="10" fill="#34d399">[23:14:02] [C++ ENGINE] Boost.Asio event loop running on 4 core threads (sub-millisecond tick)</text>
+  <text x="45" y="430" font-family="'Courier New', monospace" font-size="10" fill="#56e8d0">[23:14:03] [BINANCE WS] BTCUSDT tick +$520.00 move · simdjson parse: 1.1µs · Latency: 11ms</text>
+  <text x="45" y="450" font-family="'Courier New', monospace" font-size="10" fill="#a78bfa">[23:14:03] [EDGE DETECTOR] Sigmoid Model P(UP)=0.68, Edge=0.16. Signal Fired!</text>
+  <text x="45" y="470" font-family="'Courier New', monospace" font-size="10" fill="#34d399">[23:14:03] [EIP-712] Signed via libsecp256k1 (320µs) · FAK Buy order filled 50 shares @ $0.52</text>
+  <text x="45" y="490" font-family="'Courier New', monospace" font-size="10" fill="#f59e0b">[23:14:10] [DUMP HEDGE] SOL sum=0.965 (discount 3.5%). Dual-leg FAK orders executing...</text>
+  <text x="45" y="515" font-family="'Courier New', monospace" font-size="10" fill="#34d399">[23:14:12] [RISK ENGINE] Circuit breaker HEALTHY · 0.00% Drawdown · Balance: $1,005.85 USDC</text>
+</svg>

@@ -1,0 +1,125 @@
+---
+title: "SecurCore"
+summary: "A full-featured password manager and security analytics tool built in C++ for CS221 — demonstrating AVL trees, hash maps, graphs, and real-time breach detection using data structures and algorithms."
+stack:
+  - "C++17"
+  - "STL (Standard Template Library)"
+  - "AVL Trees"
+  - "Hash Maps (unordered_map)"
+  - "Graphs (adjacency list)"
+  - "Linked Lists"
+  - "Stacks & Queues"
+  - "File I/O (fstream)"
+  - "Bit manipulation"
+  - "SHA-256 (custom impl)"
+workflow:
+  - "GitHub"
+  - "g++ / GCC"
+  - "VS Code"
+  - "Make"
+  - "ChatGPT (algorithm design assistance)"
+role: "Team project — Umer Wali & Hamza Mehboob (CS221, Dr. Zubair Ahmed)"
+links:
+  repo: "https://github.com/Zars1wali/SecurCore-CS221"
+year: 2025
+featured: true
+image: "/images/securcore_card_cover.svg"
+---
+
+## Project Overview
+
+**SecurCore** is an advanced password manager and security analytics system developed as the capstone project for **CS221 — Data Structures and Algorithms** at the university, instructed by **Dr. Zubair Ahmed**. Built entirely in **C++17**, it demonstrates practical applications of core data structures in a real-world cybersecurity context.
+
+Team: **Umer Wali** (2023736) and **Hamza Mehboob** (2024392).
+
+---
+
+## Data Structures Used
+
+The project was designed to showcase DSA concepts in a non-trivial application:
+
+```cpp
+// AVL Tree node — used for O(log n) sorted password retrieval
+struct AVLNode {
+    string key;      // site domain
+    string password; // encrypted vault entry
+    int height;
+    AVLNode* left;
+    AVLNode* right;
+
+    AVLNode(string k, string p)
+        : key(k), password(p), height(1),
+          left(nullptr), right(nullptr) {}
+};
+
+// Self-balancing insert with rotation
+AVLNode* insert(AVLNode* node, string key, string pass) {
+    if (!node) return new AVLNode(key, pass);
+    if (key < node->key)
+        node->left = insert(node->left, key, pass);
+    else if (key > node->key)
+        node->right = insert(node->right, key, pass);
+    else return node; // duplicate site
+
+    node->height = 1 + max(height(node->left),
+                           height(node->right));
+    return rebalance(node);
+}
+
+// Hash map for O(1) credential lookup
+unordered_map<string, string> vaultIndex;
+
+// Graph adjacency list for breach propagation analysis
+unordered_map<string, vector<string>> siteGraph;
+
+// Stack-based undo history for vault edits
+stack<VaultAction> undoStack;
+```
+
+---
+
+## Core Features & Architecture
+
+### 🔐 Password Vault (AVL Tree)
+Passwords are stored in an **AVL tree** keyed by site domain, ensuring O(log n) insert, lookup, and deletion with guaranteed balance. The tree is serialized to an encrypted flat file for persistence.
+
+### ⚡ Fast Lookup Index (Hash Map)
+An `unordered_map` provides O(1) average-case retrieval for the most-accessed credentials, complementing the sorted tree structure.
+
+### 🕸️ Breach Propagation Graph
+A directed **graph** (adjacency list) models relationships between sites that share credentials. If a breach is detected on one node, a **BFS/DFS traversal** identifies all potentially compromised accounts.
+
+### 🔢 Security Analytics
+- **Password strength scoring** — entropy calculation via character set analysis and bit manipulation
+- **Duplicate detection** — hash-based collision detection across the vault
+- **Breach simulation** — graph traversal reports propagation distance from the compromised node
+- **Custom SHA-256** — lightweight hash function for credential fingerprinting without external dependencies
+
+### 💾 Persistence Layer
+All vault data is written to structured binary files using `fstream`. Encryption keys are derived from a master password using a custom key-stretching function.
+
+### ↩️ Undo/Redo (Stack)
+All vault modifications (add/delete/update) push actions onto a `stack<VaultAction>`, enabling multi-level undo without external libraries.
+
+---
+
+## Build & Run
+
+```bash
+g++ -std=c++17 main.cpp -o securcore
+./securcore
+```
+
+No external dependencies — pure STL C++17.
+
+---
+
+## Skills Demonstrated
+
+| Category | Specifics |
+|---|---|
+| **Data Structures** | AVL Tree, Hash Map, Graph, Stack, Queue, Linked List |
+| **Algorithms** | BFS, DFS, Tree rotations, Entropy analysis |
+| **Systems** | File I/O, binary serialization, custom hashing |
+| **Software** | g++, Make, VS Code, GitHub |
+| **AI Tools** | ChatGPT for algorithm pseudocode review and test case generation |

@@ -1,0 +1,54 @@
+---
+title: "Cybersecurity Incident Management System"
+summary: "A database-driven enterprise security platform for tracking cyber incidents, vulnerabilities, affected assets, and automated PL/pgSQL remediation workflows."
+stack: ["JavaScript", "PostgreSQL", "PL/pgSQL", "Python", "Express", "Docker"]
+workflow: ["GitHub", "Docker", "PostgreSQL", "Jira"]
+role: "Database Architect & Lead Security Engineer"
+links:
+  repo: "https://github.com/Zars1wali/2023736-DBMS-PROJECT"
+  live: "https://www.linkedin.com/posts/umer-wali-803271285_security-architecture-of-my-database-management-activity-7469135245108305920-29ML"
+year: 2026
+featured: true
+image: "/videos/dbms.mp4"
+---
+
+<video controls autoPlay loop muted playsInline style={{ width: "100%", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.12)", margin: "1.5rem 0" }}>
+  <source src="/videos/dbms.mp4" type="video/mp4" />
+</video>
+
+## Security Architecture & Overview
+
+The Cybersecurity Incident Management System (CIMS) is an enterprise-grade platform designed to streamline security incident response, threat containment, and vulnerability management. Built on PostgreSQL with custom PL/pgSQL triggers, the system enforces strict audit trails, rate limiting, and Role-Based Access Control (RBAC) at the database layer.
+
+---
+
+## Core Security Features
+
+* **Role-Based Access Control (RBAC)**: Fine-grained permissions isolating Analysts, Incident Commanders, and Administrators.
+* **Automated Remediation Triggers**: Database-level PL/pgSQL procedures that automatically elevate severity scores and lock compromised asset records upon critical threat detection.
+* **Audit Logging & Tamper Resistance**: Append-only audit logs tracking all user queries, status transitions, and credential modifications.
+* **API Protection**: Express gateway with API rate limiting, JWT token validation, and sanitized PostgreSQL queries protecting against SQL injection.
+
+```sql
+-- PL/pgSQL Trigger: Auto-elevate Incident Severity on Critical Threat Match
+CREATE OR REPLACE FUNCTION elevate_incident_severity()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.threat_vector = 'CRITICAL_EXPLOIT' AND NEW.affected_assets_count > 5 THEN
+        NEW.severity := 'CRITICAL';
+        NEW.escalated_at := NOW();
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+---
+
+## Architecture Breakdown
+
+1. **Frontend / API Gateway**: Node.js & Express API with middleware enforcement (`authenticate`, `apiRateLimiter`).
+2. **Database Engine**: PostgreSQL with custom schema design, indexes on high-frequency triage columns, and materialized views for security analytics.
+3. **Containerized Deployment**: Multi-container Docker Compose setup for consistent deployment across staging and production environments.
+
+[View Security Architecture Post on LinkedIn](https://www.linkedin.com/posts/umer-wali-803271285_security-architecture-of-my-database-management-activity-7469135245108305920-29ML)

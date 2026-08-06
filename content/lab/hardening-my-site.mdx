@@ -1,0 +1,65 @@
+---
+title: "Hardening My Site"
+summary: "A security and performance hardening pass for this self-hosted portfolio: dependency auditing, response-header policy, source-map exposure, and deployment maintenance."
+year: 2026
+featured: false
+wip: true
+---
+
+## Scope
+
+This pass reviewed the local deployment at `http://localhost:3000` and the
+application configuration that ships with the portfolio: `next.config.ts`,
+the `/infra` Docker + Nginx setup, and the dependency tree.
+
+## Changes made
+
+- **Dependency audit**: `npm audit` currently reports **0 known
+  vulnerabilities** across the full tree (verified August 2026).
+- **No framework disclosure**: `X-Powered-By` is disabled via
+  `poweredByHeader: false`.
+- **No production source maps**: `productionBrowserSourceMaps: false` keeps
+  compiled assets lean and makes the shipped bundle harder to reverse.
+- **Response-header policy** (applied to all routes in `next.config.ts`):
+  - `Content-Security-Policy` — `default-src 'self'`, strict `font-src` /
+    `img-src` / `connect-src`, `frame-ancestors 'none'`, `base-uri 'self'`,
+    `form-action 'self'`, and `upgrade-insecure-requests`. The dev server
+    additionally permits `'unsafe-eval'` for React tooling; production
+    strips it.
+  - `Strict-Transport-Security` — `max-age=31536000; includeSubDomains;
+    preload`.
+  - `X-Frame-Options: DENY` (clickjacking), `X-Content-Type-Options: nosniff`
+    (MIME-sniffing), `Referrer-Policy: strict-origin-when-cross-origin`,
+    `Permissions-Policy` disabling camera, microphone, geolocation, and
+    interest-cohort.
+- **Supply chain**: Dependabot configured for three ecosystems — npm, Docker,
+  and GitHub Actions — with weekly schedules and dev-dependency grouping.
+- **Dynamic security endpoints**: `robots.txt`, `sitemap.xml`, and
+  `/.well-known/security.txt` are generated routes whose canonical URLs derive
+  from the request origin, so they work on localhost and after deployment
+  behind Nginx.
+
+## Deployment verification
+
+Every public route on the running server returned the configured CSP, HSTS,
+frame protection, MIME-sniffing protection, referrer policy, and permissions
+policy, with no `X-Powered-By` header. An unknown route returns a clean 404
+without stack-trace leakage.
+
+The container image runs the standalone build as a **non-root user**
+(`USER nextjs`, UID 1001) on `node:22-alpine` with `NODE_ENV=production` and
+telemetry disabled — a minor but meaningful reduction of blast radius.
+
+The current verification was run against the **development** server, which
+intentionally serves development source maps and allows `unsafe-eval`.
+Production source-map availability, HTTPS mixed-content status, and
+mobile/desktop rendering remain to be verified from the production container
+behind TLS.
+
+{/* TODO: paste actual SSL Labs / securityheaders.com results here */}
+
+## Follow-up
+
+After the production URL is confirmed: verify deployed response headers on
+every public route, confirm an unknown route returns the production 404 page,
+run the host through SSL Labs, and capture desktop and mobile screenshots.

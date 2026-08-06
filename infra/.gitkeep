@@ -1,0 +1,6 @@
+# Infra files go here (added during infra phase):
+# - Dockerfile
+# - docker-compose.yml
+# - nginx.conf (with CSP, HSTS, X-Frame-Options, X-Content-Type-Options)
+# - deploy workflow (.github/workflows/deploy.yml)
+# - renovate.json / dependabot.yml

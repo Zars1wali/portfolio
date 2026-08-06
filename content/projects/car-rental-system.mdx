@@ -1,0 +1,162 @@
+---
+title: "Car Rental System"
+summary: "A full-featured C++ OOP console application for vehicle rental management — polymorphic user roles, real-time fleet tracking, automated billing, and flat-file persistence — co-authored with Suleman Malik."
+stack:
+  - "C++17"
+  - "OOP (Polymorphism, Inheritance, Abstraction)"
+  - "STL (vector, map, string)"
+  - "File I/O (fstream)"
+  - "Abstract Base Classes"
+  - "Operator Overloading"
+  - "Exception Handling"
+  - "Function Overloading"
+  - "Flat-file Database"
+workflow:
+  - "GitHub"
+  - "g++ / GCC"
+  - "VS Code"
+  - "Code::Blocks"
+  - "ChatGPT (debugging & OOP design review)"
+role: "Lead Developer (Team Project — Umer Wali & Suleman Malik)"
+links:
+  repo: "https://github.com/Zars1wali/CarRentalProject"
+  live: "https://www.linkedin.com/posts/umer-wali-803271285_cplusplus-oop-codingproject-activity-7333207067484225538-JFvj"
+year: 2025
+featured: false
+image: "/images/car_rental_card_cover.svg"
+---
+
+## Project Overview
+
+A console-based **C++ Object-Oriented Programming** car rental management system demonstrating advanced OOP principles through a real-world domain. The application handles two distinct user roles — **Customer** and **Administrator** — each with role-specific access controls, authenticated through a secure login system.
+
+Co-authored by **Umer Wali** and **Suleman Malik**.
+
+---
+
+## Core Architecture
+
+The system is built around a deep inheritance hierarchy with an abstract base class:
+
+```cpp
+// Abstract base — pure virtual interface enforces role contracts
+class Person {
+protected:
+    string username;
+    string password;
+    string name;
+    string contactNumber;
+public:
+    virtual void showProfile() = 0;       // pure virtual
+    virtual void mainMenu() = 0;          // pure virtual
+    string getUsername() { return username; }
+    virtual ~Person() {}
+};
+
+// Customer inherits Person — booking, history, feedback
+class Customer : public Person {
+private:
+    vector<RentalRecord> rentalHistory;
+public:
+    void showProfile() override;
+    void mainMenu() override;
+    void rentVehicle(Vehicle& v, int days);
+    void returnVehicle(string plateNum);
+    void viewReceipt(string rentalId);
+    void submitFeedback(int rating, string comment);
+};
+
+// Administrator — fleet management, user oversight
+class Administrator : public Person {
+public:
+    void showProfile() override;
+    void mainMenu() override;
+    void addVehicle(Vehicle v);
+    void removeVehicle(string plateNum);
+    void viewAllRentals();
+    void generateReport();
+};
+
+// Vehicle class — polymorphic fleet
+class Vehicle {
+protected:
+    string plateNumber;
+    string model;
+    string brand;
+    bool isAvailable;
+    double dailyRate;
+public:
+    virtual double calculateRent(int days) = 0;
+    virtual void display() = 0;
+    string getPlate() { return plateNumber; }
+    bool available() { return isAvailable; }
+};
+
+class Car : public Vehicle {
+public:
+    double calculateRent(int days) override {
+        return dailyRate * days;
+    }
+    void display() override;
+};
+
+class SUV : public Vehicle {
+    bool hasRoofRack;
+public:
+    double calculateRent(int days) override {
+        return dailyRate * days * (hasRoofRack ? 1.15 : 1.0);
+    }
+    void display() override;
+};
+```
+
+---
+
+## Features
+
+### 👤 Authentication & Security
+- User registration with unique username validation
+- Password hashing (XOR + shift cipher) stored in `users.dat`
+- Password recovery via registered security questions
+- Session management with role-based menu routing
+
+### 🚗 Fleet Management (Admin)
+- Add, update, remove vehicles (Car/SUV/Truck polymorphic types)
+- Real-time availability tracking using `map<string, Vehicle*>`
+- Fleet utilization reports — daily/weekly revenue summaries
+
+### 📋 Rental Workflow (Customer)
+- Browse available vehicles by type, price range, or model
+- Rent with date validation and conflict checking
+- Return processing with damage assessment prompt
+- Receipt generation — itemized bill with daily rate × days + tax
+
+### 📁 Flat-file Persistence
+All data is read/written through `fstream` binary files:
+- `users.dat` — customer and admin credentials
+- `vehicles.dat` — full fleet inventory
+- `rentals.dat` — active and historical rental records
+- `feedback.dat` — customer ratings and comments
+
+### 💰 Billing Engine
+- Auto-calculates total cost on return
+- Late return penalty calculation (1.5× daily rate per overdue day)
+- Generates formatted text receipt to console + appends to `receipts.log`
+
+---
+
+## Skills Demonstrated
+
+| Category | Specifics |
+|---|---|
+| **OOP Pillars** | Encapsulation, Inheritance, Polymorphism, Abstraction |
+| **C++ Features** | Pure virtual functions, operator overloading, exception handling, templates |
+| **Data Management** | Binary file I/O, STL containers (vector, map, string) |
+| **Software Tools** | g++/GCC, VS Code, Code::Blocks, GitHub |
+| **AI Tools** | ChatGPT for OOP design review, edge case debugging, and unit test ideas |
+
+---
+
+## Demo
+
+[Watch the C++ OOP Rental System Demonstration on LinkedIn](https://www.linkedin.com/posts/umer-wali-803271285_cplusplus-oop-codingproject-activity-7333207067484225538-JFvj)

@@ -1,0 +1,78 @@
+# GitHub GraphQL query for the /lab activity dashboard
+# Source: content-seed/lab-data/github-stats-query.graphql
+#
+# Variables:
+#   $username : String!   — GitHub login (GITHUB_USERNAME env var)
+#   $from     : DateTime! — ISO 8601, start of trailing 12 months
+#   $to       : DateTime! — ISO 8601, now
+#
+# All field names use the exact GitHub GraphQL schema identifiers.
+# Do NOT edit field names without verifying against
+# https://docs.github.com/en/graphql/reference/objects
+
+query GitHubStats($username: String!, $from: DateTime!, $to: DateTime!) {
+  user(login: $username) {
+    repositories(
+      first: 100
+      ownerAffiliations: OWNER
+      privacy: PUBLIC
+      orderBy: { field: PUSHED_AT, direction: DESC }
+    ) {
+      totalCount
+      nodes {
+        name
+        description
+        url
+        stargazerCount
+        forkCount
+        isArchived
+        isFork
+        primaryLanguage {
+          name
+          color
+        }
+        languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
+          edges {
+            size
+            node {
+              name
+              color
+            }
+          }
+        }
+      }
+    }
+
+    pinnedItems(first: 6, types: REPOSITORY) {
+      nodes {
+        ... on Repository {
+          name
+          description
+          url
+          stargazerCount
+          forkCount
+          primaryLanguage {
+            name
+            color
+          }
+        }
+      }
+    }
+
+    contributionsCollection(from: $from, to: $to) {
+      totalCommitContributions
+      totalIssueContributions
+      totalPullRequestContributions
+      totalPullRequestReviewContributions
+      contributionCalendar {
+        totalContributions
+        weeks {
+          contributionDays {
+            contributionCount
+            date
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" width="900" height="560">
+  <defs>
+    <linearGradient id="carBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1c1306"/>
+      <stop offset="50%" style="stop-color:#2a1a08"/>
+      <stop offset="100%" style="stop-color:#180f03"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f59e0b"/>
+      <stop offset="50%" style="stop-color:#ef4444"/>
+      <stop offset="100%" style="stop-color:#fbbf24"/>
+    </linearGradient>
+    <linearGradient id="cppShield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0284c7"/>
+      <stop offset="100%" style="stop-color:#0369a1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="560" rx="12" fill="url(#carBg)"/>
+  <rect width="900" height="4" rx="2" fill="url(#amberGrad)"/>
+
+  <!-- Top Banner -->
+  <text x="30" y="42" font-family="'Courier New', monospace" font-size="13" font-weight="bold" fill="#f59e0b">// C++ OBJECT-ORIENTED CAR RENTAL &amp; FLEET ENGINE</text>
+  <text x="870" y="42" font-family="'Courier New', monospace" font-size="11" fill="#fbbf24" text-anchor="end">BUILD: g++ 13.2 (-std=c++20)</text>
+  <line x1="30" y1="54" x2="870" y2="54" stroke="rgba(245,158,11,0.2)" stroke-width="1"/>
+
+  <!-- Left Side: Stylized Car Vector Silhouette + C++ Badge -->
+  <rect x="30" y="70" width="380" height="270" rx="8" fill="#140c03" stroke="rgba(245,158,11,0.25)" stroke-width="1"/>
+  
+  <!-- C++ Shield Badge -->
+  <polygon points="60,90 110,90 120,130 85,145 50,130" fill="url(#cppShield)"/>
+  <text x="85" y="118" font-family="'Helvetica Neue', sans-serif" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">C++</text>
+  <text x="135" y="112" font-family="'Courier New', monospace" font-size="12" font-weight="bold" fill="#f59e0b">OOP ARCHITECTURE</text>
+  <text x="135" y="128" font-family="'Courier New', monospace" font-size="10" fill="#cbd5e1">Polymorphic Vehicle Catalog</text>
+
+  <!-- Stylized Sports Car Silhouette Artwork -->
+  <g transform="translate(50, 165)">
+    <!-- Car body path -->
+    <path d="M 10 70 C 40 68, 70 40, 110 32 C 160 22, 230 25, 270 45 L 320 52 C 340 55, 350 65, 345 75 L 340 85 C 330 90, 20 90, 10 85 Z" fill="#f59e0b" opacity="0.85"/>
+    <!-- Roof & Windshield -->
+    <path d="M 95 38 C 120 25, 180 20, 235 32 L 255 46 Z" fill="#0f172a" opacity="0.9"/>
+    <!-- Wheels -->
+    <circle cx="80" cy="85" r="22" fill="#0f172a" stroke="#f59e0b" stroke-width="4"/>
+    <circle cx="80" cy="85" r="9" fill="#f59e0b"/>
+    <circle cx="280" cy="85" r="22" fill="#0f172a" stroke="#f59e0b" stroke-width="4"/>
+    <circle cx="280" cy="85" r="9" fill="#f59e0b"/>
+    <!-- Headlight beam glow -->
+    <polygon points="340,65 375,55 375,80" fill="#fbbf24" opacity="0.5"/>
+  </g>
+
+  <!-- Fleet Statistics Pills -->
+  <rect x="45" y="285" width="105" height="40" rx="6" fill="#2a1805" stroke="#f59e0b" stroke-width="1"/>
+  <text x="97" y="302" font-family="'Courier New', monospace" font-size="9" fill="#94a3b8" text-anchor="middle">FLEET SIZE</text>
+  <text x="97" y="318" font-family="'Courier New', monospace" font-size="12" font-weight="bold" fill="#fbbf24" text-anchor="middle">24 Vehicles</text>
+
+  <rect x="165" y="285" width="115" height="40" rx="6" fill="#2a1805" stroke="#f59e0b" stroke-width="1"/>
+  <text x="222" y="302" font-family="'Courier New', monospace" font-size="9" fill="#94a3b8" text-anchor="middle">RATE RANGE</text>
+  <text x="222" y="318" font-family="'Courier New', monospace" font-size="12" font-weight="bold" fill="#34d399" text-anchor="middle">$120 – $450/day</text>
+
+  <rect x="295" y="285" width="100" height="40" rx="6" fill="#2a1805" stroke="#f59e0b" stroke-width="1"/>
+  <text x="345" y="302" font-family="'Courier New', monospace" font-size="9" fill="#94a3b8" text-anchor="middle">STORAGE</text>
+  <text x="345" y="318" font-family="'Courier New', monospace" font-size="12" font-weight="bold" fill="#60a5fa" text-anchor="middle">Flat-Files</text>
+
+  <!-- Right Side: C++ Code IDE Window -->
+  <rect x="430" y="70" width="440" height="270" rx="8" fill="#110a02" stroke="rgba(245,158,11,0.25)" stroke-width="1"/>
+  <text x="445" y="95" font-family="'Courier New', monospace" font-size="11" font-weight="bold" fill="#f59e0b">// C++ CLASS HIERARCHY &amp; POLYMORPHISM</text>
+
+  <text x="445" y="120" font-family="'Courier New', monospace" font-size="10" fill="#ef4444">class <tspan fill="#f8fafc">Person</tspan> &#123;</text>
+  <text x="445" y="136" font-family="'Courier New', monospace" font-size="10" fill="#94a3b8">protected:</text>
+  <text x="460" y="152" font-family="'Courier New', monospace" font-size="10" fill="#60a5fa">string <tspan fill="#f8fafc">username, password, contact;</tspan></text>
+  <text x="445" y="168" font-family="'Courier New', monospace" font-size="10" fill="#94a3b8">public:</text>
+  <text x="460" y="184" font-family="'Courier New', monospace" font-size="10" fill="#ef4444">virtual void <tspan fill="#34d399">showProfile</tspan>() = 0;</text>
+  <text x="460" y="200" font-family="'Courier New', monospace" font-size="10" fill="#ef4444">virtual bool <tspan fill="#34d399">authenticate</tspan>(string user, string pass);</text>
+  <text x="445" y="216" font-family="'Courier New', monospace" font-size="10" fill="#f8fafc">&#125;;</text>
+
+  <text x="445" y="240" font-family="'Courier New', monospace" font-size="10" fill="#ef4444">class <tspan fill="#f8fafc">Customer</tspan> : <tspan fill="#ef4444">public</tspan> <tspan fill="#60a5fa">Person</tspan> &#123;</text>
+  <text x="445" y="256" font-family="'Courier New', monospace" font-size="10" fill="#94a3b8">public:</text>
+  <text x="460" y="272" font-family="'Courier New', monospace" font-size="10" fill="#ef4444">void <tspan fill="#34d399">showProfile</tspan>() <tspan fill="#ef4444">override</tspan>; <tspan fill="#64748b">// Rental history &amp; receipts</tspan></text>
+  <text x="460" y="288" font-family="'Courier New', monospace" font-size="10" fill="#ef4444">void <tspan fill="#34d399">bookVehicle</tspan>(Vehicle&amp; v, int days);</text>
+  <text x="445" y="304" font-family="'Courier New', monospace" font-size="10" fill="#f8fafc">&#125;;</text>
+
+  <text x="445" y="328" font-family="'Courier New', monospace" font-size="9" fill="#34d399">✓ Encapsulated Class Methods  ✓ Dynamic Bill Calculation</text>
+
+  <!-- Bottom Console Execution Stream -->
+  <rect x="30" y="360" width="840" height="175" rx="8" fill="#080401" stroke="rgba(245,158,11,0.25)" stroke-width="1"/>
+  <text x="45" y="385" font-family="'Courier New', monospace" font-size="11" font-weight="bold" fill="#f59e0b">// RENTAL ENGINE CONSOLE OUTPUT &amp; LINKEDIN DEMO</text>
+  
+  <text x="45" y="410" font-family="'Courier New', monospace" font-size="10" fill="#34d399">[SYSTEM] Initializing C++ Car Rental Management System v2.0</text>
+  <text x="45" y="430" font-family="'Courier New', monospace" font-size="10" fill="#60a5fa">[FILE I/O] Loaded 'vehicles.dat' (24 records) and 'users.dat' (18 accounts)</text>
+  <text x="45" y="450" font-family="'Courier New', monospace" font-size="10" fill="#fbbf24">[BOOKING #R-9041] Customer: zarss · Vehicle: Porsche 911 GT3 · 3 Days @ $350.00/day</text>
+  <text x="45" y="470" font-family="'Courier New', monospace" font-size="10" fill="#34d399">[RECEIPT GENERATED] Total Amount Due: $1,050.00 (Tax Included) · Written to 'receipts.txt'</text>
+  <text x="45" y="490" font-family="'Courier New', monospace" font-size="10" fill="#a78bfa">[LINKEDIN DEMO] Video Walkthrough: linkedin.com/posts/umer-wali-803271285_cplusplus-oop-codingproject...</text>
+  <text x="45" y="515" font-family="'Courier New', monospace" font-size="10" fill="#94a3b8">Authors: Umer Wali ("zarss") &amp; Suleman Malik  ·  Repository: github.com/Zars1wali/CarRentalProject</text>
+</svg>

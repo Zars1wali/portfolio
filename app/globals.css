@@ -1,0 +1,226 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SIGNAL DESIGN SYSTEM — based on hero-preview.html
+   Token names match AGENTS.md: void, navy, glass, cyan, violet, fog, mist
+───────────────────────────────────────────────────────────────────────────── */
+@theme inline {
+  /* ── Palette ─────────────────────────────────────────────── */
+  --color-void:         #05070C;
+  --color-navy:         #0B1220;
+  --color-cyan:         #56E8D0;
+  --color-cyan-light:   #6EF0DA;
+  --color-violet:       #8B7CF6;
+  --color-fog:          #EDEFF3;
+  --color-mist:         #8B93A3;
+
+  /* Glass surface — used via Tailwind classes bg-glass, border-glass-border */
+  --color-glass:        rgba(255,255,255,0.05);
+  --color-glass-border: rgba(255,255,255,0.12);
+  --color-glass-strong: rgba(255,255,255,0.08);
+
+  /* ── Fonts ───────────────────────────────────────────────── */
+  --font-sans:    var(--font-inter), system-ui, sans-serif;
+  --font-mono:    var(--font-jetbrains), monospace;
+  --font-display: var(--font-space-grotesk), system-ui, sans-serif;
+}
+
+/* Runtime CSS custom properties for inline-style usage (glass effects, etc.) */
+:root {
+  --glass:        rgba(255,255,255,0.05);
+  --glass-border: rgba(255,255,255,0.12);
+  --glass-glow:   rgba(86,232,208,0.15);
+}
+
+/* ── Skeleton shimmer — used by GitHub dashboard when token not set ── */
+@keyframes skeleton-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+/* Respect reduced-motion for skeletons */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+}
+
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    /* Scene background lives here — always rendered, no JS/z-index required */
+    background:
+      radial-gradient(ellipse 60% 50% at 30% 20%, rgba(86,232,208,0.08), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 75% 75%, rgba(139,124,246,0.07), transparent 60%),
+      linear-gradient(160deg, #05070C 0%, #0B1220 100%);
+    min-height: 100dvh;
+    color: #EDEFF3;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background: transparent;
+    color: var(--color-fog);
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Headings: Space Grotesk */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--color-fog);
+    margin: 0;
+  }
+
+  /* Code elements: JetBrains Mono */
+  code, kbd, samp, pre {
+    font-family: var(--font-mono);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  ul, ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+@layer utilities {
+
+  /* Footer — no backdrop blur: the footer scrolls over the fixed cosmic-dust
+     canvas, and backdrop-filter would force per-frame repaints of the WebGL
+     layer. Slightly more opaque void tint keeps footer text legible instead. */
+  .site-footer {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    background-color: rgba(5,7,12,0.75);
+    margin-top: auto;
+    position: relative;
+    z-index: 10;
+  }
+
+  /* MDX body prose — used in /projects/[slug] and /lab/[slug] */
+  .prose {
+    color: var(--color-mist);
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4 {
+    color: var(--color-fog);
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 1.8rem 0 0.6rem;
+  }
+  .prose h1 { font-size: 1.5rem; }
+  .prose h2 { font-size: 1.25rem; }
+  .prose h3 { font-size: 1.1rem; }
+
+  .prose p  { margin: 0.85rem 0; }
+
+  .prose a {
+    color: var(--color-cyan);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(86,232,208,0.4);
+    transition: text-decoration-color 0.15s;
+  }
+  .prose a:hover { text-decoration-color: var(--color-cyan); }
+
+  .prose img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.5), 0 0 25px rgba(86,232,208,0.08);
+    margin: 1.5rem 0;
+    display: block;
+  }
+
+  /* Override the base ul/ol reset only inside prose */
+  .prose ul,
+  .prose ol {
+    list-style: revert;
+    padding-left: 1.5rem;
+    margin: 0.85rem 0;
+  }
+  .prose li { margin: 0.3rem 0; }
+
+  .prose blockquote {
+    border-left: 2px solid var(--color-cyan);
+    padding-left: 1rem;
+    margin: 1rem 0;
+    color: rgba(139,147,163,0.85);
+    font-style: italic;
+  }
+
+  .prose code {
+    font-family: var(--font-jetbrains), monospace;
+    font-size: 0.88em;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+    color: var(--color-fog);
+  }
+
+  .prose pre {
+    background: rgba(5,7,12,0.7);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    margin: 1.25rem 0;
+  }
+  .prose pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.85em;
+  }
+
+  .prose hr {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    margin: 2rem 0;
+  }
+}
+

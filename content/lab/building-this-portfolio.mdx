@@ -1,0 +1,72 @@
+---
+title: "Building This Portfolio"
+summary: "Designing and building zarss.dev — a self-hosted Next.js 16 portfolio with a custom Signal design system, Tailwind v4, and MDX content pipeline."
+year: 2025
+featured: true
+wip: false
+---
+
+## Why
+
+The site needed to do three jobs at once: present shipped security/software
+work to recruiters, demonstrate live coding and AI-usage metrics, and prove
+that the person building it understands how to ship and harden a production
+web application. That meant no hosted templates and no dark-pattern
+dashboard-flavored defaults — everything from the design language to the
+deployment target was chosen deliberately.
+
+## Stack & architecture
+
+- **Next.js 16 (App Router) + React 19 + TypeScript** — server components
+  everywhere by default; the only client components are the interactive
+  pieces (CosmicDust canvas, tools modal, GitHub stats hydration).
+- **Tailwind CSS v4** for utility styling, with design tokens exposed as CSS
+  custom properties (`--color-*`, `--font-jetbrains`) so the theme survives
+  outside Tailwind classes.
+- **MDX content pipeline** (`lib/content.ts`): `gray-matter` for frontmatter
+  on index pages, `next-mdx-remote/rsc` for detail pages. Two collections —
+  `/content/projects` and `/content/lab` — share one schema and one loader.
+- **Static-first**: project and lab detail pages are prerendered via
+  `generateStaticParams`; the lab index revalidates every 24h. Nothing
+  user-specific is rendered at request time.
+
+## Design: the Signal system
+
+Dark by default, high contrast, monospace-forward. The palette is small and
+deliberate — void backgrounds, mist/fog text scales, and one saturated
+accent each for cyan and violet — with glass-panel cards (blur + hairline
+borders) instead of flat SaaS rectangles. It reads closer to a terminal or
+an instrumentation console than a template landing page.
+
+The hero background, `CosmicDust`, is a Three.js point cloud. It went through
+several performance passes before it earned its place: a single composite
+render pass (the three-composer bloom setup was dropped), DPR capped at 2,
+no antialiasing, no shadow maps, shader precompilation via
+`renderer.compile(scene, camera)` before the loop, and no scroll-jank — idle
+sits around 38fps, mid-scroll around 48fps on a mid-range machine.
+
+## Live GitHub dashboard
+
+`/api/github-stats` proxies the GitHub **GraphQL** API entirely server-side.
+The token is read from `GITHUB_TOKEN` and never leaves the server — the
+browser only ever calls the route. The response is cached with ISR for 24
+hours (`revalidate: 86400` plus `s-maxage`/`stale-while-revalidate` headers),
+and streaks are computed from the contribution calendar rather than
+hard-coded. If the token is unset the route degrades to a skeleton instead
+of leaking or erroring.
+
+## Deployment
+
+Self-hosted, not platform-hosted: a multi-stage `Dockerfile` on
+`node:22-alpine` builds the standalone Next.js output and runs it as a
+non-root user on port 3000, behind Nginx (config in `/infra`) with TLS via
+Certbot. The project is configured for automated dependency updates
+(Dependabot for npm, Docker, and Actions) from the start.
+
+## Notes for the future
+
+- The hardening pass (separate case study) was scoped before launch rather
+  than as a retrofit; the security headers and source-map policy were part
+  of the first build.
+- The content pipeline deliberately holds copy as MDX instead of fetching it
+  at runtime — every project gets a reviewable file instead of a CMS record.

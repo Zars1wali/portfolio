@@ -1,0 +1,81 @@
+---
+title: "From Tribe"
+summary: "A curated multi-vendor marketplace connecting independent artisan and craft brands with EU customers — built on a Next.js storefront, Medusa.js commerce engine, and a flat 13% commission model that replaces ad spend with quality discovery."
+stack:
+  - "Next.js 14"
+  - "TypeScript"
+  - "Medusa.js"
+  - "PostgreSQL"
+  - "Redis"
+  - "Stripe"
+  - "Tailwind CSS"
+  - "Vercel"
+  - "Cloudflare"
+  - "SendGrid"
+  - "Prisma ORM"
+  - "REST APIs"
+workflow:
+  - "GitHub"
+  - "Vercel"
+  - "Figma"
+  - "Notion"
+  - "VS Code"
+  - "ChatGPT (copy & UX refinement)"
+  - "Midjourney (brand visuals)"
+role: "Led a 3-developer build team, working under mentor and lead architect Nuno Ribeiro (senior cloud architect)"
+links:
+  live: "https://www.fromtribe.com"
+year: 2025
+featured: true
+image: "/images/from_tribe_card_cover.jpg"
+---
+
+## Project Overview
+
+From Tribe is a vendor-first multi-vendor marketplace for independent EU artisan and craft brands. The core pitch: a flat **13% commission per transaction**, zero listing fees, zero forced discounting, and organic discovery driven by quality rather than ad budget. Registered as **Fromtribe OÜ** in Tallinn, Estonia.
+
+The storefront is built on **Next.js 14** with the App Router and server components for fast initial loads and edge-optimized rendering. Commerce logic lives in a **Medusa.js** backend — product catalog, variant management, multi-vendor splits, checkout, and payout routing all run through Medusa's extensible architecture. A separate **PostgreSQL** database (with **Prisma ORM**) holds vendor profiles, application state, and sales analytics. **Redis** caches active session carts and frequently queried product feeds.
+
+---
+
+## Architecture & Tech Stack
+
+### Frontend
+- **Next.js 14** — App Router, React Server Components, dynamic routing per vendor storefront
+- **TypeScript** — end-to-end type safety across API contracts and component props
+- **Tailwind CSS** — utility-first design system with a custom editorial theme (dark luxe + lime accent `#D8FC02`)
+- **Vercel** — edge deployment with ISR (Incremental Static Regeneration) for product pages
+
+### Backend & Commerce
+- **Medusa.js** — headless commerce engine: multi-vendor order routing, fulfillment, returns, and payout splitting
+- **PostgreSQL + Prisma** — relational store for products, vendors, orders, reviews
+- **Redis** — session cache, rate-limiting, cart persistence
+- **Stripe** — payment processing and vendor payout automation via Connect
+
+### Infrastructure & Integrations
+- **Cloudflare** — DNS, DDoS protection, edge caching for static assets
+- **SendGrid** — transactional emails (order confirmations, vendor notifications, payout summaries)
+- **REST API** — custom endpoints for vendor onboarding flow, application review, and admin dashboard
+
+### AI & Design Tools
+- **ChatGPT** — product copy refinement, FAQ generation, customer communication templates
+- **Midjourney** — brand visual direction, hero imagery, look-book concept art
+- **Figma** — UI/UX prototyping, design system tokens, responsive layout planning
+
+---
+
+## Key Features
+
+* **Vendor Onboarding Flow** — Application form → 3–5 day review → automated approval/rejection emails → guided product upload wizard
+* **Multi-vendor Checkout** — Single cart across vendors, split payment routing, per-vendor fulfillment tracking
+* **Organic Discovery** — Curated editorial drops, no promoted listings, ranked by engagement not spend
+* **Admin Dashboard** — Vendor management, commission tracking, order oversight, payout scheduling
+* **Currency & Language** — EUR primary, multi-language groundwork (EN/DE/FR scaffolded)
+
+---
+
+## Business Context
+
+The marketplace targets a gap in the EU market: independent brands (fashion, accessories, home, lifestyle) who are priced out of visibility on Amazon and Etsy by ad auction dynamics. From Tribe's value prop is **community amplification** — a tribe of curated brands cross-promoting each other organically rather than competing for ad impressions.
+
+No public repository — closed-source, built with a small team.

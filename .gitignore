@@ -1,0 +1,58 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files — NEVER commit secrets (per AGENTS.md §Security)
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+# .env.example IS committed (contains no real secrets, only documented keys)
+!.env.example
+
+# Security: ignore any accidental key files
+*.pem
+*.key
+*.p12
+*.pfx
+
+# vercel
+.vercel
+
+# local dev artifacts
+dev.log
+hero-preview.html
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts

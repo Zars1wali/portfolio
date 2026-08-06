@@ -1,0 +1,2 @@
+# API clients, utilities, and server-side helpers go here.
+# e.g. github.ts — GitHub GraphQL fetcher (server-only, never exposed client-side)
