@@ -3,8 +3,10 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV !== "production";
 
 const nextConfig: NextConfig = {
-  // Standalone output for Docker self-hosting (per AGENTS.md)
-  output: "standalone",
+  // Standalone output for Docker self-hosting (per AGENTS.md).
+  // Disabled on Vercel: Next 16.3 no longer emits next-server.js.nft.json,
+  // which Vercel's build expects when standalone is enabled (known issue #96646).
+  output: process.env.VERCEL ? undefined : "standalone",
   // Do not disclose the framework in response headers.
   poweredByHeader: false,
   // Keep browser source maps out of production static assets.
