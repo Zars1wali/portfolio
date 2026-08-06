@@ -27,9 +27,9 @@ const nextConfig: NextConfig = {
           // React dev mode requires 'unsafe-eval' for call-stack reconstruction; strip in prod
           isDev
             ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-            : "script-src 'self' 'unsafe-inline'",
+            : "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com",
           "img-src 'self' data: blob:",
-          "connect-src 'self'",
+          "connect-src 'self' https://va.vercel-scripts.com",
           "frame-ancestors 'none'",
           "base-uri 'self'",
           "form-action 'self'",

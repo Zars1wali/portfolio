@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
@@ -80,6 +81,7 @@ export default function RootLayout({
             strategy="afterInteractive"
           />
         ) : null}
+        <Analytics mode="production" />
       </body>
     </html>
   );
