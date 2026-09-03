@@ -16,7 +16,7 @@
     "next-mdx-remote": "^6.0.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "simple-icons": "^16.28.0",
+    "simple-icons": "^16.29.0",
     "three": "^0.143.0"
   },
   "devDependencies": {
