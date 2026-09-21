@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import GlassPanel from "@/components/GlassPanel";
+import { Download, ExternalLink } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Resume",
@@ -22,42 +23,53 @@ export default function ResumePage() {
             <p className="text-mist text-sm font-mono">BS Cybersecurity · GIKI · Co-Founder, ZPI</p>
           </div>
 
-          <div className="flex gap-3">
-            {/* ── PLACEHOLDER BADGE ── */}
-            <span className="font-mono text-[11px] border border-yellow-400/40 text-yellow-400 bg-yellow-400/5 rounded px-2 py-1">
-              ⚠ Placeholder PDF
-            </span>
+          <div className="flex flex-wrap items-center gap-3">
             <a
               href="/resume.pdf"
-              download="umer-wali-resume.pdf"
-              className="font-mono text-[12.5px] font-medium bg-cyan text-void px-[18px] py-[10px] rounded-[10px] border border-cyan transition-colors hover:bg-[#6EF0DA] whitespace-nowrap"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-[12px] text-mist hover:text-fog px-[14px] py-[9px] rounded-[10px] border border-[rgba(255,255,255,0.12)] hover:border-[rgba(255,255,255,0.25)] bg-[rgba(255,255,255,0.03)] transition-colors flex items-center gap-2"
             >
-              Download PDF ↓
+              <ExternalLink width={13} height={13} />
+              Open in Tab
+            </a>
+            <a
+              href="/resume.pdf"
+              download="Umer_Wali_CV.pdf"
+              className="font-mono text-[12.5px] font-medium bg-cyan text-void px-[18px] py-[10px] rounded-[10px] border border-cyan transition-colors hover:bg-[#6EF0DA] flex items-center gap-2 whitespace-nowrap"
+            >
+              <Download width={14} height={14} />
+              Download CV ↓
             </a>
           </div>
         </div>
       </GlassPanel>
 
       {/* ── PDF Viewer ───────────────────────────────────────────────── */}
-      <div className="w-full rounded-[20px] overflow-hidden border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.02)] backdrop-blur-[22px] relative">
-        {/* Placeholder notice — shown if PDF fails to load */}
+      <div className="w-full rounded-[20px] overflow-hidden border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.02)] backdrop-blur-[22px] relative min-h-[700px] flex flex-col">
+        {/* Fallback notice — shown if browser cannot embed PDFs directly */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 pointer-events-none z-0">
           <p className="font-mono text-mist text-sm mb-2">
-            ⚠ This is a placeholder resume.pdf
+            Loading preview or PDF display not supported by browser
           </p>
-          <p className="text-mist/60 text-xs max-w-[30ch]">
-            Replace{" "}
-            <code className="font-mono text-cyan">/public/resume.pdf</code>{" "}
-            with your real CV to update this view.
+          <p className="text-mist/60 text-xs max-w-[34ch] mb-4">
+            You can view or download Umer&apos;s full CV directly.
           </p>
+          <a
+            href="/resume.pdf"
+            download="Umer_Wali_CV.pdf"
+            className="pointer-events-auto font-mono text-xs text-cyan underline hover:opacity-80"
+          >
+            Download Umer_Wali_CV.pdf
+          </a>
         </div>
 
-        {/* Actual PDF embed — sits above the notice when it renders */}
+        {/* Actual PDF embed */}
         <iframe
-          src="/resume.pdf"
-          title="Resume PDF"
-          className="w-full relative z-10"
-          style={{ height: "80vh", minHeight: "600px", border: "none" }}
+          src="/resume.pdf#toolbar=1&navpanes=0&scrollbar=1"
+          title="Umer Wali CV"
+          className="w-full relative z-10 flex-1"
+          style={{ height: "82vh", minHeight: "680px", border: "none" }}
         />
       </div>
     </div>
