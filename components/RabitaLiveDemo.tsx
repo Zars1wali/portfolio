@@ -6,13 +6,16 @@ import { Play, Pause, RotateCcw, Volume2, VolumeX, Bot, Terminal, Cpu, Database,
 interface SimulatorTurn {
   id: string;
   userPrompt: string;
+  userPromptEnglish: string;
   language: string;
   audioNote?: boolean;
   deepgramTranscript?: string;
+  deepgramTranscriptEnglish?: string;
   thought: string;
   action: string;
   observation: string;
   finalAnswer: string;
+  finalAnswerEnglish: string;
   mediaDelivered?: string;
 }
 
@@ -20,32 +23,39 @@ const SAMPLE_TURNS: SimulatorTurn[] = [
   {
     id: "turn-1",
     userPrompt: "Bhai 9mm handgun dikhao budget 200k k andar, tasveerein b bhejo",
+    userPromptEnglish: "Brother, show me a 9mm handgun under 200k budget, send photos too",
     language: "Roman Urdu (Urdu/English Code-Switch)",
     thought: "Customer is searching for a 9mm caliber handgun for defense within 200,000 PKR budget. Query verified catalog for matching in-stock models, format specs concisely in natural Roman Urdu, and attach photo media with price tags.",
     action: 'search_catalog(caliber="9mm", category="Handgun", max_price=200000, in_stock_only=True)',
     observation: "Found: Taurus G3 9mm (185,000 PKR, 17+1 Capacity, Polymer Frame, Brazil, In Stock). Photos: 2 verified images.",
     finalAnswer: "Jee bhai, budget k mutabiq Taurus G3 9mm best option hai. 185,000 PKR price hai, 17-round capacity aur authentic fresh piece dukaan pe available hai. Tasveerein sath attach kar di hain.",
+    finalAnswerEnglish: "Yes brother, per your budget the Taurus G3 9mm is the best option. Price is 185,000 PKR, 17-round capacity and an authentic fresh piece is available at the shop. Photos are attached.",
     mediaDelivered: "Taurus G3 9mm — 185,000 PKR (Verified Shop Photo)",
   },
   {
     id: "turn-2",
-    userPrompt: "Voice Note: [3.4s Roman Urdu audio: 'Salam bhai Abbottabad delivery charges kitne honge?']",
+    userPrompt: "Voice Note: 3.4s Roman Urdu audio",
+    userPromptEnglish: "Hello brother, how much would delivery to Abbottabad cost?",
     language: "Audio Voice Note (Deepgram STT)",
     audioNote: true,
     deepgramTranscript: "Salam bhai Abbottabad delivery charges kitne honge?",
-    thought: "Deepgram STT transcribed voice note in 340ms. Customer inquiry requires delivery pricing to Abbottabad. System rule: Out-of-city delivery requires customer verification and dispatching an escalation ticket directly to Haider Bhai.",
+    deepgramTranscriptEnglish: "Hello brother, how much would the Abbottabad delivery charges be?",
+    thought: "Deepgram STT transcribed voice note in 340ms. Customer inquiry requires delivery pricing to Abbottabad. System rule: Out-of-city delivery requires customer verification and dispatching an escalation ticket directly to the shop owner.",
     action: 'escalate_delivery_quote(city="Abbottabad", customer_name="Verified WhatsApp Contact")',
-    observation: "Ticket #412 created. Outgoing alert sent to Haider Bhai on WhatsApp: 'Delivery inquiry: Abbottabad | Ticket #412'.",
+    observation: "Ticket #412 created. Outgoing alert sent to shop owner on WhatsApp: 'Delivery inquiry: Abbottabad | Ticket #412'.",
     finalAnswer: "Walaikum Assalam bhai! Abbottabad k delivery charges shop management se confirm kar k abhi aapko isi chat mein batata hoon, bas 2 minute hold kijiyega.",
+    finalAnswerEnglish: "Peace be upon you brother! I'm confirming Abbottabad delivery charges with shop management right now and will update you in this chat, just hold for 2 minutes.",
   },
   {
     id: "turn-3",
-    userPrompt: "Owner Command: 'Glock 19 Gen 5 USA price 390k kardo aur stock in'",
+    userPrompt: "Glock 19 Gen 5 USA price 390k kardo aur stock in",
+    userPromptEnglish: "Set the Glock 19 Gen 5 USA price to 390k and mark it in stock",
     language: "Owner Administrative NLP",
     thought: "Sender phone matched OWNER_PHONE_NUMBER (+92 314...). Natural language inventory update received. Parse product brand/model and execute SQL update on PostgreSQL database.",
     action: 'update_item_price(product="Glock 19 Gen 5 USA", new_price=390000, in_stock=True)',
-    observation: "Database updated: Glock 19 Gen 5 USA -> price_pkr: 390,000, is_in_stock: True.",
+    observation: "Database updated: Glock 19 Gen 5 USA → price_pkr: 390,000, is_in_stock: True.",
     finalAnswer: "Jee Haider bhai! Glock 19 Gen 5 USA ki price 390,000 PKR update kardi gayi hai aur stock status active hai.",
+    finalAnswerEnglish: "Yes sir! The Glock 19 Gen 5 USA price has been updated to 390,000 PKR and stock status is now active.",
   },
 ];
 
@@ -420,11 +430,24 @@ export default function RabitaLiveDemo() {
                   INCOMING WHATSAPP MESSAGE ({selectedTurn.language})
                 </div>
                 <div style={{ fontSize: "14px", color: "var(--color-cloud)", fontWeight: 500 }}>
-                  "{selectedTurn.userPrompt}"
+                  &quot;{selectedTurn.userPrompt}&quot;
+                </div>
+                <div style={{ fontSize: "12px", color: "rgba(139,147,163,0.7)", marginTop: "4px", fontStyle: "italic" }}>
+                  English: &quot;{selectedTurn.userPromptEnglish}&quot;
                 </div>
                 {selectedTurn.deepgramTranscript && (
-                  <div style={{ fontSize: "12px", color: "var(--color-cyan)", marginTop: "6px", fontFamily: "var(--font-jetbrains), monospace" }}>
-                    ↳ Deepgram STT Output (&lt;340ms): "{selectedTurn.deepgramTranscript}"
+                  <div style={{ marginTop: "8px", padding: "8px 12px", background: "rgba(86,232,208,0.08)", borderRadius: "6px", border: "1px solid rgba(86,232,208,0.15)" }}>
+                    <div style={{ fontSize: "11px", color: "var(--color-cyan)", fontFamily: "var(--font-jetbrains), monospace", marginBottom: "4px" }}>
+                      DEEPGRAM STT OUTPUT (340ms)
+                    </div>
+                    <div style={{ fontSize: "12.5px", color: "var(--color-cyan)" }}>
+                      &quot;{selectedTurn.deepgramTranscript}&quot;
+                    </div>
+                    {selectedTurn.deepgramTranscriptEnglish && (
+                      <div style={{ fontSize: "11.5px", color: "rgba(139,147,163,0.7)", marginTop: "3px", fontStyle: "italic" }}>
+                        English: &quot;{selectedTurn.deepgramTranscriptEnglish}&quot;
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -439,7 +462,7 @@ export default function RabitaLiveDemo() {
                 }}
               >
                 <div style={{ fontSize: "11px", color: "var(--color-cyan)", fontFamily: "var(--font-jetbrains), monospace", marginBottom: "4px" }}>
-                  🧠 GEMINI ReACT THOUGHT (Zero Regex Pre-Parsing)
+                  🧠 GEMINI ReACT — THOUGHT
                 </div>
                 <div style={{ fontSize: "13px", color: "var(--color-fog)", lineHeight: 1.6 }}>
                   {selectedTurn.thought}
@@ -457,7 +480,7 @@ export default function RabitaLiveDemo() {
                 }}
               >
                 <div style={{ fontSize: "11px", color: "#A78BFA", marginBottom: "4px" }}>
-                  ⚡ LANGGRAPH TOOL CALL
+                  ⚡ LANGGRAPH TOOL CALL → ACTION
                 </div>
                 <div style={{ fontSize: "12.5px", color: "#DDD6FE" }}>
                   {selectedTurn.action}
@@ -492,13 +515,16 @@ export default function RabitaLiveDemo() {
                 }}
               >
                 <div style={{ fontSize: "11px", color: "#25D366", fontFamily: "var(--font-jetbrains), monospace", marginBottom: "4px" }}>
-                  💬 OUTBOUND META WHATSAPP SWIPE-REPLY (Roman Urdu)
+                  💬 OUTBOUND WHATSAPP REPLY (Roman Urdu)
                 </div>
                 <div style={{ fontSize: "14px", color: "var(--color-cloud)", lineHeight: 1.6 }}>
-                  "{selectedTurn.finalAnswer}"
+                  &quot;{selectedTurn.finalAnswer}&quot;
+                </div>
+                <div style={{ fontSize: "12px", color: "rgba(139,147,163,0.7)", marginTop: "4px", fontStyle: "italic" }}>
+                  English: &quot;{selectedTurn.finalAnswerEnglish}&quot;
                 </div>
                 {selectedTurn.mediaDelivered && (
-                  <div style={{ fontSize: "12px", color: "var(--color-cyan)", marginTop: "6px", fontFamily: "var(--font-jetbrains), monospace" }}>
+                  <div style={{ fontSize: "12px", color: "var(--color-cyan)", marginTop: "8px", fontFamily: "var(--font-jetbrains), monospace" }}>
                     📎 Attached Media: {selectedTurn.mediaDelivered}
                   </div>
                 )}
