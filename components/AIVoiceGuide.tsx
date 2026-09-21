@@ -50,7 +50,7 @@ export default function AIVoiceGuide() {
     }
   }, []);
 
-  // Pick an authoritative, formal, professional MALE voice
+  // Pick an authoritative, formal, professional AMERICAN MALE voice
   const selectVoice = useCallback((): SpeechSynthesisVoice | null => {
     const voices = voicesRef.current.length > 0
       ? voicesRef.current
@@ -63,43 +63,66 @@ export default function AIVoiceGuide() {
     if (!englishVoices.length) return voices[0] || null;
 
     // Explicitly exclude female voice identifiers
-    const FEMALE_PATTERN = /female|woman|zira|jenny|aria|samantha|victoria|karen|moira|tessa|fiona|susan|hazel|catherine|linda|heather|amber|ana|steffie/i;
+    const FEMALE_PATTERN = /female|woman|zira|jenny|aria|samantha|victoria|karen|moira|tessa|fiona|susan|hazel|catherine|linda|heather|amber|ana|steffie|ava|emma|michelle|sonia|natasha|neerja|priya/i;
+
+    // Explicitly detect British/UK/Australian/non-US accents to avoid them
+    const NON_US_ACCENT_PATTERN = /british|uk|great britain|united kingdom|england|australian|australia|en-gb|en_gb|en-au|en_au|en-in|en_in|en-za|en-nz|scotland|scottish|ireland|irish|ryan|oliver|george|daniel|arthur|alfie|harry|brian/i;
+
     const nonFemaleVoices = englishVoices.filter(v => !FEMALE_PATTERN.test(v.name));
 
-    // Priority ranked list of top-tier natural, deep, professional male voices across OSes
-    const MALE_PRIORITY_PATTERNS = [
-      /guy.*natural/i,
-      /christopher.*natural/i,
-      /david.*natural/i,
-      /ryan.*natural/i,
-      /andrew.*natural/i,
-      /google.*uk.*male/i,
-      /google.*us.*male/i,
-      /uk.*english.*male/i,
-      /us.*english.*male/i,
-      /\bdaniel\b/i, // Classic British authoritative male voice on Mac/iOS
-      /\balex\b/i,   // Classic deep American male voice on Mac/iOS
-      /\boliver\b/i,
-      /\bgeorge\b/i,
-      /\bdavid\b/i,
-      /\bmark\b/i,
-      /\bbrian\b/i,
-      /\bsteffan\b/i,
-      /\bmale\b/i,
+    // Priority 1: Strictly US English (en-US) Male voices with non-British accents
+    const usEnglishMaleVoices = nonFemaleVoices.filter(v => {
+      const isUS = v.lang.toLowerCase().replace('_', '-').startsWith('en-us');
+      const isNotBritish = !NON_US_ACCENT_PATTERN.test(v.name) && !NON_US_ACCENT_PATTERN.test(v.lang);
+      return isUS && isNotBritish;
+    });
+
+    // High-quality American male voice patterns across Windows (Edge Natural & SAPI), Chrome (Google US), macOS/iOS (Apple US)
+    const US_MALE_PRIORITY_PATTERNS = [
+      /guy.*natural/i,            // Microsoft Guy Online (Natural) - English (United States)
+      /christopher.*natural/i,    // Microsoft Christopher Online (Natural) - English (United States)
+      /eric.*natural/i,           // Microsoft Eric Online (Natural) - English (United States)
+      /roger.*natural/i,          // Microsoft Roger Online (Natural) - English (United States)
+      /steffen.*natural/i,        // Microsoft Steffen Online (Natural) - English (United States)
+      /andrew.*natural/i,         // Microsoft Andrew Online (Natural) - English (United States)
+      /microsoft.*guy/i,
+      /microsoft.*christopher/i,
+      /microsoft.*eric/i,
+      /microsoft.*david/i,        // Microsoft David - English (United States)
+      /microsoft.*mark/i,         // Microsoft Mark - English (United States)
+      /google.*us.*english/i,     // Google US English Male
+      /google.*us/i,
+      /\balex\b/i,                // Apple Alex (Deep American Male)
+      /\btom\b/i,                 // Apple Tom (US Male)
+      /\bevan\b/i,                // Apple Evan (US Male)
+      /\bnathan\b/i,              // Apple Nathan (US Male)
+      /\bamerican.*male\b/i,
+      /\bus.*male\b/i,
     ];
 
-    for (const pattern of MALE_PRIORITY_PATTERNS) {
-      const match = nonFemaleVoices.find(v => pattern.test(v.name));
+    // 1. First, search within strictly verified en-US non-British male voices
+    for (const pattern of US_MALE_PRIORITY_PATTERNS) {
+      const match = usEnglishMaleVoices.find(v => pattern.test(v.name));
       if (match) return match;
     }
 
-    // Fallback: any non-female English voice
-    if (nonFemaleVoices.length > 0) return nonFemaleVoices[0];
+    // 2. If no specific name match but we have en-US male voices, return the first en-US male voice
+    if (usEnglishMaleVoices.length > 0) {
+      return usEnglishMaleVoices[0];
+    }
 
-    return englishVoices[0];
+    // 3. Search all non-female voices with en-US tag
+    const anyUsNonFemale = nonFemaleVoices.find(v => v.lang.toLowerCase().replace('_', '-').startsWith('en-us'));
+    if (anyUsNonFemale) return anyUsNonFemale;
+
+    // 4. Fallback: Any non-female voice that does NOT have a British accent
+    const anyNonBritish = nonFemaleVoices.find(v => !NON_US_ACCENT_PATTERN.test(v.name) && !NON_US_ACCENT_PATTERN.test(v.lang));
+    if (anyNonBritish) return anyNonBritish;
+
+    return nonFemaleVoices[0] || englishVoices[0] || voices[0];
   }, []);
 
-  // Speak function with bold, formal, enthusiastic acoustic tuning
+  // Speak function with bold, formal, enthusiastic acoustic tuning in American English
   const speakText = useCallback((text: string) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window) || isMuted) return;
 
@@ -107,8 +130,12 @@ export default function AIVoiceGuide() {
     setSubtitle(text);
 
     const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "en-US";
     const voice = selectVoice();
-    if (voice) utterance.voice = voice;
+    if (voice) {
+      utterance.voice = voice;
+      if (voice.lang) utterance.lang = voice.lang;
+    }
 
     // Acoustic tuning: slightly lower pitch (0.92) for deep, authoritative, masculine tone
     // Rate at 1.04 for crisp, enthusiastic, forward-moving cadence
