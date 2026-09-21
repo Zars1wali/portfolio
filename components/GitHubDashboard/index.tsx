@@ -97,22 +97,23 @@ export default function GitHubDashboard({ stats }: Props) {
             {"// github_activity"}
           </span>
 
-          {!stats && (
-            <span
-              style={{
-                marginLeft: "auto",
-                fontFamily: "var(--font-jetbrains), monospace",
-                fontSize: "10px",
-                color: "rgba(139,147,163,0.5)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                borderRadius: "6px",
-                padding: "2px 8px",
-                background: "rgba(255,255,255,0.03)",
-              }}
-            >
-              GITHUB_TOKEN not configured
-            </span>
-          )}
+          <span
+            style={{
+              marginLeft: "auto",
+              fontFamily: "var(--font-jetbrains), monospace",
+              fontSize: "10px",
+              color: stats ? "#25D366" : "rgba(139,147,163,0.5)",
+              border: stats ? "1px solid rgba(37,211,102,0.3)" : "1px solid rgba(255,255,255,0.08)",
+              borderRadius: "6px",
+              padding: "2px 8px",
+              background: stats ? "rgba(37,211,102,0.1)" : "rgba(255,255,255,0.03)",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "5px",
+            }}
+          >
+            {stats ? "● LIVE SYNCED" : "OFFLINE"}
+          </span>
         </div>
 
         {/* ── Metric row (4 cards) ── */}
