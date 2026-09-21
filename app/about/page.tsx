@@ -14,20 +14,97 @@ export const metadata: Metadata = {
 ─────────────────────────────────────────────────────────────────────────── */
 const skillGroups: { label: string; skills: string[] }[] = [
   {
-    label: "Security",
-    skills: ["Threat Modeling", "Penetration Testing", "OSINT", "Network Security", "CTF"],
+    label: "Languages & Systems",
+    skills: [
+      "C++ (C++20, low-latency)",
+      "Python",
+      "TypeScript / JavaScript",
+      "Linux Systems Programming",
+      "Kernel Bypass & epoll",
+      "Multithreading & Concurrency",
+      "Memory Alignment",
+      "Lock-Free Data Structures",
+    ],
   },
   {
-    label: "Development",
-    skills: ["TypeScript", "Next.js", "Rust", "Python", "Go"],
+    label: "Agentic AI & Orchestration",
+    skills: [
+      "LangGraph",
+      "Multi-Agent Systems",
+      "ReAct Pattern",
+      "Function / Tool Calling",
+      "Human-in-the-Loop (HITL) Guardrails",
+    ],
   },
   {
-    label: "Infrastructure",
-    skills: ["Docker", "Nginx", "Linux", "VPS Self-Hosting", "CI/CD"],
+    label: "LLMs & Multimodal AI",
+    skills: [
+      "Google Gemini 3.5 Flash Lite (Native SDK)",
+      "Gemini Vision",
+      "Deepgram Nova-3 (STT)",
+      "Retrieval-Augmented Generation (RAG)",
+    ],
   },
   {
-    label: "AI & Data",
-    skills: ["LLM Tooling", "Satellite Imagery", "GeoSpatial Analysis", "Retrieval-Augmented Generation"],
+    label: "Backend & APIs",
+    skills: [
+      "Python 3.14",
+      "FastAPI",
+      "AsyncIO",
+      "Uvicorn",
+      "REST APIs",
+      "Meta Official WhatsApp Business Platform",
+    ],
+  },
+  {
+    label: "Full-Stack & Web",
+    skills: [
+      "Next.js 14 / 15",
+      "React / Vite",
+      "Node.js",
+      "Express",
+      "Medusa.js",
+      "PostgreSQL",
+      "MySQL",
+      "Prisma",
+      "Redis",
+      "Stripe Connect",
+    ],
+  },
+  {
+    label: "Databases & DevOps",
+    skills: [
+      "PostgreSQL",
+      "Async SQLAlchemy",
+      "Connection Pooling",
+      "Docker",
+      "Linux / Ubuntu VPS",
+      "Git",
+    ],
+  },
+  {
+    label: "Trading & Data Systems",
+    skills: [
+      "Exchange / CLOB API Connectivity",
+      "Order Execution Logic",
+      "Tick-to-Trade Latency Optimization",
+      "Satellite & Geospatial Data",
+      "Sentinel-2 & SAR",
+      "NDVI / NDRE",
+    ],
+  },
+  {
+    label: "Cybersecurity & Networking",
+    skills: [
+      "Network Security",
+      "Malware Analysis",
+      "Kali Linux",
+      "Nmap",
+      "Burp Suite",
+      "NIST Frameworks",
+      "MITRE ATT&CK",
+      "Google Chronicle (SOAR)",
+    ],
   },
 ];
 
@@ -42,14 +119,15 @@ export default function AboutPage() {
         </div>
         <h1 className="text-[clamp(26px,4vw,36px)] mb-4">Umer Wali</h1>
         <p className="text-mist text-base leading-relaxed mb-4">
-          {/* TODO: needs content — replace with about.md content once content-seed is available */}
-          BS Cybersecurity student at GIKI and Co-Founder & COO of Zero Point Intel (ZPI) — a startup
-          building satellite-driven agri-intelligence platforms and secure systems.
+          BS Cybersecurity student at GIKI, Backend AI Engineer (FlyRank AI intern), and Co-Founder of
+          Zero Point Intel (ZPI). Full-stack developer with hands-on experience directing engineering teams
+          from concept to production, specializing in production-grade AI backends, multi-agent systems,
+          and secure infrastructure.
         </p>
         <p className="text-mist text-base leading-relaxed">
-          {/* TODO: needs content — replace with about.md content once content-seed is available */}
-          My work sits at the intersection of security engineering, applied AI, and systems design.
-          I ship end-to-end products — from architecture to deployment on self-hosted VPS infrastructure.
+          My work spans server-side AI systems (LangGraph state machines, ReAct loops, RAG pipelines, tool calling),
+          full-stack web platforms (Next.js, Node.js, PostgreSQL), and low-latency systems programming
+          (C++20, kernel bypass, Linux concurrency) — backed by a rigorous cybersecurity foundation.
         </p>
       </GlassPanel>
 
@@ -64,7 +142,7 @@ export default function AboutPage() {
           {skillGroups.map((group) => (
             <div
               key={group.label}
-              className="p-5 rounded-[16px] bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)]"
+              className="p-5 rounded-[16px] bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] hover:border-cyan/30 hover:bg-[rgba(255,255,255,0.04)] transition-all duration-200"
             >
               <p className="font-mono text-xs text-cyan tracking-widest uppercase mb-3">
                 {group.label}
@@ -73,7 +151,7 @@ export default function AboutPage() {
                 {group.skills.map((skill) => (
                   <span
                     key={skill}
-                    className="font-mono text-xs text-mist bg-[rgba(255,255,255,0.05)] px-2.5 py-1 rounded-md"
+                    className="font-mono text-xs text-mist bg-[rgba(255,255,255,0.05)] px-2.5 py-1 rounded-md border border-transparent hover:border-cyan/20 hover:text-cyan hover:bg-cyan/5 transition-colors"
                   >
                     {skill}
                   </span>
