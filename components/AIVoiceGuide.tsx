@@ -4,15 +4,15 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { Volume2, VolumeX, RotateCcw, Sparkles, X, ChevronUp, ChevronDown } from "lucide-react";
 
-/* ─── Page Narration Scripts ────────────────────────────────────────────── */
+/* ─── Page Narration Scripts (Professional, Bold, Detailed, Formal) ───────── */
 const PAGE_SCRIPTS: Record<string, string> = {
-  "/": "Welcome to Umer Wali's portfolio. Umer is a full-stack developer and AI engineer specializing in production-grade multi-agent systems, deterministic ReAct loops, and low-latency C++ infrastructure. Explore his live projects or dive into his technical lab.",
-  "/about": "About Umer Wali. Umer builds AI and full-stack systems that cannot afford to be wrong under pressure. From leading production RAG and tool-calling workflows at FlyRank AI, to architecting sub-50 microsecond C++ trading bots and satellite risk systems, he owns the complete path from architecture to delivery.",
-  "/projects": "Projects gallery. Featured here is Rabta AI, a WhatsApp-native dual-agent commerce platform; Acreon, an AI agricultural platform; a high-frequency trading arbitrage bot on Polymarket; and enterprise cybersecurity platforms.",
-  "/projects/rabita-ai": "Rabta AI. A production-grade, dual-agent WhatsApp commerce engine built with LangGraph, Google Gemini 3.5 Flash Lite, Deepgram Nova-3, and PostgreSQL, backed by an enterprise Human-in-the-Loop framework for retail merchants.",
-  "/lab": "The Engineering Lab. Here Umer documents deep dives into site hardening, zero-trust infrastructure, strict Content Security Policies, and high-performance Next.js architectures.",
-  "/resume": "Curriculum Vitae. Review Umer Wali's background in AI engineering, systems programming, and cybersecurity at GIKI, or download the official PDF directly.",
-  "/contact": "Get in touch. Whether you are building production-grade AI systems, modernizing infrastructure, or exploring engineering collaborations, Umer is ready to connect.",
+  "/": "Welcome to the engineering portfolio of Umer Wali. Umer is a full-stack developer and AI systems engineer architecting software that cannot afford to fail under pressure. From production-grade multi-agent LangGraph ecosystems and zero-hallucination ReAct loops, to sub-fifty-microsecond C-plus-plus trading infrastructure, he directs the entire journey from architecture to live deployment. Explore his flagship deployments, examine his technical lab, or inspect his verified credentials.",
+  "/about": "About Umer Wali. Umer builds mission-critical AI and full-stack systems that thrive under high-stakes constraints. As a Backend AI Engineering intern at FlyRank AI, he engineered production RAG pipelines, deterministic structured outputs, and evaluation harnesses. Under senior mentorship, he directed a team of three engineers to deliver a live multi-vendor commerce marketplace from day one. Backed by a cybersecurity degree from GIKI, his engineering philosophy unites deep systems thinking, lock-free C-plus-plus concurrency, and verifiable Human-in-the-Loop AI guardrails.",
+  "/projects": "Flagship engineering projects. Featured here is Rabta AI, an autonomous dual-agent WhatsApp commerce platform engineered with LangGraph and native Gemini 3.5 Flash Lite; Acreon, an AI geospatial agriculture platform; an institutional-grade C-plus-plus arbitrage bot executing sub-fifty-microsecond hot paths on Polymarket; and enterprise cybersecurity defense suites.",
+  "/projects/rabita-ai": "Rabta AI. A production-grade, dual-agent WhatsApp commerce engine built for retail merchants. Powered by Python 3.14, FastAPI, LangGraph, and native Google Gemini 3.5 Flash Lite, Rabta AI couples a warm Roman Urdu sales closer with an owner co-pilot node, transcribes voice notes via Deepgram Nova-3, and enforces strict Human-in-the-Loop guardrails for absolute zero-hallucination catalog accuracy.",
+  "/lab": "The Engineering Lab. Here, Umer publishes technical investigations into zero-trust hardening, strict Content Security Policies, clickjacking mitigation, and modern web systems performance.",
+  "/resume": "Curriculum Vitae. Review Umer Wali's verified track record across FlyRank AI, Zero Point Intel, and cybersecurity systems at GIKI. You can inspect the high-resolution vector sheets directly on this page or download the official PDF for technical review.",
+  "/contact": "Connect with Umer Wali. If you are building mission-critical AI systems, scaling resilient backend architectures, or seeking a technical leader who owns both architecture and delivery, reach out to initiate the conversation.",
 };
 
 export default function AIVoiceGuide() {
@@ -50,7 +50,7 @@ export default function AIVoiceGuide() {
     }
   }, []);
 
-  // Pick the best natural sounding voice
+  // Pick an authoritative, formal, professional MALE voice
   const selectVoice = useCallback((): SpeechSynthesisVoice | null => {
     const voices = voicesRef.current.length > 0
       ? voicesRef.current
@@ -58,16 +58,48 @@ export default function AIVoiceGuide() {
 
     if (!voices.length) return null;
 
-    // Prefer high quality English voices
-    const preferred = voices.find(v => 
-      v.lang.startsWith("en") && 
-      (v.name.includes("Natural") || v.name.includes("Google") || v.name.includes("Neural") || v.name.includes("Samantha") || v.name.includes("Daniel") || v.name.includes("Alex"))
-    );
+    // Filter English voices
+    const englishVoices = voices.filter(v => v.lang.startsWith("en"));
+    if (!englishVoices.length) return voices[0] || null;
 
-    return preferred || voices.find(v => v.lang.startsWith("en")) || voices[0] || null;
+    // Explicitly exclude female voice identifiers
+    const FEMALE_PATTERN = /female|woman|zira|jenny|aria|samantha|victoria|karen|moira|tessa|fiona|susan|hazel|catherine|linda|heather|amber|ana|steffie/i;
+    const nonFemaleVoices = englishVoices.filter(v => !FEMALE_PATTERN.test(v.name));
+
+    // Priority ranked list of top-tier natural, deep, professional male voices across OSes
+    const MALE_PRIORITY_PATTERNS = [
+      /guy.*natural/i,
+      /christopher.*natural/i,
+      /david.*natural/i,
+      /ryan.*natural/i,
+      /andrew.*natural/i,
+      /google.*uk.*male/i,
+      /google.*us.*male/i,
+      /uk.*english.*male/i,
+      /us.*english.*male/i,
+      /\bdaniel\b/i, // Classic British authoritative male voice on Mac/iOS
+      /\balex\b/i,   // Classic deep American male voice on Mac/iOS
+      /\boliver\b/i,
+      /\bgeorge\b/i,
+      /\bdavid\b/i,
+      /\bmark\b/i,
+      /\bbrian\b/i,
+      /\bsteffan\b/i,
+      /\bmale\b/i,
+    ];
+
+    for (const pattern of MALE_PRIORITY_PATTERNS) {
+      const match = nonFemaleVoices.find(v => pattern.test(v.name));
+      if (match) return match;
+    }
+
+    // Fallback: any non-female English voice
+    if (nonFemaleVoices.length > 0) return nonFemaleVoices[0];
+
+    return englishVoices[0];
   }, []);
 
-  // Speak function
+  // Speak function with bold, formal, enthusiastic acoustic tuning
   const speakText = useCallback((text: string) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window) || isMuted) return;
 
@@ -78,8 +110,11 @@ export default function AIVoiceGuide() {
     const voice = selectVoice();
     if (voice) utterance.voice = voice;
 
-    utterance.rate = 1.02;
-    utterance.pitch = 1.0;
+    // Acoustic tuning: slightly lower pitch (0.92) for deep, authoritative, masculine tone
+    // Rate at 1.04 for crisp, enthusiastic, forward-moving cadence
+    utterance.pitch = 0.92;
+    utterance.rate = 1.04;
+    utterance.volume = 1.0;
 
     utterance.onstart = () => setIsPlaying(true);
     utterance.onend = () => setIsPlaying(false);
