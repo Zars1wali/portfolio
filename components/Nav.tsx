@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { Sparkles } from "lucide-react";
 
 const NAV_LINKS = [
   { href: "/",         label: "Home"     },
@@ -88,27 +89,44 @@ export default function Nav() {
           ))}
         </ul>
 
-        {/* ── Hamburger (mobile) ── */}
-        <button
-          id="nav-hamburger"
-          aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
-          aria-expanded={menuOpen}
-          aria-controls="nav-mobile-menu"
-          onClick={() => setMenuOpen(v => !v)}
-          className="nav-hamburger"
-          style={{
-            display: "none",
-            background: "none",
-            border: "1px solid rgba(255,255,255,0.12)",
-            borderRadius: "6px",
-            padding: "0.4rem 0.5rem",
-            cursor: "pointer",
-            color: "var(--color-fog)",
-            lineHeight: 1,
-          }}
-        >
-          <HamburgerIcon open={menuOpen} />
-        </button>
+        {/* ── Right Controls: AI Voice & Mobile Hamburger ── */}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <button
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("toggle-ai-voice"));
+              }
+            }}
+            title="Toggle AI Voice Guide"
+            aria-label="Toggle AI Voice Guide"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-[8px] border border-[rgba(0,240,255,0.25)] bg-[rgba(0,240,255,0.06)] hover:bg-[rgba(0,240,255,0.14)] hover:border-cyan text-cyan text-[11.5px] font-mono transition-all cursor-pointer shadow-[0_0_8px_rgba(0,240,255,0.1)]"
+          >
+            <Sparkles width={12} height={12} className="animate-pulse" />
+            <span>AI Voice</span>
+          </button>
+
+          {/* ── Hamburger (mobile) ── */}
+          <button
+            id="nav-hamburger"
+            aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={menuOpen}
+            aria-controls="nav-mobile-menu"
+            onClick={() => setMenuOpen(v => !v)}
+            className="nav-hamburger"
+            style={{
+              display: "none",
+              background: "none",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: "6px",
+              padding: "0.4rem 0.5rem",
+              cursor: "pointer",
+              color: "var(--color-fog)",
+              lineHeight: 1,
+            }}
+          >
+            <HamburgerIcon open={menuOpen} />
+          </button>
+        </div>
       </nav>
 
       {/* ── Mobile Drawer ── */}
@@ -157,6 +175,20 @@ export default function Nav() {
             </li>
           ))}
         </ul>
+        <div style={{ marginTop: "1rem" }}>
+          <button
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("toggle-ai-voice"));
+              }
+              setMenuOpen(false);
+            }}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-[10px] border border-cyan/40 bg-cyan/10 text-cyan font-mono text-xs cursor-pointer shadow-[0_0_10px_rgba(0,240,255,0.15)]"
+          >
+            <Sparkles width={14} height={14} className="animate-pulse" />
+            <span>Toggle AI Voice Tour</span>
+          </button>
+        </div>
         <hr style={{ margin: "1.5rem 0", borderColor: "rgba(255,255,255,0.08)" }} />
         <p style={{ fontFamily: "var(--font-jetbrains), monospace", fontSize: "0.75rem", color: "var(--color-mist)", letterSpacing: "0.08em" }}>
           github.com/Zars1wali

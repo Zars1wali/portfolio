@@ -7,6 +7,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import SignalMesh from "@/components/SignalMesh";
 import CosmicDust from "@/components/CosmicDust";
+import AIVoiceGuide from "@/components/AIVoiceGuide";
 
 /* ─── Fonts ─────────────────────────────────────────────────────────────── */
 const inter = Inter({
@@ -71,6 +72,7 @@ export default function RootLayout({
         <Nav />
         <main>{children}</main>
         <Footer />
+        <AIVoiceGuide />
         {process.env.NODE_ENV === "production" &&
         process.env.NEXT_PUBLIC_UMAMI_URL &&
         process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID ? (
