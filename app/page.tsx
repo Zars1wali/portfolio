@@ -123,7 +123,7 @@ export default function HomePage() {
                 </Link>
                 <ToolsIUse />
                 <a
-                  href="https://paxel.ycombinator.com/results/cimwolox"
+                  href="https://paxel.ycombinator.com/results/b1qyu7zu"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="ghost-trigger"
