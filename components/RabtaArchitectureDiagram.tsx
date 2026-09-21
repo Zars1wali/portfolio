@@ -342,7 +342,7 @@ export default function RabtaArchitectureDiagram() {
                 padding: "16px 18px",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   <span
                     style={{
@@ -358,12 +358,28 @@ export default function RabtaArchitectureDiagram() {
                     LAYER 3
                   </span>
                   <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--color-cloud)" }}>
-                    Application Core &amp; Dual-Agent Router (FastAPI / LangGraph)
+                    Application Core &amp; LangGraph State Machine (backend/app)
                   </span>
                 </div>
                 <span style={{ fontSize: "11px", color: "#818CF8", fontFamily: "var(--font-jetbrains), monospace" }}>
-                  Voice + State Machine Routing
+                  Python 3.14 · FastAPI · AsyncIO · Uvicorn
                 </span>
+              </div>
+
+              {/* Gateway bridge callout */}
+              <div
+                style={{
+                  background: "rgba(0, 0, 0, 0.35)",
+                  padding: "10px 14px",
+                  borderRadius: "8px",
+                  border: "1px solid rgba(129, 140, 248, 0.2)",
+                  marginBottom: "12px",
+                  fontSize: "12px",
+                  color: "var(--color-fog)",
+                  lineHeight: "1.5",
+                }}
+              >
+                <strong style={{ color: "#818CF8", fontFamily: "var(--font-jetbrains), monospace" }}>Gateway Bridge (gateway_bridge.py):</strong> Central entrypoint that decodes payloads, transcribes voice notes via Deepgram Nova-3, and resolves privacy LIDs to authentic mobile numbers.
               </div>
 
               {/* Sub-routing items */}
@@ -371,20 +387,20 @@ export default function RabtaArchitectureDiagram() {
                 <div style={{ background: "rgba(15, 23, 42, 0.7)", padding: "12px 14px", borderRadius: "8px", border: "1px solid rgba(129, 140, 248, 0.2)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#A855F7", marginBottom: "4px" }}>
                     <Bot size={15} />
-                    <span style={{ fontSize: "13px", fontWeight: 600 }}>Customer Sales Engine (Temp: 0.5)</span>
+                    <span style={{ fontSize: "13px", fontWeight: 600 }}>Customer Sales Agent (prompts_customer.py, temp=0.5)</span>
                   </div>
                   <div style={{ fontSize: "12px", color: "var(--color-fog)", lineHeight: "1.5" }}>
-                    Friendly Pakistani Roman Urdu sales persona. Concise 1–3 sentence messages, budget discovery, and proactive deal closing. Never invents calibers or pricing.
+                    Natural, friendly Pakistani retail persona that sends short (1–3 sentence) messages and proactively drives to close deals.
                   </div>
                 </div>
 
                 <div style={{ background: "rgba(15, 23, 42, 0.7)", padding: "12px 14px", borderRadius: "8px", border: "1px solid rgba(129, 140, 248, 0.2)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#38BDF8", marginBottom: "4px" }}>
                     <Terminal size={15} />
-                    <span style={{ fontSize: "13px", fontWeight: 600 }}>Owner Co-Pilot Engine (Temp: 0.2)</span>
+                    <span style={{ fontSize: "13px", fontWeight: 600 }}>Owner Co-Pilot Node (prompts_owner.py, temp=0.2)</span>
                   </div>
                   <div style={{ fontSize: "12px", color: "var(--color-fog)", lineHeight: "1.5" }}>
-                    Deterministic administrative assistant. Translates natural language messages from the boss (e.g. <em>"Tisas 1911 out of stock kardo"</em>) directly into SQL database mutations.
+                    Strict, deterministic, zero-fluff assistant for managing inventory, adjusting prices, and resolving customer negotiations.
                   </div>
                 </div>
               </div>
@@ -519,7 +535,7 @@ export default function RabtaArchitectureDiagram() {
                 padding: "16px 18px",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   <span
                     style={{
@@ -535,7 +551,7 @@ export default function RabtaArchitectureDiagram() {
                     LAYER 5
                   </span>
                   <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--color-cloud)" }}>
-                    Foundation Model Layer: Google Gemini 3.5 Flash Lite
+                    Native Gemini ReAct Engine &amp; Model (agent_harness.py)
                   </span>
                 </div>
                 <span
@@ -548,22 +564,43 @@ export default function RabtaArchitectureDiagram() {
                     borderRadius: "4px",
                   }}
                 >
-                  Sub-Second Native ReACT
+                  google-genai SDK · Gemini 3.5 Flash Lite
                 </span>
+              </div>
+
+              {/* Loop Mechanics & Zero-Hallucination Law */}
+              <div
+                style={{
+                  background: "rgba(0, 0, 0, 0.35)",
+                  padding: "10px 14px",
+                  borderRadius: "8px",
+                  border: "1px solid rgba(251, 146, 60, 0.2)",
+                  marginBottom: "12px",
+                  fontSize: "12px",
+                  color: "var(--color-fog)",
+                  lineHeight: "1.5",
+                }}
+              >
+                <div style={{ marginBottom: "4px" }}>
+                  <strong style={{ color: "#FB923C" }}>Loop Mechanics:</strong> Generates thoughts, calls tools, observes database results, and formulates final responses in a single async turn.
+                </div>
+                <div>
+                  <strong style={{ color: "var(--color-cyan)" }}>Zero-Hallucination Law:</strong> Specs, stock, and prices are never guessed; they are retrieved strictly from live database catalog queries.
+                </div>
               </div>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "10px", fontSize: "12px", color: "var(--color-fog)" }}>
                 <div style={{ background: "rgba(0, 0, 0, 0.3)", padding: "10px 12px", borderRadius: "8px" }}>
                   <div style={{ fontWeight: 600, color: "#FB923C", marginBottom: "3px" }}>Native Function Calling</div>
-                  No brittle regex string scrapers. Gemini 3.5 Flash Lite emits structured JSON tool arguments directly into LangGraph state nodes.
+                  No brittle regex string scrapers. The official <code>google-genai</code> SDK emits structured JSON tool arguments directly into state nodes.
                 </div>
                 <div style={{ background: "rgba(0, 0, 0, 0.3)", padding: "10px 12px", borderRadius: "8px" }}>
                   <div style={{ fontWeight: 600, color: "#FB923C", marginBottom: "3px" }}>Bilingual Code-Switching</div>
-                  Zero-shot understanding of Pakistani Roman Urdu (e.g. <em>"bhai 9mm handgun dikhao budget 200k k andar"</em>) seamlessly combined with English gun specs.
+                  Zero-shot understanding of Pakistani Roman Urdu (e.g. <em>"bhai 9mm handgun dikhao budget 200k k andar"</em>) seamlessly combined with English specs.
                 </div>
                 <div style={{ background: "rgba(0, 0, 0, 0.3)", padding: "10px 12px", borderRadius: "8px" }}>
-                  <div style={{ fontWeight: 600, color: "#FB923C", marginBottom: "3px" }}>Low Latency &amp; Efficiency</div>
-                  Delivers first token in under 450ms, allowing full ReACT loop completion, database query, and photo attachment in &lt;850ms on WhatsApp.
+                  <div style={{ fontWeight: 600, color: "#FB923C", marginBottom: "3px" }}>Sub-Second Inference</div>
+                  Delivers first token in &lt;450ms, allowing full ReACT loop completion, database query, and photo attachment in &lt;850ms on WhatsApp.
                 </div>
               </div>
             </div>
@@ -582,7 +619,7 @@ export default function RabtaArchitectureDiagram() {
                 padding: "16px 18px",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   <span
                     style={{
@@ -598,11 +635,11 @@ export default function RabtaArchitectureDiagram() {
                     LAYER 6
                   </span>
                   <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--color-cloud)" }}>
-                    Active ReACT Tools &amp; Grounded Data Layer
+                    Data &amp; Persistence Layer (PostgreSQL)
                   </span>
                 </div>
                 <span style={{ fontSize: "11px", color: "#4ADE80", fontFamily: "var(--font-jetbrains), monospace" }}>
-                  PostgreSQL 16 + Caddy Media CDN
+                  Async SQLAlchemy (pool_size=5, max_overflow=10)
                 </span>
               </div>
 
@@ -646,9 +683,9 @@ export default function RabtaArchitectureDiagram() {
                 <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
                   <Database size={16} style={{ color: "#F472B6", marginTop: "2px" }} />
                   <div>
-                    <div style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--color-fog)" }}>PostgreSQL 16 Database</div>
+                    <div style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--color-fog)" }}>PostgreSQL 16 Storage (Async SQLAlchemy)</div>
                     <div style={{ fontSize: "11px", color: "var(--color-mist)", lineHeight: "1.4" }}>
-                      Holds multi-tenant configs, firearms SKUs, prices (PKR), active escalation tickets, and 2-hour mute records.
+                      Stores tenants, authenticated product SKUs, prices, customer history, and active escalation tickets (ESC-XX). Pool: up to 15 concurrent connections.
                     </div>
                   </div>
                 </div>
@@ -656,9 +693,9 @@ export default function RabtaArchitectureDiagram() {
                 <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
                   <Radio size={16} style={{ color: "#38BDF8", marginTop: "2px" }} />
                   <div>
-                    <div style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--color-fog)" }}>Static Media CDN (/static/catalog_images/)</div>
+                    <div style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--color-fog)" }}>Verified Studio Media Assets</div>
                     <div style={{ fontSize: "11px", color: "var(--color-mist)", lineHeight: "1.4" }}>
-                      Authenticated studio photos served via Caddy with HTTPS. Delivered directly into WhatsApp with dynamic product captions.
+                      Verified studio firearm photos hosted locally and delivered securely over HTTPS with dynamic product captions.
                     </div>
                   </div>
                 </div>
@@ -860,6 +897,30 @@ export default function RabtaArchitectureDiagram() {
               </div>
               <div style={{ fontSize: "12px", color: "var(--color-fog)", marginTop: "8px", lineHeight: "1.5" }}>
                 Owner escalation tickets for legal compliance &amp; shipping verification. 2-Hour Auto-Mute Guard preventing AI hallucinations in regulated commerce.
+              </div>
+            </div>
+
+            <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "10px", padding: "16px" }}>
+              <div style={{ fontSize: "11px", color: "var(--color-mist)", fontFamily: "var(--font-jetbrains), monospace" }}>
+                BACKEND &amp; LANGGRAPH STATE MACHINE
+              </div>
+              <div style={{ fontSize: "16px", fontWeight: 700, color: "#818CF8", marginTop: "4px" }}>
+                Python 3.14 · FastAPI · AsyncIO
+              </div>
+              <div style={{ fontSize: "12px", color: "var(--color-fog)", marginTop: "8px", lineHeight: "1.5" }}>
+                <code>gateway_bridge.py</code> central entrypoint. Dual intelligence routing via <code>prompts_customer.py</code> (temp=0.5) and <code>prompts_owner.py</code> (temp=0.2). Native ReAct loop in <code>agent_harness.py</code>.
+              </div>
+            </div>
+
+            <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "10px", padding: "16px" }}>
+              <div style={{ fontSize: "11px", color: "var(--color-mist)", fontFamily: "var(--font-jetbrains), monospace" }}>
+                DATA LAYER &amp; MEDIA ASSETS
+              </div>
+              <div style={{ fontSize: "16px", fontWeight: 700, color: "#4ADE80", marginTop: "4px" }}>
+                Async SQLAlchemy · PostgreSQL
+              </div>
+              <div style={{ fontSize: "12px", color: "var(--color-fog)", marginTop: "8px", lineHeight: "1.5" }}>
+                Engine pool (pool_size=5, max_overflow=10, up to 15 concurrent connections). Stores tenants, SKUs, prices, customer history, ESC-XX tickets. Verified studio photos served locally over HTTPS.
               </div>
             </div>
           </div>

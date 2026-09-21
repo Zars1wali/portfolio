@@ -9,7 +9,8 @@ stack:
   - "Deepgram Nova-3 STT"
   - "Responsible AI (HITL)"
   - "FastAPI"
-  - "Python 3.11"
+  - "Python 3.14"
+  - "google-genai SDK"
   - "Node.js 20"
   - "PostgreSQL 16"
   - "Docker Compose"
@@ -132,77 +133,58 @@ WhatsApp assigns privacy identifiers for user messaging. The gateway maintains a
 
 ---
 
-## Layer 3 — Dual-Agent Engine (FastAPI & LangGraph)
+## Layer 3 — Application Core & LangGraph State Machine (`backend/app`)
 
-The backend runs two separate ReACT agents with different configurations, each optimized for its role.
+- **Technology Stack:** Python 3.14, FastAPI, AsyncIO, Uvicorn.
+- **Gateway Bridge (`gateway_bridge.py`):** Central entrypoint that decodes incoming webhooks and burst payloads, coordinates voice note transcription via Deepgram Nova-3, and resolves privacy LIDs to real mobile numbers.
 
-### Customer Sales Agent (Temperature: 0.5)
+### Dual Intelligence Routing
 
-A warm, conversational sales persona that speaks natural Pakistani Roman Urdu. Designed to build trust and close deals.
-
-- **Persona:** Friendly, respectful, culturally aware — uses greetings like *"Jee bhai"* (English: "Yes, brother") and *"Bilkul"* (English: "Absolutely")
-- **Response discipline:** 1 to 3 sentences maximum. Never sends walls of text.
-- **Sales-aggressive:** Proactively guides undecided customers toward purchase decisions by asking about budget, use case, and preferences.
-- **Order intake funnel:** When a customer confirms interest, the agent collects: (1) Name, (2) City, (3) Delivery address, (4) SIM number — in that sequence.
-
-### Owner Co-Pilot Agent (Temperature: 0.2)
-
-A strict, deterministic engine for business operations. Low temperature ensures precise, predictable execution.
-
-- **Catalog mutations:** Processes natural language commands like *"Glock 19 price 390k kardo"* (English: "Set the Glock 19 price to 390,000") and executes exact SQL updates.
-- **Inventory control:** Toggles stock status via casual messages like *"Tisas out of stock"* (English: "Mark Tisas as out of stock").
-- **Two-way escalation relay:** When a customer escalation requires the owner's input, the owner's reply is intercepted and relayed back to the waiting customer thread automatically.
+- **Customer Sales Agent (`prompts_customer.py`, temp=0.5):** Natural, friendly Pakistani retail persona that sends short (1–3 sentence) messages and proactively drives to close deals. Designed to build customer trust while guiding undecided buyers through budget, caliber, and intended use case.
+  - *Order Intake Funnel:* Systematically collects (1) Name, (2) City, (3) Delivery Address, and (4) Mobile Number when intent is confirmed.
+- **Owner Co-Pilot Node (`prompts_owner.py`, temp=0.2):** Strict, deterministic, zero-fluff assistant for managing inventory, adjusting prices, and resolving customer negotiations.
+  - *Catalog Mutations:* Processes natural language commands like *"Glock 19 price 390k kardo"* (English: "Set the Glock 19 price to 390,000") and executes exact SQL updates.
+  - *Inventory Control:* Toggles stock status via casual messages like *"Tisas out of stock"*.
+  - *Two-Way Escalation Relay:* Relays the owner's answers back to waiting customer threads automatically.
 
 ---
 
-## Layer 4 — ReACT Tool Calling
+## Layer 4 — Native Gemini ReAct Engine (`agent_harness.py`)
 
-Every tool call is grounded against the live PostgreSQL database. The AI never fabricates product specs, prices, or availability.
+- **Technology:** `google-genai` SDK with native tool calling.
+- **Loop Mechanics:** Generates thoughts, calls tools, observes database results, and formulates final responses in a single async turn.
+- **Zero-Hallucination Law:** Specs, stock, and prices are never guessed; they are retrieved strictly from live database catalog queries.
 
-### Customer Tools
+### Zero-Hallucination ReACT Tool Registry
 
-**`search_catalog`** — Queries the product database with zero-hallucination guarantees. Uses exact SQL matching for brands, models, and calibers. Decimal calibers like `5.56`, `.308`, and `7.62` are preserved as atomic values — never split by tokenizers.
+#### Customer Tools:
+- **`search_catalog`** — Queries the product database with zero-hallucination guarantees. Uses exact SQL matching for brands, models, and calibers. Decimal calibers like `5.56`, `.308`, and `7.62` are preserved as atomic values — never split by tokenizers.
+- **`get_product_photos`** — Retrieves verified studio photographs from the static media server. Each photo is served via Caddy with a dynamic caption showing the product name and current price.
+- **`check_delivery_policy`** — Returns dealership delivery terms: managed shipping, 100% advance payment required, and city-specific availability.
+- **`get_payment_bank_details`** — Provides verified dealership bank account details for advance deposits.
+- **`escalate_inquiry`** — Creates a structured ESC-XX ticket when a customer question touches delivery logistics, legal licensing talks, bulk orders, or custom pricing.
 
-**`get_product_photos`** — Retrieves verified studio photographs from the static media server. Each photo is served via Caddy with a dynamic caption showing the product name and current price.
-
-**`check_delivery_policy`** — Returns the dealership's delivery terms: managed shipping, 100% advance payment required, and city-specific availability.
-
-**`get_payment_bank_details`** — Provides the dealership's verified bank account details for advance payments.
-
-**`escalate_inquiry`** — Creates a structured ESC-XX ticket when a customer question requires the owner's input (delivery logistics, legal licensing talks, bulk orders, custom pricing). The ticket is forwarded to the owner's WhatsApp with all customer context.
-
-### Owner Tools
-
-**`update_product_price`** — Executes a direct SQL price update on the product catalog. Returns confirmation with old price vs. new price.
-
-**`toggle_in_stock`** — Flips a product's availability status between in-stock and out-of-stock.
+#### Owner Tools:
+- **`update_product_price`** — Executes a direct SQL price mutation on the product catalog and returns previous vs. new price confirmation.
+- **`toggle_in_stock`** — Flips a firearm's availability status between in-stock and out-of-stock in real time.
 
 ---
 
 ## Layer 5 — Foundation Model: Google Gemini 3.5 Flash Lite
 
-**Google Gemini 3.5 Flash Lite** with native ReACT function calling.
+**Google Gemini 3.5 Flash Lite** with native ReACT function calling via the official `google-genai` SDK.
 
-- **Why Gemini 3.5 Flash Lite:** Sub-second inference latency critical for WhatsApp real-time commerce. Native function calling eliminates brittle regex parsers. Exceptional comprehension of code-switched Roman Urdu and English without fine-tuning.
-- **Cost & Token Efficiency:** Delivers first tokens in &lt;450ms, enabling complete ReACT reasoning loops in under 850ms on WhatsApp.
-- **Precision:** Low temperature execution guarantees deterministic tool selection without conversational drift.
+- **Why Gemini 3.5 Flash Lite:** Sub-second inference latency critical for real-time WhatsApp commerce. Native tool-calling eliminates brittle regex string parsers. Exceptional zero-shot comprehension of code-switched Roman Urdu and English without fine-tuning.
+- **Cost & Token Efficiency:** Delivers first tokens in &lt;450ms, enabling complete ReACT reasoning loops, tool calls, and media payloads in under 850ms on WhatsApp.
+- **Dual Temperature Profiles:** Temperature 0.5 for engaging customer sales conversations; temperature 0.2 for deterministic owner administrative mutations.
 
 ---
 
-## Layer 6 — Data Layer & Persistence
+## Layer 6 — Data & Persistence Layer (PostgreSQL)
 
-### PostgreSQL 16 + pgvector
-
-Single source of truth for the entire platform. Stores:
-- **Tenant configurations** — multi-tenant architecture supporting different business clients
-- **Product catalog** — every SKU with brand, model, caliber, price (PKR), origin country, and stock status
-- **Escalation tickets** — ESC-XX records with customer context, owner responses, and resolution timestamps
-- **2-hour mute records** — tracks which customer threads have active owner takeovers
-- **AI persona configurations** — system prompts, temperature settings, and behavioral rules per tenant
-
-### Static Media Server
-
-Product photographs are stored on disk at `/static/catalog_images/` and served through Caddy's static file server with automatic HTTPS. Photos are verified against product records — the AI can only deliver images that exist in the catalog.
+- **Connection Pool:** Async SQLAlchemy engine (`pool_size=5`, `max_overflow=10`, supporting up to 15 concurrent pooled connections).
+- **PostgreSQL 16 + pgvector Storage:** Stores multi-tenant configurations, authenticated product SKUs, prices, customer conversation history, and active escalation tickets (`ESC-XX`).
+- **Media Assets:** Verified studio firearm photos hosted locally on disk at `/static/catalog_images/` and delivered securely over HTTPS via Caddy with dynamic product captions. Photos are verified against database records — the AI can only deliver images that exist in the active catalog.
 
 ---
 
