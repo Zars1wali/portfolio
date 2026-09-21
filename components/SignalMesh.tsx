@@ -33,6 +33,10 @@ export default function SignalMesh() {
         zIndex: 0,
         pointerEvents: "none",
         overflow: "hidden",
+        contain: "strict",
+        isolation: "isolate",
+        willChange: "transform",
+        transform: "translate3d(0, 0, 0)",
       }}
     >
       <svg

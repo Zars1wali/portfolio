@@ -63,17 +63,19 @@ export default function GlassPanel({ children, className = "", style, wide = fal
           z-index: 2;
           width: min(520px, 88vw); /* overridden by wide prop */
           padding: 44px 40px;
-          background: var(--color-glass, rgba(255,255,255,0.05));
+          background: rgba(10, 15, 26, 0.78);
           border: 1px solid var(--color-glass-border, rgba(255,255,255,0.12));
           border-radius: var(--radius-glass, 20px);
-          backdrop-filter: blur(22px);
-          -webkit-backdrop-filter: blur(22px);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
           box-shadow:
             0 0 0 1px rgba(255,255,255,0.03) inset,
             0 30px 60px -20px rgba(0,0,0,0.6),
-            0 0 40px -10px rgba(86,232,208,0.15); /* cyan glow */
+            0 0 40px -10px rgba(86,232,208,0.12); /* cyan glow */
           transform-style: preserve-3d;
           transition: transform 0.15s ease-out, box-shadow 0.3s ease;
+          contain: layout style;
+          isolation: isolate;
           
           /* Entrance animation */
           opacity: 0;
