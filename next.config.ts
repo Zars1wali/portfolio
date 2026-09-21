@@ -30,6 +30,8 @@ const nextConfig: NextConfig = {
             : "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com",
           "img-src 'self' data: blob:",
           "connect-src 'self' https://va.vercel-scripts.com",
+          "frame-src 'self' blob: data:",
+          "object-src 'self' blob: data:",
           "frame-ancestors 'self'",
           "base-uri 'self'",
           "form-action 'self'",
@@ -41,7 +43,7 @@ const nextConfig: NextConfig = {
         key: "Strict-Transport-Security",
         value: "max-age=31536000; includeSubDomains; preload",
       },
-      // Prevent framing (clickjacking) — allow same-origin for internal embeds (e.g. /resume.pdf)
+      // Prevent framing (clickjacking) — allow same-origin for internal embeds
       {
         key: "X-Frame-Options",
         value: "SAMEORIGIN",
@@ -65,9 +67,27 @@ const nextConfig: NextConfig = {
 
     return [
       {
-        // Apply to all routes
-        source: "/(.*)",
+        // Apply security headers to pages and API routes (exempt raw resume PDF)
+        source: "/((?!resume\\.pdf).*)",
         headers,
+      },
+      {
+        // Specific headers for resume PDF: allow inline viewing without framing restrictions
+        source: "/resume.pdf",
+        headers: [
+          {
+            key: "Content-Type",
+            value: "application/pdf",
+          },
+          {
+            key: "Content-Disposition",
+            value: "inline; filename=\"Umer_Wali_CV.pdf\"",
+          },
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*",
+          },
+        ],
       },
     ];
   },
