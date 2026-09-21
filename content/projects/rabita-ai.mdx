@@ -1,8 +1,9 @@
 ---
 title: "Rabita AI"
-summary: "WhatsApp-native Agentic AI commerce platform with Responsible AI Human-in-the-Loop governance. Powered by Google Gemini 3.5 Flash Lite ReACT reasoning, Meta Official WhatsApp Business Platform, Deepgram Nova-3 voice transcription, and zero-hallucination catalog grounding — deployed 24/7 on Vultr VPS via Docker for Haider Arms."
+summary: "WhatsApp-native Agentic AI commerce platform with Responsible AI Human-in-the-Loop governance. Powered by Google Gemini 3.5 Flash Lite ReACT reasoning, Multimodal Intelligence (Gemini Vision rollmark audit & Deepgram Nova-3 voice processing), Meta Official WhatsApp Business Platform, and zero-hallucination catalog grounding — deployed 24/7 on Vultr VPS via Docker for Haider Arms."
 stack:
   - "Google Gemini 3.5 Flash Lite"
+  - "Gemini Vision (Rollmark Audit)"
   - "LangGraph"
   - "ReACT Architecture"
   - "Meta Official WhatsApp Business Platform"
@@ -187,17 +188,34 @@ WhatsApp assigns privacy identifiers for user messaging. The gateway maintains a
 
 ---
 
-## Voice Intelligence — Deepgram Nova-3
+## Multimodal Intelligence
 
-Pakistani customers heavily prefer sending voice notes over typing. Deepgram Nova-3 handles bilingual speech-to-text:
+Rabita AI integrates visual perception and real-time speech processing into a unified multimodal pipeline, ensuring zero-hallucination media delivery and natural conversational commerce:
+
+- **Vision:** Audited studio firearm catalog photos against physical SKUs using Gemini Vision rollmark detection to eliminate weapon mismatches.
+- **Voice:** Integrated Deepgram Nova-3 via async streaming WebSockets for low-latency voice note processing.
+
+### Vision Intelligence — Gemini Vision Rollmark Audit
+
+In firearms retail, sending an incorrect photograph is a critical compliance and credibility risk. A customer asking for a Palmetto State Armory PA-15 rifle must never receive an image of an Anderson M4 or a Batmaz .223 rifle.
+
+To eliminate catalog cross-contamination before media ever reaches WhatsApp:
+1. **Automated Rollmark & Slide Engraving Inspection:** An asynchronous auditing pipeline feeds studio photography into Gemini Vision (`gemini-3.5-flash-lite`).
+2. **Receiver & Caliber Verification:** Gemini Vision reads visible manufacturer stamps, receiver engravings, caliber rollmarks (`5.56 NATO`, `.308 WIN`, `9x19mm`), and packaging hang tags.
+3. **Physical SKU Grounding:** Extracted markings are audited directly against the database's physical SKU metadata. Only photos with verified rollmark matches are committed to `metadata_json['visual_verification']`.
+4. **Tool Guardrail:** The sales agent's `get_product_photos` tool only delivers rollmark-verified photos. If authentic studio photos are still pending verification, the AI gracefully informs the customer rather than fabricating or sending an unverified image.
+
+### Voice Intelligence — Deepgram Nova-3 (Async Streaming WebSockets)
+
+Pakistani retail customers predominantly communicate via WhatsApp voice notes rather than typing. Deepgram Nova-3 handles bilingual speech-to-text with sub-second turnaround:
 
 1. Customer sends a `.ogg` voice note on WhatsApp
-2. Gateway detects audio media and forwards the binary to the backend
-3. Backend streams the audio to Deepgram's Nova-3 STT API
+2. Gateway detects audio media and streams binary buffers to the backend via async WebSockets
+3. Backend streams the audio directly to Deepgram's Nova-3 STT API
 4. Deepgram transcribes code-switched Roman Urdu and English into structured text (under 400ms)
-5. Transcribed text enters the same LangGraph pipeline as typed messages
+5. Transcribed text immediately enters the LangGraph ReACT pipeline identical to typed messages
 
-**Example:** A customer sends a 4-second voice note: *"Salam bhai, Glock ki price kya hai?"* (English: "Hello brother, what's the Glock's price?"). Deepgram Nova-3 transcribes in 320ms. The sales agent responds with exact pricing within 1 second.
+**Example:** A customer sends a 4-second voice note: *"Salam bhai, Glock ki price kya hai?"* (English: "Hello brother, what's the Glock's price?"). Deepgram Nova-3 transcribes in 320ms. The sales agent responds with exact pricing and rollmark-verified photos within 1 second.
 
 ---
 
