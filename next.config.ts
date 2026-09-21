@@ -30,7 +30,7 @@ const nextConfig: NextConfig = {
             : "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com",
           "img-src 'self' data: blob:",
           "connect-src 'self' https://va.vercel-scripts.com",
-          "frame-ancestors 'none'",
+          "frame-ancestors 'self'",
           "base-uri 'self'",
           "form-action 'self'",
           "upgrade-insecure-requests",
@@ -41,10 +41,10 @@ const nextConfig: NextConfig = {
         key: "Strict-Transport-Security",
         value: "max-age=31536000; includeSubDomains; preload",
       },
-      // Prevent framing (clickjacking)
+      // Prevent framing (clickjacking) — allow same-origin for internal embeds (e.g. /resume.pdf)
       {
         key: "X-Frame-Options",
-        value: "DENY",
+        value: "SAMEORIGIN",
       },
       // Prevent MIME sniffing
       {

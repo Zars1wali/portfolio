@@ -65,12 +65,19 @@ export default function ResumePage() {
         </div>
 
         {/* Actual PDF embed */}
-        <iframe
-          src="/resume.pdf#toolbar=1&navpanes=0&scrollbar=1"
-          title="Umer Wali CV"
+        <object
+          data="/resume.pdf#toolbar=1&navpanes=0&scrollbar=1"
+          type="application/pdf"
           className="w-full relative z-10 flex-1"
           style={{ height: "82vh", minHeight: "680px", border: "none" }}
-        />
+        >
+          <iframe
+            src="/resume.pdf#toolbar=1&navpanes=0&scrollbar=1"
+            title="Umer Wali CV"
+            className="w-full h-full border-none"
+            style={{ height: "82vh", minHeight: "680px" }}
+          />
+        </object>
       </div>
     </div>
   );

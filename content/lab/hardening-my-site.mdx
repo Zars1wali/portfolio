@@ -22,13 +22,13 @@ the `/infra` Docker + Nginx setup, and the dependency tree.
   compiled assets lean and makes the shipped bundle harder to reverse.
 - **Response-header policy** (applied to all routes in `next.config.ts`):
   - `Content-Security-Policy` — `default-src 'self'`, strict `font-src` /
-    `img-src` / `connect-src`, `frame-ancestors 'none'`, `base-uri 'self'`,
+    `img-src` / `connect-src`, `frame-ancestors 'self'`, `base-uri 'self'`,
     `form-action 'self'`, and `upgrade-insecure-requests`. The dev server
     additionally permits `'unsafe-eval'` for React tooling; production
     strips it.
   - `Strict-Transport-Security` — `max-age=31536000; includeSubDomains;
     preload`.
-  - `X-Frame-Options: DENY` (clickjacking), `X-Content-Type-Options: nosniff`
+  - `X-Frame-Options: SAMEORIGIN` (clickjacking protection allowing same-origin embeds), `X-Content-Type-Options: nosniff`
     (MIME-sniffing), `Referrer-Policy: strict-origin-when-cross-origin`,
     `Permissions-Policy` disabling camera, microphone, geolocation, and
     interest-cohort.
