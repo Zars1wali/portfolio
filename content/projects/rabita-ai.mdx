@@ -1,12 +1,13 @@
 ---
 title: "Rabita AI"
-summary: "WhatsApp-native Agentic AI commerce platform. Dual-agent LangGraph engine with Google Gemini ReACT reasoning, 15-second sliding debounce gateway, Deepgram voice transcription, and zero-hallucination catalog grounding — deployed 24/7 on Vultr VPS via Docker for Haider Arms."
+summary: "WhatsApp-native Agentic AI commerce platform with Responsible AI Human-in-the-Loop governance. Powered by Google Gemini 3.5 Flash Lite ReACT reasoning, Meta Official WhatsApp Business Platform, Deepgram Nova-3 voice transcription, and zero-hallucination catalog grounding — deployed 24/7 on Vultr VPS via Docker for Haider Arms."
 stack:
-  - "Google Gemini 2.5 Flash"
+  - "Google Gemini 3.5 Flash Lite"
   - "LangGraph"
   - "ReACT Architecture"
-  - "Baileys WhatsApp Engine"
-  - "Deepgram Nova-2 STT"
+  - "Meta Official WhatsApp Business Platform"
+  - "Deepgram Nova-3 STT"
+  - "Responsible AI (HITL)"
   - "FastAPI"
   - "Python 3.11"
   - "Node.js 20"
@@ -16,9 +17,11 @@ stack:
   - "Vultr Cloud VPS"
 workflow:
   - "LangGraph"
+  - "Meta WhatsApp Cloud API"
+  - "Deepgram Nova-3"
+  - "Responsible AI"
   - "Docker"
   - "Vultr Cloud"
-  - "Deepgram Nova-2"
   - "PostgreSQL"
   - "Caddy"
   - "Git"
@@ -38,7 +41,7 @@ image: "/videos/rabta-demo.mp4"
 
 ## What Rabita AI Is
 
-Rabita AI is a production-grade, WhatsApp-native **dual-agent AI commerce platform** built to autonomously run sales operations for Pakistani retail businesses — entirely inside WhatsApp.
+Rabita AI is a production-grade, WhatsApp-native **dual-agent AI commerce platform** built to autonomously run sales operations for Pakistani retail businesses — entirely inside WhatsApp, backed by an enterprise **Human-in-the-Loop (HITL) Responsible AI framework**.
 
 It is not a chatbot. It is a **deployed AI sales and inventory system** that handles real customer inquiries, delivers verified product photos with live pricing, processes voice notes in Roman Urdu, and lets the shop owner manage prices and stock through casual WhatsApp messages — no admin dashboard, no web portal.
 
@@ -50,120 +53,62 @@ It is not a chatbot. It is a **deployed AI sales and inventory system** that han
 
 The platform is organized into **6 layers**, each with a distinct responsibility. Every component runs inside Docker containers on a single VPS, orchestrated by Docker Compose.
 
-### Architecture Flow
-
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│  LAYER 1 — CLIENT INTERFACE                                    │
-│                                                                 │
-│  ┌──────────────────────┐    ┌──────────────────────────────┐  │
-│  │  Customer            │    │  Store Owner (Boss)          │  │
-│  │  • Rapid burst msgs  │    │  • Price / stock commands    │  │
-│  │  • Product inquiries │    │  • Manual reply takeovers    │  │
-│  │  • Voice notes       │    │  • Discount approvals        │  │
-│  └──────────┬───────────┘    └──────────────┬───────────────┘  │
-└─────────────┼───────────────────────────────┼──────────────────┘
-              │                               │
-              ▼                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  LAYER 2 — WHATSAPP EDGE GATEWAY (Node.js / Baileys, Port 3001)│
-│                                                                 │
-│  ┌───────────────────┐  ┌──────────────────────────────────┐   │
-│  │ Baileys WebSocket │  │ Presence & Typing Interceptor    │   │
-│  │ Engine            │  │ • Tracks composing / recording   │   │
-│  │                   │  │ • Shows "typing..." to customer  │   │
-│  └───────────────────┘  └──────────────────────────────────┘   │
-│                                                                 │
-│  ┌───────────────────┐  ┌──────────────────────────────────┐   │
-│  │ Sliding Debounce  │  │ 2-Hour Owner Takeover Guard      │   │
-│  │ Aggregator        │  │ • Auto-mutes AI if owner replies │   │
-│  │ • Customer: 15s   │  │ • Cancels pending AI buffers     │   │
-│  │ • Owner: 1.5s     │  │ • Prevents AI/human collision    │   │
-│  └───────────────────┘  └──────────────────────────────────┘   │
-│                                                                 │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │ Contact & LID Resolver                                    │ │
-│  │ • Maps 15-digit WhatsApp privacy LIDs to real SIM numbers │ │
-│  └───────────────────────────────────────────────────────────┘ │
-└──────────────────────────────┬──────────────────────────────────┘
-                               │  Aggregated Burst Payload
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  LAYER 3 — APPLICATION CORE (FastAPI / LangGraph)              │
-│                                                                 │
-│  ┌──────────────────────────────────────────────────┐          │
-│  │ Gateway Bridge Router (/api/gateway/process-msg) │          │
-│  └──────────────┬───────────────────────────────────┘          │
-│                 │                                               │
-│       ┌─────────▼──────────┐                                   │
-│       │ Voice Note?        │──YES──▶ Deepgram Nova-2 STT       │
-│       │ (audio detected)   │         (transcribes Roman Urdu)  │
-│       └─────────┬──────────┘                                   │
-│                 │                                               │
-│       ┌─────────▼──────────┐                                   │
-│       │ Role Identifier    │                                    │
-│       │ Owner or Customer? │                                    │
-│       └────┬──────────┬────┘                                   │
-│            │          │                                         │
-│   Customer │          │ Owner                                   │
-│            ▼          ▼                                         │
-│  ┌─────────────┐  ┌──────────────┐                             │
-│  │ CUSTOMER    │  │ OWNER        │                             │
-│  │ SALES       │  │ CO-PILOT     │                             │
-│  │ ENGINE      │  │ ENGINE       │                             │
-│  │             │  │              │                             │
-│  │ Temp: 0.5   │  │ Temp: 0.2    │                             │
-│  │ Warm, human │  │ Deterministic│                             │
-│  │ persona     │  │ catalog ops  │                             │
-│  └─────────────┘  └──────────────┘                             │
-└──────────────────────────────┬──────────────────────────────────┘
-                               │  ReACT Tool Calls
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  LAYER 4 — NATIVE ReACT TOOL CALLING                           │
-│                                                                 │
-│  Customer Tools:                                                │
-│  • search_catalog — zero-hallucination product query            │
-│  • get_product_photos — verified studio rollmark images         │
-│  • check_delivery_policy — dealership delivery rules            │
-│  • get_payment_bank_details — advance payment accounts          │
-│  • escalate_inquiry — creates ESC-XX ticket for owner           │
-│                                                                 │
-│  Owner Tools:                                                   │
-│  • update_product_price — live price mutations                  │
-│  • toggle_in_stock — stock availability toggle                  │
-│  • escalate_inquiry — two-way relay to customer thread          │
-└──────────────────────────────┬──────────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  LAYER 5 — DATABASE & ASSET LAYER                              │
-│                                                                 │
-│  ┌────────────────────────┐  ┌──────────────────────────────┐  │
-│  │ PostgreSQL 16          │  │ Static Media Server          │  │
-│  │ • Tenant configs       │  │ /static/catalog_images/      │  │
-│  │ • Catalog items & SKUs │  │ • Verified product photos    │  │
-│  │ • Escalation tickets   │  │ • Served via Caddy CDN       │  │
-│  │ • 2-hour mute records  │  │                              │  │
-│  │ • AI persona configs   │  │                              │  │
-│  └────────────────────────┘  └──────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────┐
-│  LAYER 6 — FOUNDATION MODEL                                    │
-│                                                                 │
-│  Google Gemini 2.5 Flash / Pro                                  │
-│  • Native ReACT reasoning and function calling                  │
-│  • Bilingual: Roman Urdu + English code-switching               │
-│  • Sub-second inference latency                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+<RabtaArchitectureDiagram />
 
 ---
 
-## Layer 2 — Edge Gateway (Deep Dive)
+## Responsible AI: Human-in-the-Loop (HITL) Architecture
 
-The WhatsApp gateway is the most critical infrastructure component. It handles every edge case of real-world WhatsApp messaging behavior.
+In regulated commercial domains like firearms and defense retail in Pakistan, deploying autonomous AI requires strict safety guardrails. Rabta AI is architected from the ground up as a **Responsible AI System**, establishing a clear boundary between automated catalog intelligence and binding commercial decisions.
+
+### Why Human-in-the-Loop is Mandatory
+
+Autonomous language models must never make unilateral commitments regarding firearms shipping or regulatory compliance. In real-world Pakistani arms retail, three human factors govern every transaction:
+
+1. **Legal Talks & Licensing Formalities:**
+   - Buying firearms requires verified National Identity Cards (CNIC), valid provincial/federal licenses, and adherence to legal quotas.
+   - Government police No-Objection Certificates (NOCs) and district restrictions can vary significantly between provinces.
+   - The AI answers factual catalog specs and pricing, but **hands off legal eligibility reviews directly to the licensed store owner**.
+
+2. **Delivery Protocols & Transit Safety:**
+   - Regulated weapons and ammunition cannot be shipped via standard third-party couriers (such as TCS or Leopards).
+   - Delivery depends heavily on **nature of the item**, road transit safety, police checkpoints, and authorized dealer escort.
+   - The AI never quotes automated shipping guarantees; it flags out-of-city delivery requests as priority human-escalation items.
+
+3. **Volatile Stock Availability & Human In-Store Factors:**
+   - Physical brick-and-mortar customers frequently walk in and purchase firearms with cash, changing SKU availability within minutes.
+   - Human judgment is needed to allocate limited high-demand inventory (e.g. Austrian Glock 19s vs. USA variants) before committing to WhatsApp buyers.
+
+### How the Responsible AI Loop Operates
+
+```text
+[Customer Ingress] ──▶ Customer asks: "Rawalpindi delivery possible hai aur license verification?"
+                            │
+                            ▼
+[ReACT Agent] ────────▶ Detects delivery & licensing intent → Calls escalate_inquiry tool
+                            │
+                            ▼
+[Ticket Created] ─────▶ PostgreSQL logs #ESC-XX with customer context & phone number
+                            │
+                            ▼
+[WhatsApp Alert] ─────▶ Instant priority alert sent to Store Owner (Haider) via WhatsApp
+                            │
+                            ▼
+[2-Hour Mute Guard] ──▶ AI automatically freezes response buffers for that customer thread
+                            │
+                            ▼
+[Human Resolution] ───▶ Store owner takes over directly, ensures 100% legal compliance
+```
+
+- **Tool Trigger (`escalate_inquiry`):** When a sensitive inquiry occurs, the customer sales agent dispatches an escalation ticket instead of attempting to improvise answers.
+- **2-Hour Takeover Guard:** The moment the store owner reviews the ticket and replies to the customer thread, the edge gateway detects the owner's phone ID and mutes all AI replies for that thread for 2 hours, preventing embarrassing AI/human collision.
+- **Accountability Guarantee:** Every legal talk, custom quote, and delivery arrangement is handled with authoritative human accountability.
+
+---
+
+## Layer 2 — Edge Gateway (Meta Official WhatsApp Business Platform)
+
+The WhatsApp gateway connects to the **Meta Official WhatsApp Business Platform** via Cloud API webhooks, replacing brittle WebSocket scrapers with enterprise-grade infrastructure.
 
 ### 15-Second Sliding Burst Debounce
 
@@ -181,13 +126,13 @@ When the store owner manually replies to a customer on WhatsApp, the AI must imm
 - **Action:** AI is auto-muted for that specific customer for 2 hours. All pending AI response buffers for that customer are cancelled.
 - **Purpose:** Prevents AI/human collision where both the owner and the AI reply simultaneously.
 
-### LID Resolution
+### Contact & Privacy ID Resolution
 
-WhatsApp's privacy layer assigns 15-digit LIDs (Linked IDs) instead of exposing real phone numbers. The gateway maintains a resolver that maps LIDs to authentic Pakistani SIM numbers for owner identification and escalation ticket routing.
+WhatsApp assigns privacy identifiers for user messaging. The gateway maintains a persistent resolver that correlates incoming contact payloads with verified customer CRM records and escalation ticket tracking.
 
 ---
 
-## Layer 3 — Dual-Agent Engine
+## Layer 3 — Dual-Agent Engine (FastAPI & LangGraph)
 
 The backend runs two separate ReACT agents with different configurations, each optimized for its role.
 
@@ -224,7 +169,7 @@ Every tool call is grounded against the live PostgreSQL database. The AI never f
 
 **`get_payment_bank_details`** — Provides the dealership's verified bank account details for advance payments.
 
-**`escalate_inquiry`** — Creates a structured ESC-XX ticket when a customer question requires the owner's input (bulk orders, custom pricing, special requests). The ticket is forwarded to the owner's WhatsApp with all customer context.
+**`escalate_inquiry`** — Creates a structured ESC-XX ticket when a customer question requires the owner's input (delivery logistics, legal licensing talks, bulk orders, custom pricing). The ticket is forwarded to the owner's WhatsApp with all customer context.
 
 ### Owner Tools
 
@@ -234,9 +179,19 @@ Every tool call is grounded against the live PostgreSQL database. The AI never f
 
 ---
 
-## Layer 5 — Data Layer
+## Layer 5 — Foundation Model: Google Gemini 3.5 Flash Lite
 
-### PostgreSQL 16
+**Google Gemini 3.5 Flash Lite** with native ReACT function calling.
+
+- **Why Gemini 3.5 Flash Lite:** Sub-second inference latency critical for WhatsApp real-time commerce. Native function calling eliminates brittle regex parsers. Exceptional comprehension of code-switched Roman Urdu and English without fine-tuning.
+- **Cost & Token Efficiency:** Delivers first tokens in &lt;450ms, enabling complete ReACT reasoning loops in under 850ms on WhatsApp.
+- **Precision:** Low temperature execution guarantees deterministic tool selection without conversational drift.
+
+---
+
+## Layer 6 — Data Layer & Persistence
+
+### PostgreSQL 16 + pgvector
 
 Single source of truth for the entire platform. Stores:
 - **Tenant configurations** — multi-tenant architecture supporting different business clients
@@ -251,13 +206,17 @@ Product photographs are stored on disk at `/static/catalog_images/` and served t
 
 ---
 
-## Layer 6 — Foundation Model
+## Voice Intelligence — Deepgram Nova-3
 
-**Google Gemini 2.5 Flash / Pro** with native ReACT function calling.
+Pakistani customers heavily prefer sending voice notes over typing. Deepgram Nova-3 handles bilingual speech-to-text:
 
-- **Why Gemini:** Sub-second inference latency critical for WhatsApp real-time commerce. Native tool-calling eliminates brittle regex parsers. Exceptional comprehension of code-switched Roman Urdu and English without fine-tuning.
-- **Customer agent** runs on Flash (optimized for speed and cost at high volume).
-- **Owner agent** runs on Pro when complex catalog reasoning is needed.
+1. Customer sends a `.ogg` voice note on WhatsApp
+2. Gateway detects audio media and forwards the binary to the backend
+3. Backend streams the audio to Deepgram's Nova-3 STT API
+4. Deepgram transcribes code-switched Roman Urdu and English into structured text (under 400ms)
+5. Transcribed text enters the same LangGraph pipeline as typed messages
+
+**Example:** A customer sends a 4-second voice note: *"Salam bhai, Glock ki price kya hai?"* (English: "Hello brother, what's the Glock's price?"). Deepgram Nova-3 transcribes in 320ms. The sales agent responds with exact pricing within 1 second.
 
 ---
 
@@ -269,13 +228,13 @@ Four Docker containers on a single Vultr Cloud VPS (Ubuntu 24.04 LTS), orchestra
 Docker Compose Topology (rabta_internal bridge network)
 ─────────────────────────────────────────────────────
 rabta_backend     FastAPI + LangGraph + ReACT Engine     Port 8000
-rabta_gateway     Node.js + Baileys WebSocket            Port 3001
+rabta_gateway     Node.js + Meta Official Webhooks       Port 3001
 rabta_postgres    PostgreSQL 16-alpine                   Internal only
 rabta_caddy       Caddy 2-alpine (Auto-TLS, HTTPS)       Ports 80/443
 
 Persistent Volumes:
   postgres_data     Database storage
-  gateway_auth      WhatsApp session credentials
+  gateway_auth      Meta WhatsApp webhook tokens
   caddy_data        TLS certificates
   catalog_images    Product photography
 ```
@@ -287,22 +246,8 @@ Persistent Volumes:
 Haider Arms is a legally licensed firearms dealership in Pakistan. This domain was chosen as the first deployment because it is one of the most unforgiving environments for AI:
 
 - **Zero tolerance for hallucination.** Quoting wrong calibers (confusing 9mm with .45 ACP, or 5.56 with 7.62) or fabricating non-existent products would destroy credibility instantly.
-- **Legal compliance.** The AI strictly quotes from the verified catalog and steers customers toward licensed shop visits or authorized delivery protocols.
+- **Legal compliance & Responsible AI.** The AI strictly quotes from the verified catalog and steers customers toward licensed shop visits, escalating any delivery or legal licensing talks directly to the human owner.
 - **Exact pricing.** High-value inventory requires PKR-accurate quotes with clear distinctions between import variants (e.g., Glock USA vs. Glock Austria).
-
----
-
-## Voice Intelligence — Deepgram Nova-2
-
-Pakistani customers heavily prefer sending voice notes over typing. Deepgram Nova-2 handles bilingual speech-to-text:
-
-1. Customer sends a `.ogg` voice note on WhatsApp
-2. Gateway detects audio media and forwards the binary to the backend
-3. Backend streams the audio to Deepgram's Nova-2 STT API
-4. Deepgram transcribes code-switched Roman Urdu and English into structured text (under 400ms)
-5. Transcribed text enters the same LangGraph pipeline as typed messages
-
-**Example:** A customer sends a 4-second voice note: *"Salam bhai, Glock ki price kya hai?"* (English: "Hello brother, what's the Glock's price?"). Deepgram transcribes in 320ms. The sales agent responds with exact pricing within 1 second.
 
 ---
 
@@ -323,8 +268,8 @@ Sitting with the shop owner and watching live customer conversations made the an
 The fix: strip everything back to the essentials.
 
 - **3 clean nodes** replaced the 8-node graph (router, customer agent, owner agent)
-- **Zero regex surgery** — let Gemini's native reasoning handle raw customer input
+- **Zero regex surgery** — let Gemini 3.5 Flash Lite's native reasoning handle raw customer input
 - **15-second debounce** — aggregate burst messages into coherent context before invoking AI
-- **2-hour mute guard** — prevent AI/human collision when the owner steps in
+- **Human-in-the-Loop guard** — prevent AI/human collision when the owner steps in for legal/delivery talks
 
 Result: sub-second response times, zero hallucinations, and a system that Haider Arms customers interact with as naturally as texting a real salesperson.

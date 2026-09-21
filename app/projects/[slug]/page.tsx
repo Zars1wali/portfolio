@@ -5,6 +5,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import { getProjectSlugs, getProjectContent } from "@/lib/content";
 import PolymarketLiveDashboard from "@/components/PolymarketLiveDashboard";
 import RabitaLiveDemo from "@/components/RabitaLiveDemo";
+import RabtaArchitectureDiagram from "@/components/RabtaArchitectureDiagram";
 
 /* ── Static generation ──────────────────────────────────────────────────── */
 export async function generateStaticParams() {
@@ -291,7 +292,7 @@ export default async function ProjectDetailPage({
           {slug === "polymarket-arbitrage-bot" && <PolymarketLiveDashboard />}
           {slug === "rabita-ai" && <RabitaLiveDemo />}
           <div className="prose">
-            <MDXRemote source={content} />
+            <MDXRemote source={content} components={{ RabtaArchitectureDiagram }} />
           </div>
         </div>
       )}

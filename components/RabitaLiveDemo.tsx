@@ -57,6 +57,17 @@ const SAMPLE_TURNS: SimulatorTurn[] = [
     finalAnswer: "Jee Haider bhai! Glock 19 Gen 5 USA ki price 390,000 PKR update kardi gayi hai aur stock status active hai.",
     finalAnswerEnglish: "Yes sir! The Glock 19 Gen 5 USA price has been updated to 390,000 PKR and stock status is now active.",
   },
+  {
+    id: "turn-4",
+    userPrompt: "Bhai kya delivery Rawalpindi ho sakti hai aur arms license verification ka kya procedure hai?",
+    userPromptEnglish: "Brother, is delivery to Rawalpindi possible and what is the arms license verification procedure?",
+    language: "Customer Legal & Delivery Inquiry (Responsible AI Flag)",
+    thought: "Customer inquiry touches firearm delivery logistics and legal licensing compliance. Rule: Due to regulatory compliance, provincial laws, and nature of item, the autonomous AI must never make binding delivery guarantees or approve licenses. Immediately invoke escalate_inquiry to alert Store Owner (Haider) and activate 2-Hour Mute Guard.",
+    action: 'escalate_inquiry(topic="Delivery & Legal Licensing", city="Rawalpindi", customer_phone="+92 300 782XXXX")',
+    observation: "Ticket #ESC-419 created in PostgreSQL. Priority WhatsApp notification dispatched to Store Owner. 2-Hour Owner Takeover Guard armed.",
+    finalAnswer: "Jee bhai! Rawalpindi delivery protocols aur arms license verification k legal paperwork k baray mein dukan k licensed owner (Haider bhai) abhi direct aapko guide karenge. Unhein notification chali gayi hai aur AI temporarily pause ho gaya hai taake authorized insaan aap se baat kar sakay.",
+    finalAnswerEnglish: "Yes brother! Regarding Rawalpindi delivery protocols and legal arms license verification paperwork, the licensed shop owner (Haider) will guide you directly in a moment. He has been notified and the AI has paused so an authorized human can assist you.",
+  },
 ];
 
 export default function RabitaLiveDemo() {
@@ -126,7 +137,7 @@ export default function RabitaLiveDemo() {
               </span>
             </div>
             <div style={{ fontSize: "11px", color: "var(--color-mist)", fontFamily: "var(--font-jetbrains), monospace" }}>
-              Client: Haider Arms · Meta WhatsApp Cloud API · Vultr VPS (65.20.90.130)
+              Client: Haider Arms · Meta Official WhatsApp Business Platform · Gemini 3.5 Flash Lite · Deepgram Nova-3
             </div>
           </div>
         </div>
@@ -366,10 +377,10 @@ export default function RabitaLiveDemo() {
                   VOICE NOTE TRANSCRIPTION
                 </div>
                 <div style={{ fontSize: "18px", fontWeight: 600, color: "var(--color-fog)", marginTop: "4px" }}>
-                  Deepgram Nova-2
+                  Deepgram Nova-3
                 </div>
                 <div style={{ fontSize: "11px", color: "var(--color-mist)", marginTop: "2px" }}>
-                  Bilingual Roman Urdu + English STT
+                  Bilingual Roman Urdu + English STT (&lt;400ms)
                 </div>
               </div>
             </div>
@@ -400,7 +411,7 @@ export default function RabitaLiveDemo() {
                     fontFamily: "var(--font-jetbrains), monospace",
                   }}
                 >
-                  Scenario {i + 1}: {turn.audioNote ? "🎙️ Voice Note" : turn.id === "turn-3" ? "👑 Owner Command" : "💬 Customer Query"}
+                  Scenario {i + 1}: {turn.id === "turn-4" ? "🛡️ Responsible AI (HITL)" : turn.audioNote ? "🎙️ Voice Note (Nova-3)" : turn.id === "turn-3" ? "👑 Owner Command" : "💬 Customer Query"}
                 </button>
               ))}
             </div>
@@ -630,7 +641,7 @@ export default function RabitaLiveDemo() {
                   <span style={{ color: "#25D366" }}>● Up 24/7 (Port 5432)</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", background: "rgba(255, 255, 255, 0.02)", borderRadius: "6px" }}>
-                  <span style={{ color: "var(--color-fog)" }}>deepgram-stt-connector (Nova-2 Speech Engine)</span>
+                  <span style={{ color: "var(--color-fog)" }}>deepgram-stt-connector (Nova-3 Speech Engine)</span>
                   <span style={{ color: "#25D366" }}>● Active Streaming</span>
                 </div>
               </div>
