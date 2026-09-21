@@ -4,7 +4,7 @@ import { getAllProjects } from "@/lib/content";
 /* The four homepage features, in display order (slugs match content/projects/*.mdx).
    Cards are rendered with the same ProjectCard component as the /projects page,
    so the look and behaviour are identical. */
-const FEATURED_SLUGS = ["rabita-ai", "polymarket-arbitrage-bot", "from-tribe", "acreon"];
+const FEATURED_SLUGS = ["rabita-ai", "acreon", "polymarket-arbitrage-bot", "from-tribe"];
 
 export default function FeaturedProjectsStub() {
   const all = getAllProjects();

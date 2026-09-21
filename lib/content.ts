@@ -30,6 +30,8 @@ export interface ProjectMeta {
   };
   year: number;
   featured: boolean;
+  /** Explicit display order index (1-based); lowest numbers appear first */
+  order?: number;
   /** true = body is TODO; show "details coming soon" badge, do not fabricate copy */
   wip?: boolean;
   /** Optional cover image URL — when present, rendered as card background with glass+scrim treatment */
@@ -87,7 +89,14 @@ export function getAllProjects(): ProjectMeta[] {
   const dir = path.join(contentRoot, "projects");
   return getMDXFiles(dir)
     .map((f) => readFrontmatter<ProjectMeta>(dir, f))
-    .sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
+    .sort((a, b) => {
+      if (a.order !== undefined && b.order !== undefined) {
+        return a.order - b.order;
+      }
+      if (a.order !== undefined) return -1;
+      if (b.order !== undefined) return 1;
+      return (b.year ?? 0) - (a.year ?? 0);
+    });
 }
 
 export function getProjectSlugs(): string[] {
