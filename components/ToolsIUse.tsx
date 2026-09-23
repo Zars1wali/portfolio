@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import {
   siAnthropic,
   siOpenrouter,
@@ -127,18 +128,14 @@ const OPENAI_MARK: BrandSvg = {
 /* ── Tool + category data ────────────────────────────────────────────────── */
 interface Tool {
   name: string;
-  /** icon fill / accent color (brand hex, or #fff for black marks) */
   color: string;
-  /** simple-icons brand mark */
   icon?: SimpleIcon;
-  /** custom official SVG brand mark */
   svg?: BrandSvg;
-  /** render the Microsoft 365 2x2 mark */
   office?: boolean;
-  /** lucide-style glyph (skill categories / products without a mark) */
   glyph?: string;
 }
 interface ToolCategory {
+  id: string;
   title: string;
   accent: string;
   tools: Tool[];
@@ -149,6 +146,7 @@ const CYBER_SOFT = "#F87171";
 
 const CATEGORIES: ToolCategory[] = [
   {
+    id: "ai",
     title: "AI",
     accent: "#8B7CF6",
     tools: [
@@ -161,6 +159,7 @@ const CATEGORIES: ToolCategory[] = [
     ],
   },
   {
+    id: "software",
     title: "Software",
     accent: "#3B82F6",
     tools: [
@@ -173,6 +172,7 @@ const CATEGORIES: ToolCategory[] = [
     ],
   },
   {
+    id: "programming",
     title: "Programming",
     accent: "#34D399",
     tools: [
@@ -183,6 +183,7 @@ const CATEGORIES: ToolCategory[] = [
     ],
   },
   {
+    id: "webdev",
     title: "Web Development",
     accent: "#61DAFB",
     tools: [
@@ -194,6 +195,7 @@ const CATEGORIES: ToolCategory[] = [
     ],
   },
   {
+    id: "cybersecurity",
     title: "Cybersecurity",
     accent: CYBER_RED,
     tools: [
@@ -210,6 +212,7 @@ const CATEGORIES: ToolCategory[] = [
     ],
   },
   {
+    id: "productivity",
     title: "Productivity",
     accent: "#FBBF24",
     tools: [
@@ -222,10 +225,12 @@ const CATEGORIES: ToolCategory[] = [
   },
 ];
 
+const TOTAL_TOOLS_COUNT = CATEGORIES.reduce((acc, cat) => acc + cat.tools.length, 0);
+
 /* ── Microsoft 365 mark (2x2 official squares) ───────────────────────────── */
 const OFFICE_COLORS = ["#F25022", "#7FBA00", "#00A4EF", "#FFB900"];
 
-function OfficeMark() {
+function OfficeMark({ size = 16 }: { size?: number }) {
   const cells = [
     [1, 1],
     [12, 1],
@@ -233,7 +238,7 @@ function OfficeMark() {
     [12, 12],
   ];
   return (
-    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
       {cells.map(([x, y], i) => (
         <rect key={i} x={x} y={y} width={11} height={11} rx={2.2} fill={OFFICE_COLORS[i]} />
       ))}
@@ -241,18 +246,18 @@ function OfficeMark() {
   );
 }
 
-/* ── Icon tile ───────────────────────────────────────────────────────────── */
+/* ── Icon tile (refined compact size: 34x34) ─────────────────────────────── */
 function ToolTile({ tool }: { tool: Tool }) {
   return (
     <span
       aria-hidden
       style={{
         flexShrink: 0,
-        width: "44px",
-        height: "44px",
-        borderRadius: "12px",
+        width: "34px",
+        height: "34px",
+        borderRadius: "9px",
         background: "rgba(255,255,255,0.05)",
-        border: "1px solid rgba(255,255,255,0.14)",
+        border: "1px solid rgba(255,255,255,0.12)",
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
         display: "flex",
         alignItems: "center",
@@ -260,12 +265,12 @@ function ToolTile({ tool }: { tool: Tool }) {
       }}
     >
       {tool.office ? (
-        <OfficeMark />
+        <OfficeMark size={16} />
       ) : tool.svg ? (
         <svg
           viewBox={tool.svg.viewBox}
-          height="21"
-          style={{ maxWidth: "70%", maxHeight: "70%" }}
+          height="17"
+          style={{ maxWidth: "68%", maxHeight: "68%" }}
           preserveAspectRatio="xMidYMid meet"
         >
           {tool.svg.paths.map((p) => (
@@ -273,14 +278,14 @@ function ToolTile({ tool }: { tool: Tool }) {
           ))}
         </svg>
       ) : tool.icon ? (
-        <svg viewBox="0 0 24 24" width="21" height="21">
+        <svg viewBox="0 0 24 24" width="16" height="16">
           <path d={tool.icon.path} fill={tool.color} />
         </svg>
       ) : (
         <svg
           viewBox="0 0 24 24"
-          width="21"
-          height="21"
+          width="16"
+          height="16"
           fill="none"
           stroke={tool.color}
           strokeWidth="1.8"
@@ -299,10 +304,16 @@ function ToolTile({ tool }: { tool: Tool }) {
   );
 }
 
-/* ── Modal ───────────────────────────────────────────────────────────────── */
+/* ── Main Component ──────────────────────────────────────────────────────── */
 export default function ToolsIUse() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const closeRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -319,6 +330,322 @@ export default function ToolsIUse() {
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  const displayedCategories =
+    selectedCategory === "all"
+      ? CATEGORIES
+      : CATEGORIES.filter((c) => c.id === selectedCategory);
+
+  const modalContent = open ? (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Tools I use"
+      onClick={() => setOpen(false)}
+      className="tools-overlay"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 99999,
+        background: "rgba(4, 7, 14, 0.85)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "clamp(12px, 3vw, 28px)",
+      }}
+    >
+      <div
+        role="document"
+        onClick={(e) => e.stopPropagation()}
+        className="tools-dialog-card"
+        style={{
+          position: "relative",
+          width: "min(1060px, 100%)",
+          maxHeight: "min(88vh, 840px)",
+          display: "flex",
+          flexDirection: "column",
+          background: "linear-gradient(165deg, #0b1220 0%, #070b13 100%)",
+          border: "1px solid rgba(86, 232, 208, 0.28)",
+          borderRadius: "18px",
+          boxShadow:
+            "0 24px 64px -20px rgba(0,0,0,0.8), 0 0 36px -16px rgba(86,232,208,0.35)",
+          overflow: "hidden",
+        }}
+      >
+        {/* ── Pinned Header ── */}
+        <div
+          style={{
+            padding: "18px 24px 14px",
+            borderBottom: "1px solid rgba(255,255,255,0.07)",
+            background: "rgba(11, 18, 32, 0.75)",
+            backdropFilter: "blur(8px)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "14px",
+            flexShrink: 0,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <div
+              style={{
+                fontFamily: "var(--font-jetbrains), monospace",
+                fontSize: "13px",
+                letterSpacing: "0.08em",
+                color: "var(--color-cyan)",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              <span
+                style={{
+                  width: "7px",
+                  height: "7px",
+                  borderRadius: "50%",
+                  background: "var(--color-cyan)",
+                  boxShadow: "0 0 10px var(--color-cyan)",
+                  display: "block",
+                }}
+              />
+              <span>{"// tools_i_use"}</span>
+              <span
+                style={{
+                  fontSize: "11px",
+                  color: "rgba(139,147,163,0.7)",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                ({TOTAL_TOOLS_COUNT} tools)
+              </span>
+            </div>
+
+            <button
+              ref={closeRef}
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Close dialog"
+              className="tools-close-btn"
+              style={{
+                fontFamily: "var(--font-jetbrains), monospace",
+                fontSize: "13px",
+                lineHeight: 1,
+                color: "var(--color-mist)",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                borderRadius: "8px",
+                padding: "8px 12px",
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* ── Category filter pills ── */}
+          <div
+            className="category-pill-row"
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "7px",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setSelectedCategory("all")}
+              className={`pill-btn ${selectedCategory === "all" ? "active" : ""}`}
+              style={{
+                fontFamily: "var(--font-jetbrains), monospace",
+                fontSize: "11.5px",
+                padding: "5px 12px",
+                borderRadius: "999px",
+                cursor: "pointer",
+                border:
+                  selectedCategory === "all"
+                    ? "1px solid var(--color-cyan)"
+                    : "1px solid rgba(255,255,255,0.1)",
+                background:
+                  selectedCategory === "all"
+                    ? "rgba(86,232,208,0.14)"
+                    : "rgba(255,255,255,0.03)",
+                color:
+                  selectedCategory === "all"
+                    ? "var(--color-cyan)"
+                    : "var(--color-mist)",
+                transition: "all 0.15s ease",
+              }}
+            >
+              All ({TOTAL_TOOLS_COUNT})
+            </button>
+
+            {CATEGORIES.map((cat) => {
+              const isSelected = selectedCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`pill-btn ${isSelected ? "active" : ""}`}
+                  style={{
+                    fontFamily: "var(--font-jetbrains), monospace",
+                    fontSize: "11.5px",
+                    padding: "5px 11px",
+                    borderRadius: "999px",
+                    cursor: "pointer",
+                    border: isSelected
+                      ? `1px solid ${cat.accent}`
+                      : "1px solid rgba(255,255,255,0.1)",
+                    background: isSelected
+                      ? `color-mix(in srgb, ${cat.accent} 18%, transparent)`
+                      : "rgba(255,255,255,0.03)",
+                    color: isSelected ? cat.accent : "var(--color-mist)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: "5px",
+                      height: "5px",
+                      borderRadius: "50%",
+                      background: cat.accent,
+                    }}
+                  />
+                  {cat.title} ({cat.tools.length})
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── Scrollable Content Area ── */}
+        <div
+          className="tools-scroll-content"
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            overflowX: "hidden",
+            padding: "20px 24px 26px",
+            WebkitOverflowScrolling: "touch",
+            overscrollBehavior: "contain",
+          }}
+        >
+          {selectedCategory === "all" ? (
+            /* 3-column responsive layout for 'All' */
+            <div className="tools-grid-all">
+              {displayedCategories.map((cat) => (
+                <section
+                  key={cat.id}
+                  aria-label={cat.title}
+                  className="cat-section"
+                  style={{ "--accent": cat.accent } as CSSProperties}
+                >
+                  <div className="cat-head">
+                    <span
+                      style={{
+                        width: "6px",
+                        height: "6px",
+                        borderRadius: "50%",
+                        background: cat.accent,
+                        boxShadow: `0 0 8px ${cat.accent}`,
+                        display: "block",
+                      }}
+                    />
+                    <h3
+                      style={{
+                        fontFamily: "var(--font-jetbrains), monospace",
+                        fontSize: "11px",
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: cat.accent,
+                        margin: 0,
+                      }}
+                    >
+                      {cat.title}
+                    </h3>
+                    <span className="cat-count">{cat.tools.length}</span>
+                  </div>
+
+                  <ul className="tools-list">
+                    {cat.tools.map((tool, i) => (
+                      <li
+                        key={tool.name}
+                        title={tool.name}
+                        className="tool-card"
+                        style={{ animationDelay: `${i * 15}ms` }}
+                      >
+                        <ToolTile tool={tool} />
+                        <span className="tool-name">{tool.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
+          ) : (
+            /* 2/3-column card grid when a specific category is selected */
+            <div
+              style={{
+                "--accent": displayedCategories[0]?.accent ?? "var(--color-cyan)",
+              } as CSSProperties}
+            >
+              <div className="cat-head" style={{ marginBottom: "18px" }}>
+                <span
+                  style={{
+                    width: "7px",
+                    height: "7px",
+                    borderRadius: "50%",
+                    background: displayedCategories[0]?.accent,
+                    boxShadow: `0 0 10px ${displayedCategories[0]?.accent}`,
+                    display: "block",
+                  }}
+                />
+                <h3
+                  style={{
+                    fontFamily: "var(--font-jetbrains), monospace",
+                    fontSize: "13px",
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    color: displayedCategories[0]?.accent,
+                    margin: 0,
+                  }}
+                >
+                  {displayedCategories[0]?.title}
+                </h3>
+                <span className="cat-count">
+                  {displayedCategories[0]?.tools.length} tools
+                </span>
+              </div>
+
+              <div className="tools-grid-single">
+                {displayedCategories[0]?.tools.map((tool, i) => (
+                  <div
+                    key={tool.name}
+                    className="tool-card"
+                    style={{ animationDelay: `${i * 20}ms` }}
+                  >
+                    <ToolTile tool={tool} />
+                    <span className="tool-name">{tool.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  ) : null;
 
   return (
     <>
@@ -369,216 +696,84 @@ export default function ToolsIUse() {
         Tools I use
       </button>
 
-      {open && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Tools I use"
-          onClick={() => setOpen(false)}
-          className="tools-overlay"
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 100,
-            background: "rgba(5,7,12,0.82)",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "20px",
-          }}
-        >
-          <div
-            className="tools-scrollwrap"
-            style={{
-              position: "relative",
-              width: "min(1180px, 100%)",
-              maxHeight: "86vh",
-            }}
-          >
-            <div
-              role="document"
-              onClick={(e) => e.stopPropagation()}
-              className="tools-scroll"
-              style={{
-                maxHeight: "86vh",
-                overflowY: "auto",
-                overflowX: "hidden",
-                WebkitOverflowScrolling: "touch",
-                overscrollBehavior: "contain",
-                transform: "translateZ(0)",
-                willChange: "transform",
-                contain: "layout paint",
-                background: "linear-gradient(160deg, #0B1220 0%, #080C14 100%)",
-                border: "1px solid rgba(86,232,208,0.28)",
-                borderRadius: "18px",
-                boxShadow: "0 24px 64px -28px rgba(0,0,0,0.7), 0 0 36px -18px rgba(86,232,208,0.4)",
-                padding: "28px 30px 30px",
-              }}
-            >
-              {/* ── Header ── */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: "24px",
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: "var(--font-jetbrains), monospace",
-                    fontSize: "12px",
-                    letterSpacing: "0.1em",
-                    color: "var(--color-cyan)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                  }}
-                >
-                  <span
-                    style={{
-                      width: "7px",
-                      height: "7px",
-                      borderRadius: "50%",
-                      background: "var(--color-cyan)",
-                      boxShadow: "0 0 10px var(--color-cyan)",
-                      display: "block",
-                    }}
-                  />
-                  {"// tools_i_use"}
-                </div>
-                <button
-                  ref={closeRef}
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  aria-label="Close tools dialog"
-                  style={{
-                    fontFamily: "var(--font-jetbrains), monospace",
-                    fontSize: "14px",
-                    lineHeight: 1,
-                    color: "var(--color-mist)",
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    borderRadius: "8px",
-                    padding: "8px 11px",
-                    cursor: "pointer",
-                    transition: "color 0.15s, border-color 0.15s",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = "var(--color-cyan)";
-                    e.currentTarget.style.borderColor = "rgba(86,232,208,0.4)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = "var(--color-mist)";
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* ── Horizontal category row ── */}
-              <div className="tools-hrow">
-                {CATEGORIES.map((cat) => (
-                  <section
-                    key={cat.title}
-                    aria-label={cat.title}
-                    style={{ "--accent": cat.accent } as CSSProperties}
-                  >
-                    <div className="cat-head">
-                      <span
-                        style={{
-                          width: "6px",
-                          height: "6px",
-                          borderRadius: "50%",
-                          background: cat.accent,
-                          boxShadow: `0 0 8px ${cat.accent}`,
-                          display: "block",
-                        }}
-                      />
-                      <h3
-                        style={{
-                          fontFamily: "var(--font-jetbrains), monospace",
-                          fontSize: "11px",
-                          letterSpacing: "0.12em",
-                          textTransform: "uppercase",
-                          color: cat.accent,
-                          margin: 0,
-                        }}
-                      >
-                        {cat.title}
-                      </h3>
-                      <span className="cat-count">{cat.tools.length}</span>
-                    </div>
-
-                    <ul className="tools-list">
-                      {cat.tools.map((tool, i) => (
-                        <li
-                          key={tool.name}
-                          title={tool.name}
-                          className="tool-card"
-                          style={{ animationDelay: `${i * 20}ms` }}
-                        >
-                          <ToolTile tool={tool} />
-                          <span style={{ fontSize: "13px", lineHeight: 1.3, color: "var(--color-fog)" }}>
-                            {tool.name}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                ))}
-              </div>
-            </div>
-
-            {/* ── scroll-edge fades (visual cue, pinned over the scrollport) ── */}
-            <div className="scroll-fade scroll-fade-top" aria-hidden="true" />
-            <div className="scroll-fade scroll-fade-bottom" aria-hidden="true" />
-          </div>
-        </div>
-      )}
+      {/* Render via Portal so it mounts to document.body, free from parent transforms */}
+      {mounted && typeof document !== "undefined" && modalContent
+        ? createPortal(modalContent, document.body)
+        : null}
 
       <style>{`
-        /* ── Entrance (GPU-only: opacity + transform) ── */
-        @keyframes toolsOverlayIn {
+        @keyframes toolsOverlayFadeIn {
           from { opacity: 0; }
           to   { opacity: 1; }
         }
-        @keyframes toolsPanelIn {
-          from { opacity: 0; transform: scale(0.96) translateZ(0); }
-          to   { opacity: 1; transform: scale(1) translateZ(0); }
+        @keyframes toolsCardScaleIn {
+          from { opacity: 0; transform: scale(0.96) translateY(12px); }
+          to   { opacity: 1; transform: scale(1) translateY(0); }
         }
-        @keyframes toolCardIn {
-          from { opacity: 0; transform: translateY(8px) translateZ(0); }
-          to   { opacity: 1; transform: translateY(0) translateZ(0); }
-        }
-        .tools-overlay {
-          animation: toolsOverlayIn 200ms ease-out both;
-        }
-        .tools-scroll {
-          animation: toolsPanelIn 220ms ease-out both;
-        }
-        .tool-card {
-          animation: toolCardIn 320ms ease-out both;
+        @keyframes toolItemFadeIn {
+          from { opacity: 0; transform: translateY(6px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* ── Category rows ── */
-        .tools-hrow {
+        .tools-overlay {
+          animation: toolsOverlayFadeIn 180ms ease-out both;
+        }
+        .tools-dialog-card {
+          animation: toolsCardScaleIn 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        .tool-card {
+          animation: toolItemFadeIn 240ms ease-out both;
+        }
+
+        /* ── Close button hover ── */
+        .tools-close-btn:hover {
+          color: var(--color-cyan) !important;
+          border-color: rgba(86, 232, 208, 0.45) !important;
+          background: rgba(86, 232, 208, 0.08) !important;
+        }
+
+        /* ── Pill filter buttons hover ── */
+        .pill-btn:hover:not(.active) {
+          border-color: rgba(255, 255, 255, 0.25) !important;
+          color: var(--color-fog) !important;
+          background: rgba(255, 255, 255, 0.06) !important;
+        }
+
+        /* ── Category grid layout (All mode) ── */
+        .tools-grid-all {
           display: grid;
-          grid-template-columns: repeat(6, 1fr);
-          gap: 22px;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
           align-items: start;
         }
-        @media (max-width: 1200px) {
-          .tools-hrow { grid-template-columns: repeat(3, 1fr); }
+        @media (max-width: 880px) {
+          .tools-grid-all {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+          }
         }
-        @media (max-width: 700px) {
-          .tools-hrow { grid-template-columns: repeat(2, 1fr); }
+        @media (max-width: 560px) {
+          .tools-grid-all {
+            grid-template-columns: 1fr;
+            gap: 16px;
+          }
+        }
+
+        /* ── Single category filtered grid ── */
+        .tools-grid-single {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 12px;
+        }
+        @media (max-width: 720px) {
+          .tools-grid-single {
+            grid-template-columns: repeat(2, 1fr);
+          }
         }
         @media (max-width: 480px) {
-          .tools-hrow { grid-template-columns: 1fr; }
+          .tools-grid-single {
+            grid-template-columns: 1fr;
+          }
         }
 
         .tools-list {
@@ -587,17 +782,17 @@ export default function ToolsIUse() {
           padding: 0;
           display: flex;
           flex-direction: column;
-          gap: 9px;
+          gap: 7px;
         }
 
-        /* ── Category header: glowing accent underline ── */
+        /* ── Category header ── */
         .cat-head {
           position: relative;
           display: flex;
           align-items: center;
           gap: 8px;
-          margin-bottom: 14px;
-          padding-bottom: 11px;
+          margin-bottom: 12px;
+          padding-bottom: 9px;
         }
         .cat-head::after {
           content: "";
@@ -605,94 +800,68 @@ export default function ToolsIUse() {
           left: 0;
           right: 0;
           bottom: 0;
-          height: 2px;
+          height: 1.5px;
           border-radius: 2px;
-          background: linear-gradient(90deg,
-            color-mix(in srgb, var(--accent) 80%, transparent) 0%,
-            color-mix(in srgb, var(--accent) 25%, transparent) 55%,
-            transparent 100%);
-          box-shadow: 0 0 12px -1px color-mix(in srgb, var(--accent) 65%, transparent);
-        }
-        .cat-head h3 {
-          text-shadow: 0 0 16px color-mix(in srgb, var(--accent) 55%, transparent);
+          background: linear-gradient(
+            90deg,
+            color-mix(in srgb, var(--accent) 75%, transparent) 0%,
+            color-mix(in srgb, var(--accent) 20%, transparent) 60%,
+            transparent 100%
+          );
         }
         .cat-count {
           font-family: var(--font-jetbrains), monospace;
           font-size: 10px;
-          color: rgba(139,147,163,0.55);
+          color: rgba(139, 147, 163, 0.65);
           margin-left: auto;
           padding: 1px 6px;
           border-radius: 6px;
-          border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+          border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
         }
 
-        /* ── Tool cards: base + hover lift / accent glow ── */
+        /* ── Tool card: sleek, compact, readable ── */
         .tool-card {
           display: flex;
           align-items: center;
-          gap: 11px;
-          padding: 8px 10px;
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 12px;
-          transform: translateZ(0);
-          transition: transform 150ms ease, border-color 150ms ease,
-            box-shadow 150ms ease, background 150ms ease;
+          gap: 10px;
+          padding: 6px 10px;
+          background: rgba(255, 255, 255, 0.025);
+          border: 1px solid rgba(255, 255, 255, 0.07);
+          border-radius: 11px;
+          transition: transform 140ms ease, border-color 140ms ease,
+            box-shadow 140ms ease, background 140ms ease;
         }
         .tool-card:hover {
-          transform: translateY(-2px) translateZ(0);
-          background: rgba(255,255,255,0.06);
-          border-color: color-mix(in srgb, var(--accent) 60%, rgba(255,255,255,0.15));
-          box-shadow: 0 10px 22px -12px color-mix(in srgb, var(--accent) 55%, transparent),
-            inset 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent);
+          transform: translateY(-2px);
+          background: rgba(255, 255, 255, 0.055);
+          border-color: color-mix(in srgb, var(--accent) 55%, rgba(255, 255, 255, 0.15));
+          box-shadow: 0 8px 18px -10px color-mix(in srgb, var(--accent) 50%, transparent);
+        }
+        .tool-name {
+          font-size: 12.5px;
+          line-height: 1.25;
+          font-weight: 500;
+          color: var(--color-fog);
+          word-break: break-word;
         }
 
-        /* ── Native scrollbar (thin, accent on hover) ── */
-        .tools-scroll {
+        /* ── Custom sleek scrollbar ── */
+        .tools-scroll-content {
           scrollbar-width: thin;
-          scrollbar-color: rgba(139,147,163,0.25) transparent;
+          scrollbar-color: rgba(139, 147, 163, 0.3) transparent;
         }
-        .tools-scroll::-webkit-scrollbar {
-          width: 8px;
+        .tools-scroll-content::-webkit-scrollbar {
+          width: 6px;
         }
-        .tools-scroll::-webkit-scrollbar-track {
+        .tools-scroll-content::-webkit-scrollbar-track {
           background: transparent;
         }
-        .tools-scroll::-webkit-scrollbar-thumb {
-          background: rgba(139,147,163,0.22);
-          border-radius: 8px;
-          border: 2px solid transparent;
-          background-clip: padding-box;
+        .tools-scroll-content::-webkit-scrollbar-thumb {
+          background: rgba(139, 147, 163, 0.25);
+          border-radius: 6px;
         }
-        .tools-scroll:hover::-webkit-scrollbar-thumb {
-          background: rgba(86,232,208,0.45);
-          background-clip: padding-box;
-          border: 2px solid transparent;
-        }
-        .tools-scroll::-webkit-scrollbar-thumb:hover {
-          background: rgba(86,232,208,0.75);
-          background-clip: padding-box;
-          border: 2px solid transparent;
-        }
-
-        /* ── Scroll-edge fade cue ── */
-        .scroll-fade {
-          position: absolute;
-          left: 0;
-          right: 0;
-          height: 26px;
-          z-index: 2;
-          pointer-events: none;
-        }
-        .scroll-fade-top {
-          top: 0;
-          border-radius: 18px 18px 0 0;
-          background: linear-gradient(to bottom, rgba(11,18,32,0.92) 0%, rgba(11,18,32,0) 100%);
-        }
-        .scroll-fade-bottom {
-          bottom: 0;
-          border-radius: 0 0 18px 18px;
-          background: linear-gradient(to top, rgba(8,12,20,0.92) 0%, rgba(8,12,20,0) 100%);
+        .tools-scroll-content:hover::-webkit-scrollbar-thumb {
+          background: rgba(86, 232, 208, 0.5);
         }
       `}</style>
     </>
