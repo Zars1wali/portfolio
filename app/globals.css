@@ -30,6 +30,15 @@
   --glass:        rgba(255,255,255,0.05);
   --glass-border: rgba(255,255,255,0.12);
   --glass-glow:   rgba(86,232,208,0.15);
+
+  /* Scene-reactive CosmicDust tint — GSAP animates these between scenes.
+     Values are 0–1 floats matching Three.js Vector3 color space. */
+  --scene-cool-r: 0.178;  /* #2dd4bf cyan-teal */
+  --scene-cool-g: 0.831;
+  --scene-cool-b: 0.749;
+  --scene-warm-r: 0.655;  /* #a78bfa violet */
+  --scene-warm-g: 0.545;
+  --scene-warm-b: 0.980;
 }
 
 /* ── Skeleton shimmer — used by GitHub dashboard when token not set ── */

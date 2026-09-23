@@ -3,11 +3,9 @@ import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
-import Nav from "@/components/Nav";
-import Footer from "@/components/Footer";
-import SignalMesh from "@/components/SignalMesh";
 import CosmicDust from "@/components/CosmicDust";
 import AIVoiceGuide from "@/components/AIVoiceGuide";
+import ConditionalChrome from "@/components/ConditionalChrome";
 
 /* ─── Fonts ─────────────────────────────────────────────────────────────── */
 const inter = Inter({
@@ -68,10 +66,7 @@ export default function RootLayout({
     >
       <body>
         <CosmicDust />
-        <SignalMesh />
-        <Nav />
-        <main>{children}</main>
-        <Footer />
+        <ConditionalChrome>{children}</ConditionalChrome>
         <AIVoiceGuide />
         {process.env.NODE_ENV === "production" &&
         process.env.NEXT_PUBLIC_UMAMI_URL &&
@@ -88,3 +83,4 @@ export default function RootLayout({
     </html>
   );
 }
+

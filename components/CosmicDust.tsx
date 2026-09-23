@@ -41,6 +41,20 @@ const FLAME_B = "#818cf8"; // indigo corner flame (was #ffce5a)
 const COOL = "#2dd4bf"; // cool teal dust (was #b3401f)
 const WARM = "#a78bfa"; // warm violet dust (was #ffc46b)
 
+/* ─── Scene-reactive tint presets ─────────────────────────────────────────── */
+/* These can be dynamically overridden by CSS custom properties set by GSAP:
+   --scene-cool-r/g/b and --scene-warm-r/g/b (0–1 floats) */
+function readSceneTint(prefix: string, fallback: THREE.Vector3): void {
+  if (typeof document === "undefined") return;
+  const style = getComputedStyle(document.documentElement);
+  const r = parseFloat(style.getPropertyValue(`--scene-${prefix}-r`));
+  const g = parseFloat(style.getPropertyValue(`--scene-${prefix}-g`));
+  const b = parseFloat(style.getPropertyValue(`--scene-${prefix}-b`));
+  if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
+    fallback.set(r, g, b);
+  }
+}
+
 /* ─── Fixed parameters (verbatim) ─────────────────────────────────────────── */
 const FLAME_AMT = 0.2;
 const DUST_ALPHA = 0.68;
@@ -255,11 +269,31 @@ export default function CosmicDust() {
 
     /* ── Per-frame point update (Zero GC allocation) ── */
     const driftStep = new THREE.Vector3();
+    let lastScrollY = 0;
+    let scrollVelocity = 0;
+    const onScroll = () => {
+      const newY = window.scrollY;
+      scrollVelocity = Math.min(Math.abs(newY - lastScrollY) * 0.002, 0.5);
+      lastScrollY = newY;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    const coolFallback = hexToVec3(COOL);
+    const warmFallback = hexToVec3(WARM);
+
     const flyPoints = {
       render() {
         uniforms.iTime.value = performance.now() / 1000;
-        driftStep.copy(camera.position).multiplyScalar(0.0022 * DRIFT_SPEED);
+        const speedMul = 1 + scrollVelocity;
+        driftStep.copy(camera.position).multiplyScalar(0.0022 * DRIFT_SPEED * speedMul);
         uniforms.iShift.value.add(driftStep);
+        scrollVelocity *= 0.92; // decay
+
+        // Scene-reactive color tinting (reads CSS custom properties)
+        readSceneTint("cool", coolFallback);
+        readSceneTint("warm", warmFallback);
+        uniforms.uCool.value.copy(coolFallback);
+        uniforms.uWarm.value.copy(warmFallback);
       },
     };
 
@@ -326,6 +360,7 @@ export default function CosmicDust() {
     const dispose = () => {
       cancelAnimationFrame(rafId);
       window.removeEventListener("resize", resize);
+      window.removeEventListener("scroll", onScroll);
       geometry.dispose();
       material.dispose();
       finalComposer.renderTarget1.dispose();
