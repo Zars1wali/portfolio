@@ -17,6 +17,7 @@ import SceneIndicator from "@/components/SceneIndicator";
 import HorizontalCarousel from "@/components/HorizontalCarousel";
 import MagneticButton from "@/components/MagneticButton";
 import CounterAnimation from "@/components/CounterAnimation";
+import ToolsIUse from "@/components/ToolsIUse";
 
 /* ─── Hero chip orbit data ────────────────────────────────────────────────── */
 interface HeroChip {
@@ -413,6 +414,7 @@ export default function CinematicHome() {
                   See My Work
                 </button>
               </MagneticButton>
+              <ToolsIUse />
               <MagneticButton>
                 <a
                   href="https://paxel.ycombinator.com/results/b1qyu7zu"
