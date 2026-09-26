@@ -56,3 +56,5 @@ hero-preview.html
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+.vercel
