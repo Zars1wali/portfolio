@@ -6,6 +6,7 @@ import { getProjectSlugs, getProjectContent } from "@/lib/content";
 import PolymarketLiveDashboard from "@/components/PolymarketLiveDashboard";
 import RabitaLiveDemo from "@/components/RabitaLiveDemo";
 import RabtaArchitectureDiagram from "@/components/RabtaArchitectureDiagram";
+import RabtaFAQAccordion from "@/components/RabtaFAQAccordion";
 
 /* ── Static generation ──────────────────────────────────────────────────── */
 export async function generateStaticParams() {
@@ -292,7 +293,7 @@ export default async function ProjectDetailPage({
           {slug === "polymarket-arbitrage-bot" && <PolymarketLiveDashboard />}
           {slug === "rabita-ai" && <RabitaLiveDemo />}
           <div className="prose">
-            <MDXRemote source={content} components={{ RabtaArchitectureDiagram }} />
+            <MDXRemote source={content} components={{ RabtaArchitectureDiagram, RabtaFAQAccordion }} />
           </div>
         </div>
       )}
