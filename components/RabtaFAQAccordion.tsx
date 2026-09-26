@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import RabtaRAGPipelineDiagram from "./RabtaRAGPipelineDiagram";
 
 interface FAQItem {
   question: string;
@@ -94,27 +95,20 @@ export default function RabtaFAQAccordion() {
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
           <p>Rabita uses an <strong>Agentic Hybrid Search RAG pipeline</strong> built directly into the PostgreSQL application layer:</p>
           
-          <div style={{ margin: "6px 0" }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src="/images/rag-pipeline-architecture.jpg" 
-              alt="Rabita AI Agentic Hybrid RAG Pipeline Architecture" 
-              style={{ width: "100%", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 20px 40px -15px rgba(0,0,0,0.7)" }} 
-            />
-          </div>
+          <RabtaRAGPipelineDiagram />
 
           <ol style={{ paddingLeft: "20px", display: "flex", flexDirection: "column", gap: "8px", margin: 0 }}>
             <li>
-              <strong>Pakistani Roman Urdu Typo Normalization:</strong> Customers often misspell brand and product names on WhatsApp (e.g., <em>&quot;samung&quot;</em> / <em>&quot;samsng&quot;</em> → Samsung, <em>&quot;ipon&quot;</em> → iPhone, <em>&quot;nikon&quot;</em> → Nikon, <em>&quot;adida&quot;</em> → Adidas). Rabita normalizes phonetics before searching.
+              <strong>Pakistani Roman Urdu &amp; Brand Typo Normalization:</strong> Customers frequently use phonetic misspellings on WhatsApp (e.g., <em>&quot;glok&quot;</em> / <em>&quot;g-19&quot;</em> → Glock 19, <em>&quot;bereta&quot;</em> → Beretta 92FS, <em>&quot;tisas&quot;</em> / <em>&quot;zigana&quot;</em> → Tisas Zigana Sport). Rabita normalizes dialect phrasing before searching.
             </li>
             <li>
-              <strong>Hybrid Scoring Engine:</strong> Blends <strong>60% exact keyword relevance</strong> (preserving atomic SKU specifications like <code>256GB</code>, <code>512GB</code>, <code>4K</code>, <code>65-inch</code>, <code>120Hz</code> without tokenizer splitting) with <strong>40% semantic vector similarity</strong> (using <code>gemini-embedding-002</code> embeddings).
+              <strong>Hybrid Scoring Engine (PostgreSQL):</strong> Blends <strong>60% exact keyword relevance</strong> (preserving critical atomic calibers like <code>5.56</code>, <code>.308</code>, <code>9mm</code>, and <code>7.62</code> without tokenizer fragmentation) with <strong>40% dense semantic vector similarity</strong> (using <code>gemini-embedding-002</code> 768-dim embeddings in pgvector).
             </li>
             <li>
-              <strong>Semantic Intent Comprehension:</strong> If a customer asks <em>&quot;Bhai daily commute ke liye compact lightweight wireless headphones dikhao&quot;</em> (Show me compact lightweight wireless headphones for daily commute), the semantic engine retrieves relevant premium models (e.g., Sony WH-1000XM5, Bose QuietComfort) even though no brand was explicitly mentioned.
+              <strong>Semantic Intent Comprehension:</strong> If a customer asks <em>&quot;Bhai personal defense ke liye reliable compact 9mm polymer pistol dikhao&quot;</em>, the semantic engine retrieves relevant verified models (e.g., Glock 19 Gen 5, CZ P-10C) even though no specific brand was initially named.
             </li>
             <li>
-              <strong>Agentic Tool Calling:</strong> The AI retrieves product records just-in-time via native function calling (<code>search_catalog</code>), rather than pre-loading the entire store into every turn.
+              <strong>Agentic Tool Calling (<code>search_catalog</code>):</strong> The AI queries PostgreSQL just-in-time via native function calling, injecting only 3–5 verified SKUs into context (~1,200 words) — leaving &gt;99.7% of Gemini 3.5 Flash Lite&apos;s 1M context window free for zero TTFT latency.
             </li>
           </ol>
         </div>

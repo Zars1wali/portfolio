@@ -82,24 +82,7 @@ Autonomous language models must never make unilateral commitments regarding fire
 
 ### How the Responsible AI Loop Operates
 
-```text
-[Customer Ingress] ──▶ Customer asks: "Rawalpindi delivery possible hai aur license verification?"
-                            │
-                            ▼
-[ReACT Agent] ────────▶ Detects delivery & licensing intent → Calls escalate_inquiry tool
-                            │
-                            ▼
-[Ticket Created] ─────▶ PostgreSQL logs #ESC-XX with customer context & phone number
-                            │
-                            ▼
-[WhatsApp Alert] ─────▶ Instant priority alert sent to Store Owner (Haider) via WhatsApp
-                            │
-                            ▼
-[2-Hour Mute Guard] ──▶ AI automatically freezes response buffers for that customer thread
-                            │
-                            ▼
-[Human Resolution] ───▶ Store owner takes over directly, ensures 100% legal compliance
-```
+<RabtaHITLFlowDiagram />
 
 - **Tool Trigger (`escalate_inquiry`):** When a sensitive inquiry occurs, the customer sales agent dispatches an escalation ticket instead of attempting to improvise answers.
 - **2-Hour Takeover Guard:** The moment the store owner reviews the ticket and replies to the customer thread, the edge gateway detects the owner's phone ID and mutes all AI replies for that thread for 2 hours, preventing embarrassing AI/human collision.
@@ -223,20 +206,7 @@ Pakistani retail customers predominantly communicate via WhatsApp voice notes ra
 
 Four Docker containers on a single Vultr Cloud VPS (Ubuntu 24.04 LTS), orchestrated by Docker Compose with health checks and automatic restart policies:
 
-```text
-Docker Compose Topology (rabta_internal bridge network)
-─────────────────────────────────────────────────────
-rabta_backend     FastAPI + LangGraph + ReACT Engine     Port 8000
-rabta_gateway     Node.js + Meta Official Webhooks       Port 3001
-rabta_postgres    PostgreSQL 16-alpine                   Internal only
-rabta_caddy       Caddy 2-alpine (Auto-TLS, HTTPS)       Ports 80/443
-
-Persistent Volumes:
-  postgres_data     Database storage
-  gateway_auth      Meta WhatsApp webhook tokens
-  caddy_data        TLS certificates
-  catalog_images    Product photography
-```
+<RabtaDockerTopologyDiagram />
 
 ---
 
