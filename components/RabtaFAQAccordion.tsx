@@ -91,10 +91,12 @@ export default function RabtaFAQAccordion() {
     {
       question: "4. How does Rabita AI's existing RAG (Retrieval-Augmented Generation) work?",
       renderAnswer: () => (
-        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-          <p>Rabita uses an <strong>Agentic Hybrid Search RAG pipeline</strong> built directly into the PostgreSQL application layer:</p>
-          
-          <div style={{ margin: "10px 0" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <p style={{ margin: 0 }}>
+            Rabita uses an <strong>Agentic Hybrid Search RAG pipeline</strong> built directly into a single PostgreSQL engine to fetch verified catalog products and generate accurate WhatsApp replies:
+          </p>
+
+          <div style={{ margin: "4px 0" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
               src="/images/rag-pipeline-architecture.jpg" 
@@ -103,20 +105,74 @@ export default function RabtaFAQAccordion() {
             />
           </div>
 
-          <ol style={{ paddingLeft: "20px", display: "flex", flexDirection: "column", gap: "8px", margin: 0 }}>
-            <li>
-              <strong>Pakistani Roman Urdu &amp; Brand Typo Normalization:</strong> Customers frequently use phonetic misspellings on WhatsApp (e.g., <em>&quot;glok&quot;</em> / <em>&quot;g-19&quot;</em> → Glock 19, <em>&quot;bereta&quot;</em> → Beretta 92FS, <em>&quot;tisas&quot;</em> / <em>&quot;zigana&quot;</em> → Tisas Zigana Sport). Rabita normalizes dialect phrasing before searching.
-            </li>
-            <li>
-              <strong>Hybrid Scoring Engine (PostgreSQL):</strong> Blends <strong>60% exact keyword relevance</strong> (preserving critical atomic calibers like <code>5.56</code>, <code>.308</code>, <code>9mm</code>, and <code>7.62</code> without tokenizer fragmentation) with <strong>40% dense semantic vector similarity</strong> (using <code>gemini-embedding-002</code> 768-dim embeddings in pgvector).
-            </li>
-            <li>
-              <strong>Semantic Intent Comprehension:</strong> If a customer asks <em>&quot;Bhai personal defense ke liye reliable compact 9mm polymer pistol dikhao&quot;</em>, the semantic engine retrieves relevant verified models (e.g., Glock 19 Gen 5, CZ P-10C) even though no specific brand was initially named.
-            </li>
-            <li>
-              <strong>Agentic Tool Calling (<code>search_catalog</code>):</strong> The AI queries PostgreSQL just-in-time via native function calling, injecting only 3–5 verified SKUs into context (~1,200 words) — leaving &gt;99.7% of Gemini 3.5 Flash Lite&apos;s 1M context window free for zero TTFT latency.
-            </li>
-          </ol>
+          {/* 1. How It Works: 3-Step Flow */}
+          <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(0, 240, 255, 0.2)", borderRadius: "10px", padding: "14px 16px" }}>
+            <div style={{ color: "var(--color-cyan)", fontWeight: 700, fontSize: "14px", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "var(--font-jetbrains), monospace" }}>
+              1. The 3-Step Objective Flow
+            </div>
+            <ul style={{ margin: 0, paddingLeft: "18px", display: "flex", flexDirection: "column", gap: "6px", fontSize: "13.5px", lineHeight: "1.6" }}>
+              <li><strong>Step 1 (Customer Asks):</strong> The customer sends a casual text or Roman Urdu voice note on WhatsApp (e.g., <em>&quot;Bhai 50k ke andar lightweight wireless headphones dikhao&quot;</em>).</li>
+              <li><strong>Step 2 (Database Retrieves):</strong> The system normalizes typos, searches PostgreSQL, and grabs the top 3–5 matching, in-stock products with today&apos;s verified prices.</li>
+              <li><strong>Step 3 (LLM Generates):</strong> Google Gemini 3.5 Flash Lite reads only those 3–5 items and crafts a friendly, 1–2 sentence WhatsApp reply with confirmed prices and photo links.</li>
+            </ul>
+          </div>
+
+          {/* 2. Database Lookup & Hybrid Matching */}
+          <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "10px", padding: "14px 16px" }}>
+            <div style={{ color: "var(--color-cloud)", fontWeight: 700, fontSize: "14px", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "var(--font-jetbrains), monospace" }}>
+              2. How It Looks Up the Database (The 60/40 Rule)
+            </div>
+            <ul style={{ margin: 0, paddingLeft: "18px", display: "flex", flexDirection: "column", gap: "6px", fontSize: "13.5px", lineHeight: "1.6" }}>
+              <li><strong>60% Exact Word Match (Lexical Search):</strong> Matches exact SKU numbers, sizes, and specs (e.g., <code>256GB</code>, <code>4K</code>, <code>Pro Max</code>, <code>42mm</code>). Preserves technical codes without confusing them.</li>
+              <li><strong>40% Meaning Match (Vector Search):</strong> Matches customer <em>intent</em>. If someone asks for <em>&quot;budget noise-canceling earbuds for gym workout&quot;</em>, it finds matching models even if the brand isn&apos;t named.</li>
+              <li><strong>Hard SQL Filters:</strong> Instantly eliminates out-of-stock items (<code>in_stock = TRUE</code>), isolates store data (<code>tenant_id</code>), and verifies today&apos;s rates (<code>PRICES_CONFIRMED_TODAY</code>).</li>
+            </ul>
+          </div>
+
+          {/* 3. Accuracy & Zero Hallucination */}
+          <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(16, 185, 129, 0.25)", borderRadius: "10px", padding: "14px 16px" }}>
+            <div style={{ color: "#10B981", fontWeight: 700, fontSize: "14px", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "var(--font-jetbrains), monospace" }}>
+              3. Accuracy: Why It Never Hallucinates Prices or Specs
+            </div>
+            <ul style={{ margin: 0, paddingLeft: "18px", display: "flex", flexDirection: "column", gap: "6px", fontSize: "13.5px", lineHeight: "1.6" }}>
+              <li><strong>Zero Memory Guessing:</strong> The AI is strictly barred from inventing prices or specs from its general training data. It can only state facts returned by SQL.</li>
+              <li><strong>Just-In-Time Tool Calling:</strong> The model calls <code>search_catalog</code> on demand rather than loading the whole inventory at once.</li>
+              <li><strong>Honest Boundary:</strong> If an item is unconfirmed or unavailable, the AI immediately flags it or says it is out of stock. It never promises what isn&apos;t in the database.</li>
+            </ul>
+          </div>
+
+          {/* 4. Retrieval & Generation with the LLM */}
+          <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "10px", padding: "14px 16px" }}>
+            <div style={{ color: "var(--color-cloud)", fontWeight: 700, fontSize: "14px", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "var(--font-jetbrains), monospace" }}>
+              4. Retrieval vs. Generation (Separation of Powers)
+            </div>
+            <ul style={{ margin: 0, paddingLeft: "18px", display: "flex", flexDirection: "column", gap: "6px", fontSize: "13.5px", lineHeight: "1.6" }}>
+              <li><strong>Retrieval (The Facts):</strong> Handled 100% deterministically by PostgreSQL in under 5 milliseconds. Produces structured rows: product title, verified price in PKR, exact specs, and photo URL.</li>
+              <li><strong>Generation (The Communication):</strong> Handled by Gemini 3.5 Flash Lite. Translates raw database rows into polite, natural Roman Urdu/English text designed for quick WhatsApp reading.</li>
+            </ul>
+          </div>
+
+          {/* 5. Simple Explanation: Embeddings & Cosine Similarity */}
+          <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(245, 158, 11, 0.25)", borderRadius: "10px", padding: "14px 16px" }}>
+            <div style={{ color: "#F59E0B", fontWeight: 700, fontSize: "14px", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "var(--font-jetbrains), monospace" }}>
+              5. Non-Technical Guide: Embeddings &amp; Cosine Similarity
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "13.5px", lineHeight: "1.6" }}>
+              <div>
+                <strong>• What is an Embedding? (A Meaning Fingerprint):</strong><br />
+                Computers do not understand human language; they only understand math. An <strong>embedding</strong> turns words into a list of numbers (a 768-number fingerprint) that captures meaning. For example, <em>&quot;long battery life&quot;</em> and <em>&quot;lasting charge&quot;</em> use completely different words, but have nearly identical number fingerprints.
+              </div>
+              <div>
+                <strong>• What is Cosine Similarity? (Measuring the Direction of Meaning):</strong><br />
+                Think of every product and customer query as an arrow on a compass.
+                <div style={{ marginTop: "4px", paddingLeft: "12px" }}>
+                  - If the customer&apos;s question arrow points in the <strong>same direction</strong> as a product arrow, the cosine score is close to <strong>1.0 (99% match)</strong>.<br />
+                  - If they point in completely different directions (e.g., <em>&quot;laptop charger&quot;</em> vs. <em>&quot;running shoes&quot;</em>), the score is close to <strong>0.0</strong>.<br />
+                  - The database calculates this angle in milliseconds to find the closest matching products instantly.
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       ),
     },
