@@ -82,7 +82,14 @@ Autonomous language models must never make unilateral commitments regarding fire
 
 ### How the Responsible AI Loop Operates
 
-<RabtaHITLFlowDiagram />
+<div style={{ margin: "1.5rem 0" }}>
+  {/* eslint-disable-next-line @next/next/no-img-element */}
+  <img 
+    src="/images/rabta-hitl-workflow.jpg" 
+    alt="Responsible AI: Human-in-the-Loop Workflow" 
+    style={{ width: "100%", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 20px 40px -15px rgba(0,0,0,0.7)" }} 
+  />
+</div>
 
 - **Tool Trigger (`escalate_inquiry`):** When a sensitive inquiry occurs, the customer sales agent dispatches an escalation ticket instead of attempting to improvise answers.
 - **2-Hour Takeover Guard:** The moment the store owner reviews the ticket and replies to the customer thread, the edge gateway detects the owner's phone ID and mutes all AI replies for that thread for 2 hours, preventing embarrassing AI/human collision.
@@ -206,7 +213,14 @@ Pakistani retail customers predominantly communicate via WhatsApp voice notes ra
 
 Four Docker containers on a single Vultr Cloud VPS (Ubuntu 24.04 LTS), orchestrated by Docker Compose with health checks and automatic restart policies:
 
-<RabtaDockerTopologyDiagram />
+<div style={{ margin: "1.5rem 0" }}>
+  {/* eslint-disable-next-line @next/next/no-img-element */}
+  <img 
+    src="/images/rabta-docker-topology.jpg" 
+    alt="Docker Compose Production Topology (rabta_internal)" 
+    style={{ width: "100%", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 20px 40px -15px rgba(0,0,0,0.7)" }} 
+  />
+</div>
 
 ---
 

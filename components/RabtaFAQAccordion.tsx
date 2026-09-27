@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import RabtaRAGPipelineDiagram from "./RabtaRAGPipelineDiagram";
 
 interface FAQItem {
   question: string;
@@ -95,7 +94,14 @@ export default function RabtaFAQAccordion() {
         <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
           <p>Rabita uses an <strong>Agentic Hybrid Search RAG pipeline</strong> built directly into the PostgreSQL application layer:</p>
           
-          <RabtaRAGPipelineDiagram />
+          <div style={{ margin: "10px 0" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src="/images/rag-pipeline-architecture.jpg" 
+              alt="Rabita AI: Agentic Hybrid RAG Pipeline" 
+              style={{ width: "100%", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 20px 40px -15px rgba(0,0,0,0.7)" }} 
+            />
+          </div>
 
           <ol style={{ paddingLeft: "20px", display: "flex", flexDirection: "column", gap: "8px", margin: 0 }}>
             <li>
