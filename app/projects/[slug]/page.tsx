@@ -101,24 +101,27 @@ export default async function ProjectDetailPage({
 
   const hasLinks = meta.links?.repo || meta.links?.live;
   const hasBody = content.trim().length > 0;
+  const isWideProject = slug === "rabita-ai";
 
   return (
     <div
       style={{
-        maxWidth: "800px",
+        maxWidth: isWideProject ? "1560px" : "800px",
         margin: "0 auto",
-        padding: "80px 24px 64px",
+        padding: isWideProject ? "80px 20px 64px" : "80px 24px 64px",
         width: "100%",
+        transition: "max-width 0.2s ease",
       }}
     >
       {/* ── Breadcrumb ── */}
       <nav
         aria-label="Breadcrumb"
         style={{
+          maxWidth: isWideProject ? "960px" : "100%",
+          margin: isWideProject ? "0 auto 32px" : "0 0 32px",
           fontFamily: "var(--font-jetbrains), monospace",
           fontSize: "12px",
           color: "var(--color-mist)",
-          marginBottom: "32px",
           display: "flex",
           gap: "6px",
           alignItems: "center",
@@ -137,6 +140,8 @@ export default async function ProjectDetailPage({
       {/* ── Header GlassPanel ── */}
       <div
         style={{
+          maxWidth: isWideProject ? "960px" : "100%",
+          margin: isWideProject ? "0 auto 32px" : "0 0 32px",
           padding: "36px 36px 28px",
           background: "rgba(255,255,255,0.04)",
           border: "1px solid rgba(255,255,255,0.10)",
@@ -145,7 +150,6 @@ export default async function ProjectDetailPage({
           WebkitBackdropFilter: "blur(22px)",
           boxShadow:
             "0 30px 60px -20px rgba(0,0,0,0.5), 0 0 40px -10px rgba(86,232,208,0.1)",
-          marginBottom: "32px",
         }}
       >
         {/* Eyebrow */}
@@ -282,12 +286,13 @@ export default async function ProjectDetailPage({
       {hasBody && (
         <div
           style={{
-            padding: "32px 36px",
+            padding: isWideProject ? "36px 28px" : "32px 36px",
             background: "rgba(255,255,255,0.03)",
             border: "1px solid rgba(255,255,255,0.08)",
             borderRadius: "16px",
             backdropFilter: "blur(12px)",
             WebkitBackdropFilter: "blur(12px)",
+            width: "100%",
           }}
         >
           {slug === "polymarket-arbitrage-bot" && <PolymarketLiveDashboard />}

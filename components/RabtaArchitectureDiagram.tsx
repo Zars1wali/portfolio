@@ -1,956 +1,881 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Minimize2,
+  RotateCcw,
+  Download,
+  ExternalLink,
+  Layers,
   ShieldCheck,
-  UserCheck,
   Cpu,
   Database,
   Radio,
-  Bot,
-  Terminal,
-  Zap,
-  Clock,
-  ArrowRight,
-  ArrowDown,
-  Layers,
-  AlertTriangle,
-  CheckCircle2,
-  Lock,
   Sparkles,
-  PhoneCall,
-  FileCheck,
-  Truck,
-  Scale,
+  Move,
+  X,
+  CheckCircle2,
+  Server,
+  ArrowRight,
 } from "lucide-react";
 
 export default function RabtaArchitectureDiagram() {
-  const [activeView, setActiveView] = useState<"architecture" | "hitl" | "specs">("architecture");
-  const [selectedLayer, setSelectedLayer] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<"flowchart" | "hitl" | "docker">("flowchart");
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const fullscreenContainerRef = useRef<HTMLDivElement>(null);
+
+  // Zoom handlers
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 3.0));
+  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.6));
+  const handleResetZoom = () => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  };
+  const handleActualSize = () => {
+    setZoom(1.6);
+    setPan({ x: 0, y: 0 });
+  };
+
+  // Drag to pan handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoom <= 1 && !isFullscreen) return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    setPan({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y,
+    });
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+
+  // Keyboard navigation & ESC handler for fullscreen
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      setIsFullscreen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
+
+  // Lock body scroll during fullscreen
+  useEffect(() => {
+    if (isFullscreen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isFullscreen]);
+
+  const activeImageSrc =
+    activeTab === "flowchart"
+      ? "/images/rabta-system-architecture.png"
+      : activeTab === "hitl"
+      ? "/images/rabta-hitl-workflow.jpg"
+      : "/images/rabta-docker-topology.jpg";
 
   return (
     <div
       style={{
-        margin: "2rem 0",
-        background: "rgba(10, 15, 26, 0.85)",
-        border: "1px solid rgba(86, 232, 208, 0.25)",
-        borderRadius: "16px",
-        overflow: "hidden",
-        backdropFilter: "blur(20px)",
-        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 35px -5px rgba(86, 232, 208, 0.1)",
+        margin: "2.5rem 0",
+        width: "100%",
+        maxWidth: "100%",
       }}
     >
-      {/* ── Header & Mode Switcher ── */}
+      {/* ── Main Blueprint Deck ── */}
       <div
+        ref={containerRef}
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "16px 20px",
-          background: "rgba(255, 255, 255, 0.03)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-          flexWrap: "wrap",
-          gap: "12px",
+          background: "rgba(10, 15, 26, 0.92)",
+          border: "1px solid rgba(86, 232, 208, 0.3)",
+          borderRadius: "20px",
+          overflow: "hidden",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          boxShadow:
+            "0 30px 70px -15px rgba(0, 0, 0, 0.85), 0 0 45px -10px rgba(86, 232, 208, 0.12)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "32px",
-              height: "32px",
-              borderRadius: "8px",
-              background: "rgba(86, 232, 208, 0.15)",
-              border: "1px solid rgba(86, 232, 208, 0.4)",
-              color: "var(--color-cyan)",
-            }}
-          >
-            <Layers size={18} />
-          </div>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ fontWeight: 700, fontSize: "15px", color: "var(--color-cloud)" }}>
-                Rabta AI Architecture &amp; Responsible AI Blueprint
-              </span>
-              <span
+        {/* ── Header Deck ── */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "20px 24px",
+            background: "rgba(255, 255, 255, 0.03)",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+            flexWrap: "wrap",
+            gap: "14px",
+          }}
+        >
+          {/* Title & Metadata */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "40px",
+                height: "40px",
+                borderRadius: "10px",
+                background: "rgba(86, 232, 208, 0.12)",
+                border: "1px solid rgba(86, 232, 208, 0.35)",
+                color: "var(--color-cyan)",
+              }}
+            >
+              <Layers size={22} />
+            </div>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                <span
+                  style={{
+                    fontWeight: 700,
+                    fontSize: "17px",
+                    color: "var(--color-cloud)",
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  Rabta AI — Full System Architecture
+                </span>
+                <span
+                  style={{
+                    fontSize: "10px",
+                    padding: "3px 8px",
+                    borderRadius: "6px",
+                    background: "rgba(56, 189, 248, 0.15)",
+                    color: "#38BDF8",
+                    border: "1px solid rgba(56, 189, 248, 0.35)",
+                    fontFamily: "var(--font-jetbrains), monospace",
+                    fontWeight: 700,
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  PRODUCTION V2 · 6 LAYERS
+                </span>
+              </div>
+              <div
                 style={{
-                  fontSize: "10px",
-                  padding: "2px 8px",
-                  borderRadius: "10px",
-                  background: "rgba(245, 158, 11, 0.15)",
-                  color: "#F59E0B",
-                  border: "1px solid rgba(245, 158, 11, 0.35)",
+                  fontSize: "12.5px",
+                  color: "var(--color-mist)",
+                  marginTop: "3px",
                   fontFamily: "var(--font-jetbrains), monospace",
-                  fontWeight: 600,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "4px",
                 }}
               >
-                <ShieldCheck size={11} /> RESPONSIBLE AI (HITL)
-              </span>
+                Meta WhatsApp Platform · FastAPI + LangGraph Dual Agents · Google Gemini 3.5 ReAct · PostgreSQL
+              </div>
             </div>
-            <div style={{ fontSize: "12px", color: "var(--color-mist)", marginTop: "2px" }}>
-              Google Gemini 3.5 Flash Lite · Deepgram Nova-3 · Meta Official WhatsApp Business Platform
-            </div>
+          </div>
+
+          {/* Tab Switcher */}
+          <div
+            style={{
+              display: "flex",
+              gap: "6px",
+              background: "rgba(0, 0, 0, 0.4)",
+              padding: "4px",
+              borderRadius: "10px",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+            }}
+          >
+            {[
+              { id: "flowchart", label: "Master Architecture Flowchart" },
+              { id: "hitl", label: "Responsible AI (HITL)" },
+              { id: "docker", label: "Docker Topology" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id as any);
+                  handleResetZoom();
+                }}
+                style={{
+                  fontSize: "12px",
+                  fontFamily: "var(--font-jetbrains), monospace",
+                  padding: "7px 14px",
+                  borderRadius: "7px",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                  background: activeTab === tab.id ? "rgba(86, 232, 208, 0.18)" : "transparent",
+                  color: activeTab === tab.id ? "var(--color-cyan)" : "var(--color-mist)",
+                  border:
+                    activeTab === tab.id
+                      ? "1px solid rgba(86, 232, 208, 0.4)"
+                      : "1px solid transparent",
+                  fontWeight: activeTab === tab.id ? 600 : 400,
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* View Switcher Tabs */}
-        <div style={{ display: "flex", gap: "6px", background: "rgba(0, 0, 0, 0.3)", padding: "4px", borderRadius: "8px" }}>
-          {[
-            { id: "architecture", label: "System Architecture (6 Layers)" },
-            { id: "hitl", label: "Responsible AI & Human-in-the-Loop" },
-            { id: "specs", label: "Live Tech Specifications" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveView(tab.id as any)}
+        {/* ── Viewport Control Deck ── */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "10px 20px",
+            background: "rgba(15, 23, 42, 0.6)",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+            flexWrap: "wrap",
+            gap: "10px",
+            fontSize: "12px",
+            color: "var(--color-mist)",
+          }}
+        >
+          {/* Left: Diagram Status & Hint */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span
               style={{
+                width: "7px",
+                height: "7px",
+                borderRadius: "50%",
+                background: "#10B981",
+                boxShadow: "0 0 8px #10B981",
+                display: "inline-block",
+              }}
+            />
+            <span style={{ fontFamily: "var(--font-jetbrains), monospace" }}>
+              {activeTab === "flowchart"
+                ? "4K Master Diagram (3619 × 2632 px)"
+                : activeTab === "hitl"
+                ? "Responsible AI Human Guardrail Workflow"
+                : "Docker Multi-Container Service Topology"}
+            </span>
+            <span style={{ color: "rgba(255,255,255,0.2)" }}>|</span>
+            <span style={{ fontSize: "11px", color: "var(--color-mist)" }}>
+              {zoom > 1 ? "Drag to pan · Double-click to reset" : "Click Fullscreen for 100% monitor scale"}
+            </span>
+          </div>
+
+          {/* Right: Interactive Zoom & Fullscreen Buttons */}
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <button
+              onClick={handleZoomIn}
+              title="Zoom In"
+              style={{
+                background: "rgba(255, 255, 255, 0.06)",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
+                color: "var(--color-fog)",
+                padding: "6px 10px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
                 fontSize: "12px",
+              }}
+            >
+              <ZoomIn size={14} />
+            </button>
+
+            <button
+              onClick={handleZoomOut}
+              title="Zoom Out"
+              style={{
+                background: "rgba(255, 255, 255, 0.06)",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
+                color: "var(--color-fog)",
+                padding: "6px 10px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                fontSize: "12px",
+              }}
+            >
+              <ZoomOut size={14} />
+            </button>
+
+            <button
+              onClick={handleActualSize}
+              title="100% Native 4K Pixel Size"
+              style={{
+                background: "rgba(255, 255, 255, 0.06)",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
+                color: "var(--color-fog)",
+                padding: "6px 12px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "11.5px",
                 fontFamily: "var(--font-jetbrains), monospace",
+              }}
+            >
+              1:1 4K
+            </button>
+
+            <button
+              onClick={handleResetZoom}
+              title="Reset Zoom & Pan"
+              style={{
+                background: "rgba(255, 255, 255, 0.06)",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
+                color: "var(--color-fog)",
+                padding: "6px 10px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                fontSize: "12px",
+              }}
+            >
+              <RotateCcw size={13} /> Fit
+            </button>
+
+            <button
+              onClick={() => setIsFullscreen(true)}
+              title="Fullscreen Lightbox Mode"
+              style={{
+                background: "rgba(86, 232, 208, 0.15)",
+                border: "1px solid rgba(86, 232, 208, 0.4)",
+                color: "var(--color-cyan)",
                 padding: "6px 14px",
                 borderRadius: "6px",
                 cursor: "pointer",
-                transition: "all 0.15s ease",
-                background: activeView === tab.id ? "rgba(86, 232, 208, 0.18)" : "transparent",
-                color: activeView === tab.id ? "var(--color-cyan)" : "var(--color-mist)",
-                border: activeView === tab.id ? "1px solid rgba(86, 232, 208, 0.4)" : "1px solid transparent",
-                fontWeight: activeView === tab.id ? 600 : 400,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                fontSize: "12px",
+                fontWeight: 600,
+                fontFamily: "var(--font-jetbrains), monospace",
               }}
             >
-              {tab.label}
+              <Maximize2 size={13} /> Whole Page (Fullscreen)
             </button>
-          ))}
-        </div>
-      </div>
 
-      {/* ── View 1: Architecture Blueprint ── */}
-      {activeView === "architecture" && (
-        <div style={{ padding: "24px 20px" }}>
-          {/* Quick Flow Breadcrumb */}
+            <a
+              href={activeImageSrc}
+              download={activeTab === "flowchart" ? "Rabta_AI_Architecture_Master_4K.png" : undefined}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Download Master Image"
+              style={{
+                background: "rgba(255, 255, 255, 0.06)",
+                border: "1px solid rgba(255, 255, 255, 0.12)",
+                color: "var(--color-fog)",
+                padding: "6px 10px",
+                borderRadius: "6px",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                fontSize: "12px",
+              }}
+            >
+              <Download size={13} />
+            </a>
+          </div>
+        </div>
+
+        {/* ── Interactive Image Canvas ── */}
+        <div
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onDoubleClick={handleResetZoom}
+          style={{
+            position: "relative",
+            width: "100%",
+            minHeight: "520px",
+            maxHeight: "850px",
+            overflow: "hidden",
+            background: "#070A12",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: zoom > 1 ? (isDragging ? "grabbing" : "grab") : "default",
+            userSelect: "none",
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={activeImageSrc}
+            alt="Rabta AI System Architecture Diagram"
+            draggable={false}
+            style={{
+              width: "100%",
+              height: "auto",
+              display: "block",
+              maxWidth: "none",
+              transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
+              transformOrigin: "center center",
+              transition: isDragging ? "none" : "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+          />
+        </div>
+
+        {/* ── Interactive Footer Controls & Flow Summary ── */}
+        <div
+          style={{
+            padding: "16px 24px",
+            background: "rgba(255, 255, 255, 0.02)",
+            borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "12px",
+          }}
+        >
+          {/* 6-Layer Path Breadcrumb */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              padding: "10px 14px",
-              background: "rgba(0, 0, 0, 0.3)",
-              border: "1px solid rgba(255, 255, 255, 0.06)",
-              borderRadius: "10px",
-              marginBottom: "20px",
               fontSize: "12px",
               fontFamily: "var(--font-jetbrains), monospace",
               color: "var(--color-mist)",
               overflowX: "auto",
             }}
           >
-            <span style={{ color: "#38BDF8", fontWeight: 600 }}>1. WhatsApp Client</span>
-            <ArrowRight size={13} />
-            <span style={{ color: "#10B981", fontWeight: 600 }}>2. Meta Official Gateway</span>
-            <ArrowRight size={13} />
-            <span style={{ color: "#818CF8", fontWeight: 600 }}>3. FastAPI + LangGraph Core</span>
-            <ArrowRight size={13} />
-            <span style={{ color: "#FB923C", fontWeight: 600 }}>4. Gemini 3.5 Flash Lite</span>
-            <ArrowRight size={13} />
-            <span style={{ color: "#F59E0B", fontWeight: 700, background: "rgba(245,158,11,0.15)", padding: "2px 6px", borderRadius: "4px" }}>
-              5. HITL Owner Node
-            </span>
-            <ArrowRight size={13} />
-            <span style={{ color: "#4ADE80", fontWeight: 600 }}>6. ReACT Tools &amp; DB</span>
+            <span style={{ color: "#38BDF8", fontWeight: 700 }}>1. WhatsApp Client</span>
+            <ArrowRight size={12} />
+            <span style={{ color: "#10B981", fontWeight: 700 }}>2. WhatsApp Gateway</span>
+            <ArrowRight size={12} />
+            <span style={{ color: "#818CF8", fontWeight: 700 }}>3. FastAPI + LangGraph Core</span>
+            <ArrowRight size={12} />
+            <span style={{ color: "#FB923C", fontWeight: 700 }}>4. Gemini 2.5 / 3.5 ReAct</span>
+            <ArrowRight size={12} />
+            <span style={{ color: "#4ADE80", fontWeight: 700 }}>5. ReAct Tool Registry</span>
+            <ArrowRight size={12} />
+            <span style={{ color: "#F472B6", fontWeight: 700 }}>6. PostgreSQL 16 &amp; Media</span>
           </div>
 
-          {/* Layer Cards Grid */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-            {/* ── LAYER 1: CLIENT INTERFACE ── */}
-            <div
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button
+              onClick={() => setIsFullscreen(true)}
               style={{
-                background: "rgba(30, 41, 59, 0.4)",
-                border: "1px solid rgba(56, 189, 248, 0.3)",
-                borderRadius: "12px",
-                padding: "16px 18px",
+                fontSize: "12px",
+                fontFamily: "var(--font-jetbrains), monospace",
+                color: "var(--color-cyan)",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                textDecoration: "underline",
+                textUnderlineOffset: "3px",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span
-                    style={{
-                      background: "rgba(56, 189, 248, 0.15)",
-                      color: "#38BDF8",
-                      fontSize: "11px",
-                      fontFamily: "var(--font-jetbrains), monospace",
-                      fontWeight: 700,
-                      padding: "3px 8px",
-                      borderRadius: "6px",
-                    }}
-                  >
-                    LAYER 1
-                  </span>
-                  <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--color-cloud)" }}>
-                    Client Interface (WhatsApp Native)
-                  </span>
-                </div>
-                <span style={{ fontSize: "11px", color: "var(--color-mist)", fontFamily: "var(--font-jetbrains), monospace" }}>
-                  Dual-Channel User Surface
-                </span>
-              </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "12px" }}>
-                {/* Customer Box */}
-                <div
-                  style={{
-                    background: "rgba(15, 23, 42, 0.6)",
-                    border: "1px solid rgba(56, 189, 248, 0.2)",
-                    borderRadius: "8px",
-                    padding: "12px 14px",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#38BDF8", marginBottom: "6px" }}>
-                    <Bot size={15} />
-                    <span style={{ fontSize: "13px", fontWeight: 600 }}>Public Customer Channel</span>
-                  </div>
-                  <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "12px", color: "var(--color-fog)", lineHeight: "1.6" }}>
-                    <li>Rapid burst messaging (3–6 short texts in sequence)</li>
-                    <li>Firearm catalog lookups, budget queries, caliber checks</li>
-                    <li>Voice notes in Roman Urdu &amp; English</li>
-                    <li>Verified studio photo requests with price tags</li>
-                  </ul>
-                </div>
-
-                {/* Owner Box (HITL) */}
-                <div
-                  style={{
-                    background: "rgba(45, 26, 3, 0.4)",
-                    border: "1px solid rgba(245, 158, 11, 0.35)",
-                    borderRadius: "8px",
-                    padding: "12px 14px",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#F59E0B", marginBottom: "6px" }}>
-                    <UserCheck size={15} />
-                    <span style={{ fontSize: "13px", fontWeight: 600 }}>Store Owner / Boss (Human-in-the-Loop)</span>
-                  </div>
-                  <ul style={{ margin: 0, paddingLeft: "16px", fontSize: "12px", color: "var(--color-fog)", lineHeight: "1.6" }}>
-                    <li><strong>Human-in-the-Loop decision maker</strong> for legal &amp; delivery talks</li>
-                    <li>Authoritative manual reply takeovers (auto-mutes AI)</li>
-                    <li>Natural language catalog mutations (pricing, stock in/out)</li>
-                    <li>Direct two-way customer escalation resolution</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Connection Arrow */}
-            <div style={{ display: "flex", justifyContent: "center", margin: "-6px 0", color: "var(--color-cyan)" }}>
-              <ArrowDown size={18} />
-            </div>
-
-            {/* ── LAYER 2: WHATSAPP EDGE GATEWAY ── */}
-            <div
-              style={{
-                background: "rgba(15, 23, 42, 0.6)",
-                border: "1px solid rgba(16, 185, 129, 0.35)",
-                borderRadius: "12px",
-                padding: "16px 18px",
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span
-                    style={{
-                      background: "rgba(16, 185, 129, 0.15)",
-                      color: "#10B981",
-                      fontSize: "11px",
-                      fontFamily: "var(--font-jetbrains), monospace",
-                      fontWeight: 700,
-                      padding: "3px 8px",
-                      borderRadius: "6px",
-                    }}
-                  >
-                    LAYER 2
-                  </span>
-                  <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--color-cloud)" }}>
-                    WhatsApp Edge Gateway (Official Meta Cloud Platform)
-                  </span>
-                </div>
-                <span
-                  style={{
-                    fontSize: "11px",
-                    color: "#10B981",
-                    fontFamily: "var(--font-jetbrains), monospace",
-                    background: "rgba(16, 185, 129, 0.1)",
-                    padding: "2px 8px",
-                    borderRadius: "4px",
-                  }}
-                >
-                  Meta Official Webhooks (Not Baileys)
-                </span>
-              </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "10px" }}>
-                <div style={{ background: "rgba(0, 0, 0, 0.35)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
-                  <div style={{ fontSize: "12px", fontWeight: 600, color: "#10B981", marginBottom: "4px" }}>
-                    Meta Official Platform
-                  </div>
-                  <div style={{ fontSize: "11.5px", color: "var(--color-fog)", lineHeight: "1.5" }}>
-                    Direct Meta Graph Cloud API. HMAC SHA-256 signed webhooks, official green-tick support, 99.99% uptime.
-                  </div>
-                </div>
-
-                <div style={{ background: "rgba(0, 0, 0, 0.35)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
-                  <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--color-cyan)", marginBottom: "4px" }}>
-                    15s Sliding Debounce
-                  </div>
-                  <div style={{ fontSize: "11.5px", color: "var(--color-fog)", lineHeight: "1.5" }}>
-                    Aggregates customer burst payloads into 1 prompt. Resets on new keystrokes. Owner fast lane: 1.5s.
-                  </div>
-                </div>
-
-                <div style={{ background: "rgba(0, 0, 0, 0.35)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
-                  <div style={{ fontSize: "12px", fontWeight: 600, color: "#F59E0B", marginBottom: "4px" }}>
-                    2-Hour Takeover Guard
-                  </div>
-                  <div style={{ fontSize: "11.5px", color: "var(--color-fog)", lineHeight: "1.5" }}>
-                    Auto-mutes AI if owner sends a message to that customer thread. Cancels pending buffers to prevent collisions.
-                  </div>
-                </div>
-
-                <div style={{ background: "rgba(0, 0, 0, 0.35)", padding: "10px 12px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
-                  <div style={{ fontSize: "12px", fontWeight: 600, color: "#A78BFA", marginBottom: "4px" }}>
-                    Typing &amp; LID Resolver
-                  </div>
-                  <div style={{ fontSize: "11.5px", color: "var(--color-fog)", lineHeight: "1.5" }}>
-                    Renders <em>"Haider Arms is typing..."</em> via official presence events; maps 15-digit LIDs to verified SIMs.
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Connection Arrow */}
-            <div style={{ display: "flex", justifyContent: "center", margin: "-6px 0", color: "var(--color-cyan)" }}>
-              <ArrowDown size={18} />
-            </div>
-
-            {/* ── LAYER 3: APPLICATION CORE & DUAL-AGENT ENGINE ── */}
-            <div
-              style={{
-                background: "rgba(49, 46, 129, 0.3)",
-                border: "1px solid rgba(129, 140, 248, 0.35)",
-                borderRadius: "12px",
-                padding: "16px 18px",
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span
-                    style={{
-                      background: "rgba(129, 140, 248, 0.15)",
-                      color: "#818CF8",
-                      fontSize: "11px",
-                      fontFamily: "var(--font-jetbrains), monospace",
-                      fontWeight: 700,
-                      padding: "3px 8px",
-                      borderRadius: "6px",
-                    }}
-                  >
-                    LAYER 3
-                  </span>
-                  <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--color-cloud)" }}>
-                    Application Core &amp; LangGraph State Machine (backend/app)
-                  </span>
-                </div>
-                <span style={{ fontSize: "11px", color: "#818CF8", fontFamily: "var(--font-jetbrains), monospace" }}>
-                  Python 3.14 · FastAPI · AsyncIO · Uvicorn
-                </span>
-              </div>
-
-              {/* Gateway bridge callout */}
-              <div
-                style={{
-                  background: "rgba(0, 0, 0, 0.35)",
-                  padding: "10px 14px",
-                  borderRadius: "8px",
-                  border: "1px solid rgba(129, 140, 248, 0.2)",
-                  marginBottom: "12px",
-                  fontSize: "12px",
-                  color: "var(--color-fog)",
-                  lineHeight: "1.5",
-                }}
-              >
-                <strong style={{ color: "#818CF8", fontFamily: "var(--font-jetbrains), monospace" }}>Gateway Bridge (gateway_bridge.py):</strong> Central entrypoint that decodes payloads, transcribes voice notes via Deepgram Nova-3, and resolves privacy LIDs to authentic mobile numbers.
-              </div>
-
-              {/* Sub-routing items */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "12px", marginBottom: "12px" }}>
-                <div style={{ background: "rgba(15, 23, 42, 0.7)", padding: "12px 14px", borderRadius: "8px", border: "1px solid rgba(129, 140, 248, 0.2)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#A855F7", marginBottom: "4px" }}>
-                    <Bot size={15} />
-                    <span style={{ fontSize: "13px", fontWeight: 600 }}>Customer Sales Agent (prompts_customer.py, temp=0.5)</span>
-                  </div>
-                  <div style={{ fontSize: "12px", color: "var(--color-fog)", lineHeight: "1.5" }}>
-                    Natural, friendly Pakistani retail persona that sends short (1–3 sentence) messages and proactively drives to close deals.
-                  </div>
-                </div>
-
-                <div style={{ background: "rgba(15, 23, 42, 0.7)", padding: "12px 14px", borderRadius: "8px", border: "1px solid rgba(129, 140, 248, 0.2)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#38BDF8", marginBottom: "4px" }}>
-                    <Terminal size={15} />
-                    <span style={{ fontSize: "13px", fontWeight: 600 }}>Owner Co-Pilot Node (prompts_owner.py, temp=0.2)</span>
-                  </div>
-                  <div style={{ fontSize: "12px", color: "var(--color-fog)", lineHeight: "1.5" }}>
-                    Strict, deterministic, zero-fluff assistant for managing inventory, adjusting prices, and resolving customer negotiations.
-                  </div>
-                </div>
-              </div>
-
-              {/* Speech to text banner */}
-              <div
-                style={{
-                  background: "rgba(124, 45, 18, 0.25)",
-                  border: "1px solid rgba(251, 146, 60, 0.3)",
-                  borderRadius: "8px",
-                  padding: "10px 14px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  flexWrap: "wrap",
-                  gap: "8px",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span style={{ color: "#FB923C", fontWeight: 600, fontSize: "12px", fontFamily: "var(--font-jetbrains), monospace" }}>
-                    🎙️ Voice Ingress: Deepgram Nova-3
-                  </span>
-                  <span style={{ fontSize: "12px", color: "var(--color-fog)" }}>
-                    Streams .ogg Opus audio → code-switched Roman Urdu &amp; English text in &lt;400ms.
-                  </span>
-                </div>
-                <span
-                  style={{
-                    fontSize: "10.5px",
-                    background: "rgba(251, 146, 60, 0.2)",
-                    color: "#FB923C",
-                    padding: "2px 8px",
-                    borderRadius: "4px",
-                    fontFamily: "var(--font-jetbrains), monospace",
-                  }}
-                >
-                  Nova-3 Speech Engine
-                </span>
-              </div>
-            </div>
-
-            {/* Connection Arrow */}
-            <div style={{ display: "flex", justifyContent: "center", margin: "-6px 0", color: "#F59E0B" }}>
-              <ArrowDown size={18} />
-            </div>
-
-            {/* ── LAYER 4: RESPONSIBLE AI — HUMAN-IN-THE-LOOP (HITL) ── */}
-            <div
-              style={{
-                background: "linear-gradient(135deg, rgba(69, 26, 3, 0.5) 0%, rgba(30, 27, 75, 0.5) 100%)",
-                border: "2px solid #F59E0B",
-                borderRadius: "12px",
-                padding: "18px 20px",
-                boxShadow: "0 0 25px -5px rgba(245, 158, 11, 0.2)",
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span
-                    style={{
-                      background: "rgba(245, 158, 11, 0.2)",
-                      color: "#F59E0B",
-                      fontSize: "11px",
-                      fontFamily: "var(--font-jetbrains), monospace",
-                      fontWeight: 800,
-                      padding: "4px 10px",
-                      borderRadius: "6px",
-                      border: "1px solid rgba(245, 158, 11, 0.4)",
-                    }}
-                  >
-                    RESPONSIBLE AI CORE
-                  </span>
-                  <span style={{ fontSize: "15px", fontWeight: 700, color: "#FEF3C7" }}>
-                    Human-in-the-Loop (HITL) Store Owner Supervision Layer
-                  </span>
-                </div>
-                <div style={{ display: "flex", gap: "6px" }}>
-                  <span style={{ fontSize: "11px", color: "#FDE68A", background: "rgba(245, 158, 11, 0.15)", padding: "2px 8px", borderRadius: "4px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                    <Scale size={12} /> Legal Compliance
-                  </span>
-                  <span style={{ fontSize: "11px", color: "#FDE68A", background: "rgba(245, 158, 11, 0.15)", padding: "2px 8px", borderRadius: "4px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                    <Truck size={12} /> Delivery Logistics
-                  </span>
-                </div>
-              </div>
-
-              <div style={{ fontSize: "13px", color: "var(--color-fog)", lineHeight: "1.6", marginBottom: "14px" }}>
-                <strong>Why Rabta AI is a Responsible AI System:</strong> In regulated arms commerce, delivery legality, government NOCs, buyer license verification, and fluctuating shop stock depend on physical conditions, local regulations, and human discretion. <strong>The AI is strictly prohibited from making automated delivery or legal commitments.</strong>
-              </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "10px" }}>
-                <div style={{ background: "rgba(0, 0, 0, 0.4)", padding: "12px", borderRadius: "8px", border: "1px solid rgba(245, 158, 11, 0.2)" }}>
-                  <div style={{ fontSize: "12px", fontWeight: 700, color: "#F59E0B", marginBottom: "4px", display: "flex", alignItems: "center", gap: "6px" }}>
-                    <FileCheck size={14} /> 1. Detection &amp; Safeguard
-                  </div>
-                  <div style={{ fontSize: "11.5px", color: "var(--color-fog)", lineHeight: "1.5" }}>
-                    Agent flags inquiries involving out-of-city shipping, arms license verification, discounts, or custom inventory queries.
-                  </div>
-                </div>
-
-                <div style={{ background: "rgba(0, 0, 0, 0.4)", padding: "12px", borderRadius: "8px", border: "1px solid rgba(245, 158, 11, 0.2)" }}>
-                  <div style={{ fontSize: "12px", fontWeight: 700, color: "#F59E0B", marginBottom: "4px", display: "flex", alignItems: "center", gap: "6px" }}>
-                    <PhoneCall size={14} /> 2. WhatsApp Owner Alert
-                  </div>
-                  <div style={{ fontSize: "11.5px", color: "var(--color-fog)", lineHeight: "1.5" }}>
-                    Generates <code>escalate_inquiry</code> ticket. Dispatches immediate WhatsApp push to the Owner with customer context and intent.
-                  </div>
-                </div>
-
-                <div style={{ background: "rgba(0, 0, 0, 0.4)", padding: "12px", borderRadius: "8px", border: "1px solid rgba(245, 158, 11, 0.2)" }}>
-                  <div style={{ fontSize: "12px", fontWeight: 700, color: "#F59E0B", marginBottom: "4px", display: "flex", alignItems: "center", gap: "6px" }}>
-                    <ShieldCheck size={14} /> 3. Human Authority &amp; Mute
-                  </div>
-                  <div style={{ fontSize: "11.5px", color: "var(--color-fog)", lineHeight: "1.5" }}>
-                    2-Hour Auto-Mute Guard freezes AI responses for that customer. Store owner handles sensitive legal/delivery terms directly with 100% human accountability.
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Connection Arrow */}
-            <div style={{ display: "flex", justifyContent: "center", margin: "-6px 0", color: "var(--color-cyan)" }}>
-              <ArrowDown size={18} />
-            </div>
-
-            {/* ── LAYER 5: FOUNDATION MODEL & REASONING ── */}
-            <div
-              style={{
-                background: "rgba(124, 45, 18, 0.2)",
-                border: "1px solid rgba(251, 146, 60, 0.35)",
-                borderRadius: "12px",
-                padding: "16px 18px",
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span
-                    style={{
-                      background: "rgba(251, 146, 60, 0.15)",
-                      color: "#FB923C",
-                      fontSize: "11px",
-                      fontFamily: "var(--font-jetbrains), monospace",
-                      fontWeight: 700,
-                      padding: "3px 8px",
-                      borderRadius: "6px",
-                    }}
-                  >
-                    LAYER 5
-                  </span>
-                  <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--color-cloud)" }}>
-                    Native Gemini ReAct Engine &amp; Model (agent_harness.py)
-                  </span>
-                </div>
-                <span
-                  style={{
-                    fontSize: "11px",
-                    color: "#FB923C",
-                    fontFamily: "var(--font-jetbrains), monospace",
-                    background: "rgba(251, 146, 60, 0.1)",
-                    padding: "2px 8px",
-                    borderRadius: "4px",
-                  }}
-                >
-                  google-genai SDK · Gemini 3.5 Flash Lite
-                </span>
-              </div>
-
-              {/* Loop Mechanics & Zero-Hallucination Law */}
-              <div
-                style={{
-                  background: "rgba(0, 0, 0, 0.35)",
-                  padding: "10px 14px",
-                  borderRadius: "8px",
-                  border: "1px solid rgba(251, 146, 60, 0.2)",
-                  marginBottom: "12px",
-                  fontSize: "12px",
-                  color: "var(--color-fog)",
-                  lineHeight: "1.5",
-                }}
-              >
-                <div style={{ marginBottom: "4px" }}>
-                  <strong style={{ color: "#FB923C" }}>Loop Mechanics:</strong> Generates thoughts, calls tools, observes database results, and formulates final responses in a single async turn.
-                </div>
-                <div>
-                  <strong style={{ color: "var(--color-cyan)" }}>Zero-Hallucination Law:</strong> Specs, stock, and prices are never guessed; they are retrieved strictly from live database catalog queries.
-                </div>
-              </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "10px", fontSize: "12px", color: "var(--color-fog)" }}>
-                <div style={{ background: "rgba(0, 0, 0, 0.3)", padding: "10px 12px", borderRadius: "8px" }}>
-                  <div style={{ fontWeight: 600, color: "#FB923C", marginBottom: "3px" }}>Native Function Calling</div>
-                  No brittle regex string scrapers. The official <code>google-genai</code> SDK emits structured JSON tool arguments directly into state nodes.
-                </div>
-                <div style={{ background: "rgba(0, 0, 0, 0.3)", padding: "10px 12px", borderRadius: "8px" }}>
-                  <div style={{ fontWeight: 600, color: "#FB923C", marginBottom: "3px" }}>Bilingual Code-Switching</div>
-                  Zero-shot understanding of Pakistani Roman Urdu (e.g. <em>"bhai 9mm handgun dikhao budget 200k k andar"</em>) seamlessly combined with English specs.
-                </div>
-                <div style={{ background: "rgba(0, 0, 0, 0.3)", padding: "10px 12px", borderRadius: "8px" }}>
-                  <div style={{ fontWeight: 600, color: "#FB923C", marginBottom: "3px" }}>Sub-Second Inference</div>
-                  Delivers first token in &lt;450ms, allowing full ReACT loop completion, database query, and photo attachment in &lt;850ms on WhatsApp.
-                </div>
-              </div>
-            </div>
-
-            {/* Connection Arrow */}
-            <div style={{ display: "flex", justifyContent: "center", margin: "-6px 0", color: "var(--color-cyan)" }}>
-              <ArrowDown size={18} />
-            </div>
-
-            {/* ── LAYER 6: NATIVE TOOLS & PERSISTENCE ── */}
-            <div
-              style={{
-                background: "rgba(20, 83, 45, 0.25)",
-                border: "1px solid rgba(74, 222, 128, 0.35)",
-                borderRadius: "12px",
-                padding: "16px 18px",
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span
-                    style={{
-                      background: "rgba(74, 222, 128, 0.15)",
-                      color: "#4ADE80",
-                      fontSize: "11px",
-                      fontFamily: "var(--font-jetbrains), monospace",
-                      fontWeight: 700,
-                      padding: "3px 8px",
-                      borderRadius: "6px",
-                    }}
-                  >
-                    LAYER 6
-                  </span>
-                  <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--color-cloud)" }}>
-                    Data &amp; Persistence Layer (PostgreSQL)
-                  </span>
-                </div>
-                <span style={{ fontSize: "11px", color: "#4ADE80", fontFamily: "var(--font-jetbrains), monospace" }}>
-                  Async SQLAlchemy (pool_size=5, max_overflow=10)
-                </span>
-              </div>
-
-              {/* Active Tools Grid */}
-              <div style={{ marginBottom: "12px" }}>
-                <div style={{ fontSize: "11.5px", fontFamily: "var(--font-jetbrains), monospace", color: "var(--color-mist)", marginBottom: "8px" }}>
-                  ZERO-HALLUCINATION TOOL REGISTRY:
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "8px" }}>
-                  {[
-                    { name: "search_catalog", desc: "Atomic caliber & price lookups" },
-                    { name: "get_product_photos", desc: "Verified studio rollmarks" },
-                    { name: "check_delivery_policy", desc: "Dealership delivery terms" },
-                    { name: "get_payment_bank_terms", desc: "Advance bank accounts" },
-                    { name: "escalate_inquiry", desc: "Generates ESC-XX ticket for Owner" },
-                    { name: "update_product_price", desc: "Owner SQL price mutations" },
-                    { name: "toggle_in_stock", desc: "Owner real-time stock switch" },
-                  ].map((tool) => (
-                    <div
-                      key={tool.name}
-                      style={{
-                        background: "rgba(0, 0, 0, 0.4)",
-                        padding: "8px 10px",
-                        borderRadius: "6px",
-                        border: "1px solid rgba(74, 222, 128, 0.2)",
-                      }}
-                    >
-                      <div style={{ fontSize: "11.5px", fontFamily: "var(--font-jetbrains), monospace", color: "#4ADE80", fontWeight: 600 }}>
-                        {tool.name}
-                      </div>
-                      <div style={{ fontSize: "11px", color: "var(--color-mist)", marginTop: "2px" }}>
-                        {tool.desc}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* DB & Media */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "10px", marginTop: "12px", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "12px" }}>
-                <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
-                  <Database size={16} style={{ color: "#F472B6", marginTop: "2px" }} />
-                  <div>
-                    <div style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--color-fog)" }}>PostgreSQL 16 Storage (Async SQLAlchemy)</div>
-                    <div style={{ fontSize: "11px", color: "var(--color-mist)", lineHeight: "1.4" }}>
-                      Stores tenants, authenticated product SKUs, prices, customer history, and active escalation tickets (ESC-XX). Pool: up to 15 concurrent connections.
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
-                  <Radio size={16} style={{ color: "#38BDF8", marginTop: "2px" }} />
-                  <div>
-                    <div style={{ fontSize: "12.5px", fontWeight: 600, color: "var(--color-fog)" }}>Verified Studio Media Assets</div>
-                    <div style={{ fontSize: "11px", color: "var(--color-mist)", lineHeight: "1.4" }}>
-                      Verified studio firearm photos hosted locally and delivered securely over HTTPS with dynamic product captions.
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+              Open Fullscreen Lightbox ↗
+            </button>
           </div>
-        </div>
-      )}
-
-      {/* ── View 2: Responsible AI & Human-in-the-Loop Deep Dive ── */}
-      {activeView === "hitl" && (
-        <div style={{ padding: "24px 20px" }}>
-          {/* Header Banner */}
-          <div
-            style={{
-              padding: "16px 18px",
-              background: "rgba(245, 158, 11, 0.12)",
-              border: "1px solid rgba(245, 158, 11, 0.35)",
-              borderRadius: "12px",
-              marginBottom: "20px",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#F59E0B", fontWeight: 700, fontSize: "15px", marginBottom: "6px" }}>
-              <ShieldCheck size={18} />
-              Responsible AI Architecture: Why Human-in-the-Loop is Mandatory
-            </div>
-            <p style={{ margin: 0, fontSize: "13px", color: "var(--color-fog)", lineHeight: "1.6" }}>
-              Rabta AI operates in licensed firearms and defense commerce in Pakistan (Pilot: Haider Arms). Delivering weapons or quoting legal compliance cannot rely solely on probabilistic language models. Unpredictable factors such as <strong>provincial licensing laws, police NOC transit requirements, customer identity verification, and volatile stock availability</strong> mandate direct human oversight.
-            </p>
-          </div>
-
-          {/* 4 Pillars of Responsible AI */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "14px", marginBottom: "22px" }}>
-            <div style={{ background: "rgba(0, 0, 0, 0.4)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "10px", padding: "16px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#F59E0B", fontWeight: 600, fontSize: "13px", marginBottom: "8px" }}>
-                <Scale size={16} /> Legal &amp; Licensing Compliance
-              </div>
-              <div style={{ fontSize: "12px", color: "var(--color-mist)", lineHeight: "1.6" }}>
-                Under Pakistani arms regulations, purchases require valid CNIC identity cards, verified district licenses, and government record keeping. The AI provides factual product data but immediately transfers legal ownership discussions to the licensed dealer.
-              </div>
-            </div>
-
-            <div style={{ background: "rgba(0, 0, 0, 0.4)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "10px", padding: "16px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#38BDF8", fontWeight: 600, fontSize: "13px", marginBottom: "8px" }}>
-                <Truck size={16} /> Delivery &amp; Transit Logistics
-              </div>
-              <div style={{ fontSize: "12px", color: "var(--color-mist)", lineHeight: "1.6" }}>
-                Firearms cannot be shipped via ordinary couriers. Delivery depends on secure dealer-managed transit, city-specific police checkpoints, and advance deposit clearance. The AI never guarantees automatic shipping; it routes inquiries to the owner.
-              </div>
-            </div>
-
-            <div style={{ background: "rgba(0, 0, 0, 0.4)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "10px", padding: "16px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#10B981", fontWeight: 600, fontSize: "13px", marginBottom: "8px" }}>
-                <Clock size={16} /> Real-Time Stock &amp; Human Factors
-              </div>
-              <div style={{ fontSize: "12px", color: "var(--color-mist)", lineHeight: "1.6" }}>
-                In physical stores, customers walk in and purchase inventory on the spot. Rapid turnover means stock status can change within minutes. The store owner can immediately intervene or update stock via WhatsApp commands.
-              </div>
-            </div>
-
-            <div style={{ background: "rgba(0, 0, 0, 0.4)", border: "1px solid rgba(255, 255, 255, 0.08)", borderRadius: "10px", padding: "16px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#A855F7", fontWeight: 600, fontSize: "13px", marginBottom: "8px" }}>
-                <Lock size={16} /> 2-Hour Auto-Mute Safety Guard
-              </div>
-              <div style={{ fontSize: "12px", color: "var(--color-mist)", lineHeight: "1.6" }}>
-                The moment the store owner texts the customer from the business number, the gateway detects the intervention, cancels all pending AI response queues, and mutes autonomous replies for 2 hours to prevent human/AI collision.
-              </div>
-            </div>
-          </div>
-
-          {/* Step-by-Step Escalation Walkthrough */}
-          <div
-            style={{
-              background: "rgba(15, 23, 42, 0.7)",
-              border: "1px solid rgba(86, 232, 208, 0.2)",
-              borderRadius: "12px",
-              padding: "18px 20px",
-            }}
-          >
-            <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--color-cyan)", marginBottom: "12px", fontFamily: "var(--font-jetbrains), monospace" }}>
-              HITL ESCALATION PROTOCOL (STEP-BY-STEP SEQUENCE)
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {[
-                {
-                  step: "01",
-                  title: "Inquiry Ingress & Intent Classification",
-                  desc: "Customer asks: 'Can you deliver this Glock 19 to Peshawar and what license documents are required?' The LangGraph customer node classifies the query as containing sensitive legal & delivery intent.",
-                },
-                {
-                  step: "02",
-                  title: "Tool Trigger: escalate_inquiry",
-                  desc: "Customer Sales Agent halts automated sales commitment. It executes escalate_inquiry(topic='Delivery & Legal', city='Peshawar', product='Glock 19 Gen 5').",
-                },
-                {
-                  step: "03",
-                  title: "Ticket Generation & Instant WhatsApp Owner Push",
-                  desc: "PostgreSQL creates ticket #ESC-419. An automated high-priority WhatsApp alert is dispatched to Haider (Store Owner) containing the customer's phone, city, and exact request.",
-                },
-                {
-                  step: "04",
-                  title: "Customer Bridge Message",
-                  desc: "The AI sends a polite, culturally natural Roman Urdu message: 'Jee bhai! Delivery aur legal formalities dukan k owner (Haider bhai) khud handle kartay hain. Unhein aapki inquiry forward kardi hai, woh abhi direct guide karein gay.'",
-                },
-                {
-                  step: "05",
-                  title: "2-Hour Mute & Direct Human Closing",
-                  desc: "Haider opens WhatsApp, sees the ticket, and replies directly to the customer thread. The 2-Hour Takeover Guard silences the AI so the licensed dealer can finalize the legal paperwork safely.",
-                },
-              ].map((item) => (
-                <div
-                  key={item.step}
-                  style={{
-                    display: "flex",
-                    gap: "14px",
-                    alignItems: "flex-start",
-                    background: "rgba(0, 0, 0, 0.3)",
-                    padding: "12px 14px",
-                    borderRadius: "8px",
-                    borderLeft: "3px solid var(--color-cyan)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "12px",
-                      fontFamily: "var(--font-jetbrains), monospace",
-                      fontWeight: 800,
-                      color: "var(--color-cyan)",
-                      background: "rgba(86, 232, 208, 0.1)",
-                      padding: "2px 8px",
-                      borderRadius: "4px",
-                      flexShrink: 0,
-                    }}
-                  >
-                    STEP {item.step}
-                  </span>
-                  <div>
-                    <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--color-cloud)", marginBottom: "3px" }}>
-                      {item.title}
-                    </div>
-                    <div style={{ fontSize: "12px", color: "var(--color-fog)", lineHeight: "1.5" }}>
-                      {item.desc}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── View 3: Live Tech Specifications ── */}
-      {activeView === "specs" && (
-        <div style={{ padding: "24px 20px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "14px" }}>
-            <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "10px", padding: "16px" }}>
-              <div style={{ fontSize: "11px", color: "var(--color-mist)", fontFamily: "var(--font-jetbrains), monospace" }}>
-                FOUNDATION REASONING MODEL
-              </div>
-              <div style={{ fontSize: "16px", fontWeight: 700, color: "#FB923C", marginTop: "4px" }}>
-                Google Gemini 3.5 Flash Lite
-              </div>
-              <div style={{ fontSize: "12px", color: "var(--color-fog)", marginTop: "8px", lineHeight: "1.5" }}>
-                Native function calling without regex parsing. Sub-450ms token latency. High token efficiency and bilingual code-switching comprehension for Pakistani Roman Urdu.
-              </div>
-            </div>
-
-            <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "10px", padding: "16px" }}>
-              <div style={{ fontSize: "11px", color: "var(--color-mist)", fontFamily: "var(--font-jetbrains), monospace" }}>
-                SPEECH-TO-TEXT INTELLIGENCE
-              </div>
-              <div style={{ fontSize: "16px", fontWeight: 700, color: "#38BDF8", marginTop: "4px" }}>
-                Deepgram Nova-3
-              </div>
-              <div style={{ fontSize: "12px", color: "var(--color-fog)", marginTop: "8px", lineHeight: "1.5" }}>
-                Transcribes voice notes in under 400ms. Exceptional acoustic robustness against street noise, Urdu accents, and colloquial arms nomenclature.
-              </div>
-            </div>
-
-            <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "10px", padding: "16px" }}>
-              <div style={{ fontSize: "11px", color: "var(--color-mist)", fontFamily: "var(--font-jetbrains), monospace" }}>
-                INGRESS GATEWAY
-              </div>
-              <div style={{ fontSize: "16px", fontWeight: 700, color: "#10B981", marginTop: "4px" }}>
-                Meta Official WhatsApp Business Platform
-              </div>
-              <div style={{ fontSize: "12px", color: "var(--color-fog)", marginTop: "8px", lineHeight: "1.5" }}>
-                Cloud API with HMAC SHA-256 webhooks. Replaced Baileys WebSocket scraping for enterprise 99.99% uptime and zero account disconnection risk.
-              </div>
-            </div>
-
-            <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "10px", padding: "16px" }}>
-              <div style={{ fontSize: "11px", color: "var(--color-mist)", fontFamily: "var(--font-jetbrains), monospace" }}>
-                RESPONSIBLE AI GOVERNANCE
-              </div>
-              <div style={{ fontSize: "16px", fontWeight: 700, color: "#F59E0B", marginTop: "4px" }}>
-                Human-in-the-Loop (HITL) Guard
-              </div>
-              <div style={{ fontSize: "12px", color: "var(--color-fog)", marginTop: "8px", lineHeight: "1.5" }}>
-                Owner escalation tickets for legal compliance &amp; shipping verification. 2-Hour Auto-Mute Guard preventing AI hallucinations in regulated commerce.
-              </div>
-            </div>
-
-            <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "10px", padding: "16px" }}>
-              <div style={{ fontSize: "11px", color: "var(--color-mist)", fontFamily: "var(--font-jetbrains), monospace" }}>
-                BACKEND &amp; LANGGRAPH STATE MACHINE
-              </div>
-              <div style={{ fontSize: "16px", fontWeight: 700, color: "#818CF8", marginTop: "4px" }}>
-                Python 3.14 · FastAPI · AsyncIO
-              </div>
-              <div style={{ fontSize: "12px", color: "var(--color-fog)", marginTop: "8px", lineHeight: "1.5" }}>
-                <code>gateway_bridge.py</code> central entrypoint. Dual intelligence routing via <code>prompts_customer.py</code> (temp=0.5) and <code>prompts_owner.py</code> (temp=0.2). Native ReAct loop in <code>agent_harness.py</code>.
-              </div>
-            </div>
-
-            <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "10px", padding: "16px" }}>
-              <div style={{ fontSize: "11px", color: "var(--color-mist)", fontFamily: "var(--font-jetbrains), monospace" }}>
-                DATA LAYER &amp; MEDIA ASSETS
-              </div>
-              <div style={{ fontSize: "16px", fontWeight: 700, color: "#4ADE80", marginTop: "4px" }}>
-                Async SQLAlchemy · PostgreSQL
-              </div>
-              <div style={{ fontSize: "12px", color: "var(--color-fog)", marginTop: "8px", lineHeight: "1.5" }}>
-                Engine pool (pool_size=5, max_overflow=10, up to 15 concurrent connections). Stores tenants, SKUs, prices, customer history, ESC-XX tickets. Verified studio photos served locally over HTTPS.
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Bottom Bar ── */}
-      <div
-        style={{
-          padding: "12px 20px",
-          background: "rgba(0, 0, 0, 0.4)",
-          borderTop: "1px solid rgba(255, 255, 255, 0.08)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "10px",
-          fontSize: "11.5px",
-          fontFamily: "var(--font-jetbrains), monospace",
-          color: "var(--color-mist)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <span style={{ color: "#10B981" }}>●</span>
-          <span>HAIDER ARMS PRODUCTION CLUSTER · 24/7 LIVE ON VULTR VPS (65.20.90.130)</span>
-        </div>
-        <div style={{ color: "var(--color-cyan)" }}>
-          ZERO-HALLUCINATION CATALOG GROUNDING ACTIVE
         </div>
       </div>
+
+      {/* ── 3 High-Level Architectural Specification Cards ── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+          gap: "16px",
+          marginTop: "20px",
+        }}
+      >
+        {/* Card 1: Edge Gateway */}
+        <div
+          style={{
+            background: "rgba(15, 23, 42, 0.75)",
+            border: "1px solid rgba(56, 189, 248, 0.25)",
+            borderRadius: "14px",
+            padding: "20px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+            <span
+              style={{
+                padding: "3px 8px",
+                borderRadius: "6px",
+                background: "rgba(56, 189, 248, 0.15)",
+                color: "#38BDF8",
+                fontSize: "11px",
+                fontFamily: "var(--font-jetbrains), monospace",
+                fontWeight: 700,
+              }}
+            >
+              LAYER 2
+            </span>
+            <span style={{ fontWeight: 700, fontSize: "15px", color: "#38BDF8" }}>
+              ⚡ WhatsApp Gateway Layer
+            </span>
+          </div>
+          <ul
+            style={{
+              margin: 0,
+              paddingLeft: "16px",
+              fontSize: "13px",
+              lineHeight: 1.6,
+              color: "var(--color-mist)",
+              listStyleType: "disc",
+            }}
+          >
+            <li style={{ marginBottom: "6px" }}>
+              <strong style={{ color: "var(--color-fog)" }}>15s Sliding Burst Debounce:</strong> Aggregates rapid
+              multi-bubble customer messages into a single prompt context before triggering LLM generation.
+            </li>
+            <li style={{ marginBottom: "6px" }}>
+              <strong style={{ color: "var(--color-fog)" }}>Live Typing Interceptor:</strong> Listens for WhatsApp{" "}
+              <code>presence.update</code> (composing / recording) and dynamically extends debounce windows.
+            </li>
+            <li style={{ marginBottom: "6px" }}>
+              <strong style={{ color: "var(--color-fog)" }}>2-Hour Auto-Mute Guard:</strong> Automatically silences
+              AI for 2 hours if store owner manually replies to a customer thread.
+            </li>
+            <li>
+              <strong style={{ color: "var(--color-fog)" }}>LID &amp; Contact Resolver:</strong> Resolves 15-digit
+              WhatsApp privacy LIDs to verified customer records and escalation tickets.
+            </li>
+          </ul>
+        </div>
+
+        {/* Card 2: Dual-Agent Core */}
+        <div
+          style={{
+            background: "rgba(15, 23, 42, 0.75)",
+            border: "1px solid rgba(168, 85, 247, 0.25)",
+            borderRadius: "14px",
+            padding: "20px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+            <span
+              style={{
+                padding: "3px 8px",
+                borderRadius: "6px",
+                background: "rgba(168, 85, 247, 0.15)",
+                color: "#C084FC",
+                fontSize: "11px",
+                fontFamily: "var(--font-jetbrains), monospace",
+                fontWeight: 700,
+              }}
+            >
+              LAYER 3 &amp; 4
+            </span>
+            <span style={{ fontWeight: 700, fontSize: "15px", color: "#C084FC" }}>
+              🧠 Dual-Agent Intelligence Core
+            </span>
+          </div>
+          <ul
+            style={{
+              margin: 0,
+              paddingLeft: "16px",
+              fontSize: "13px",
+              lineHeight: 1.6,
+              color: "var(--color-mist)",
+              listStyleType: "disc",
+            }}
+          >
+            <li style={{ marginBottom: "6px" }}>
+              <strong style={{ color: "var(--color-fog)" }}>Customer Sales Agent (Temp: 0.5):</strong> Fast, warm
+              Pakistani salesman persona. Delivers punchy 1–3 sentence responses and closes orders.
+            </li>
+            <li style={{ marginBottom: "6px" }}>
+              <strong style={{ color: "var(--color-fog)" }}>Owner Co-Pilot Node (Temp: 0.2):</strong> Deterministic
+              ReAct assistant for real-time catalog price updates, stock toggling, and margin controls.
+            </li>
+            <li style={{ marginBottom: "6px" }}>
+              <strong style={{ color: "var(--color-fog)" }}>Zero-Hallucination Grounding:</strong> Never improvises
+              specs or prices; retrieves live verified records via async PostgreSQL connection pooling.
+            </li>
+            <li>
+              <strong style={{ color: "var(--color-fog)" }}>Deepgram Nova-2 Integration:</strong> Real-time Urdu
+              voice note speech-to-text with auto code-switching for Roman Urdu.
+            </li>
+          </ul>
+        </div>
+
+        {/* Card 3: Business Logic & Tools */}
+        <div
+          style={{
+            background: "rgba(15, 23, 42, 0.75)",
+            border: "1px solid rgba(74, 222, 128, 0.25)",
+            borderRadius: "14px",
+            padding: "20px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+            <span
+              style={{
+                padding: "3px 8px",
+                borderRadius: "6px",
+                background: "rgba(74, 222, 128, 0.15)",
+                color: "#4ADE80",
+                fontSize: "11px",
+                fontFamily: "var(--font-jetbrains), monospace",
+                fontWeight: 700,
+              }}
+            >
+              LAYER 5 &amp; 6
+            </span>
+            <span style={{ fontWeight: 700, fontSize: "15px", color: "#4ADE80" }}>
+              🛡️ Business Logic &amp; ReAct Tools
+            </span>
+          </div>
+          <ul
+            style={{
+              margin: 0,
+              paddingLeft: "16px",
+              fontSize: "13px",
+              lineHeight: 1.6,
+              color: "var(--color-mist)",
+              listStyleType: "disc",
+            }}
+          >
+            <li style={{ marginBottom: "6px" }}>
+              <strong style={{ color: "var(--color-fog)" }}>Order Intake Funnel:</strong> Sequentially collects (1)
+              Full Name, (2) Destination City, (3) Delivery Address, and (4) Mobile SIM.
+            </li>
+            <li style={{ marginBottom: "6px" }}>
+              <strong style={{ color: "var(--color-fog)" }}>Escalation Desk (ESC-XX):</strong> Automatically routes
+              out-of-city delivery inquiries and license compliance questions to owner&apos;s WhatsApp.
+            </li>
+            <li style={{ marginBottom: "6px" }}>
+              <strong style={{ color: "var(--color-fog)" }}>Verified Studio Rollmarks:</strong> Sends authenticated
+              firearm pictures directly into the WhatsApp conversation as native media.
+            </li>
+            <li>
+              <strong style={{ color: "var(--color-fog)" }}>Advance Banking Security:</strong> Issues verified
+              bank transfer details strictly through authorized dealership accounts.
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      {/* ── Fullscreen Lightbox Modal (Whole Page / Full Monitor Scale) ── */}
+      {isFullscreen && (
+        <div
+          ref={fullscreenContainerRef}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 99999,
+            background: "rgba(5, 7, 12, 0.97)",
+            backdropFilter: "blur(28px)",
+            WebkitBackdropFilter: "blur(28px)",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          {/* Fullscreen Header Deck */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "16px 28px",
+              background: "rgba(11, 18, 32, 0.8)",
+              borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+              zIndex: 10,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <span
+                style={{
+                  fontWeight: 700,
+                  fontSize: "16px",
+                  color: "var(--color-cloud)",
+                  fontFamily: "var(--font-jetbrains), monospace",
+                }}
+              >
+                Rabta AI — 4K Master Architecture Blueprint
+              </span>
+              <span
+                style={{
+                  fontSize: "11px",
+                  padding: "3px 8px",
+                  borderRadius: "6px",
+                  background: "rgba(86, 232, 208, 0.15)",
+                  color: "var(--color-cyan)",
+                  border: "1px solid rgba(86, 232, 208, 0.35)",
+                  fontFamily: "var(--font-jetbrains), monospace",
+                  fontWeight: 600,
+                }}
+              >
+                FULLSCREEN MODE
+              </span>
+            </div>
+
+            {/* Fullscreen Controls */}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <button
+                onClick={handleZoomIn}
+                style={{
+                  background: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  color: "#FFFFFF",
+                  padding: "7px 12px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  fontSize: "12px",
+                }}
+              >
+                <ZoomIn size={15} /> Zoom In
+              </button>
+
+              <button
+                onClick={handleZoomOut}
+                style={{
+                  background: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  color: "#FFFFFF",
+                  padding: "7px 12px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  fontSize: "12px",
+                }}
+              >
+                <ZoomOut size={15} /> Zoom Out
+              </button>
+
+              <button
+                onClick={handleActualSize}
+                style={{
+                  background: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  color: "#FFFFFF",
+                  padding: "7px 12px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  fontFamily: "var(--font-jetbrains), monospace",
+                }}
+              >
+                1:1 Native
+              </button>
+
+              <button
+                onClick={handleResetZoom}
+                style={{
+                  background: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  color: "#FFFFFF",
+                  padding: "7px 12px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  fontSize: "12px",
+                }}
+              >
+                <RotateCcw size={14} /> Fit
+              </button>
+
+              <a
+                href={activeImageSrc}
+                download="Rabta_AI_Architecture_Master_4K.png"
+                style={{
+                  background: "rgba(86, 232, 208, 0.18)",
+                  border: "1px solid rgba(86, 232, 208, 0.4)",
+                  color: "var(--color-cyan)",
+                  padding: "7px 14px",
+                  borderRadius: "6px",
+                  textDecoration: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  fontFamily: "var(--font-jetbrains), monospace",
+                }}
+              >
+                <Download size={14} /> Download 4K
+              </a>
+
+              <button
+                onClick={() => setIsFullscreen(false)}
+                title="Exit Fullscreen (Esc)"
+                style={{
+                  background: "rgba(239, 68, 68, 0.2)",
+                  border: "1px solid rgba(239, 68, 68, 0.4)",
+                  color: "#F87171",
+                  padding: "7px 14px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  fontFamily: "var(--font-jetbrains), monospace",
+                }}
+              >
+                <X size={15} /> Close (Esc)
+              </button>
+            </div>
+          </div>
+
+          {/* Fullscreen Interactive Canvas */}
+          <div
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onDoubleClick={handleResetZoom}
+            style={{
+              flex: 1,
+              overflow: "hidden",
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: isDragging ? "grabbing" : "grab",
+              padding: "20px",
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={activeImageSrc}
+              alt="Rabta AI System Architecture Master Fullscreen"
+              draggable={false}
+              style={{
+                maxWidth: "100%",
+                maxHeight: "92vh",
+                objectFit: "contain",
+                transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
+                transformOrigin: "center center",
+                transition: isDragging ? "none" : "transform 0.15s ease-out",
+                userSelect: "none",
+                borderRadius: "12px",
+                boxShadow: "0 25px 60px -10px rgba(0,0,0,0.9)",
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
