@@ -157,17 +157,13 @@
     font-family: var(--font-display);
     font-weight: 600;
     letter-spacing: -0.01em;
-    margin: 1.8rem auto 0.6rem;
-    max-width: 920px;
+    margin: 1.8rem 0 0.6rem;
   }
   .prose h1 { font-size: 1.5rem; }
   .prose h2 { font-size: 1.25rem; }
   .prose h3 { font-size: 1.1rem; }
 
-  .prose p {
-    margin: 0.85rem auto;
-    max-width: 920px;
-  }
+  .prose p  { margin: 0.85rem 0; }
 
   .prose a {
     color: var(--color-cyan);
@@ -193,16 +189,14 @@
   .prose ol {
     list-style: revert;
     padding-left: 1.5rem;
-    margin: 0.85rem auto;
-    max-width: 920px;
+    margin: 0.85rem 0;
   }
   .prose li { margin: 0.3rem 0; }
 
   .prose blockquote {
     border-left: 2px solid var(--color-cyan);
     padding-left: 1rem;
-    margin: 1rem auto;
-    max-width: 920px;
+    margin: 1rem 0;
     color: rgba(139,147,163,0.85);
     font-style: italic;
   }
