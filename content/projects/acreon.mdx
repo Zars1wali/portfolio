@@ -1,33 +1,207 @@
 ---
 title: "Acreon"
-summary: "Satellite-based supply-chain risk monitoring for food buyers — up to 8 weeks of lead time on crop stress, flooding, and vigor drops, built on Sentinel-2 imagery."
-stack: ["Sentinel-2 / Copernicus", "SAR (radar)", "NDVI/NDRE indices", "Python", "Next.js"]
+summary: "Enterprise satellite-based supply-chain risk intelligence for food processors and agri-buyers — delivering 3–8 weeks of early lead time on crop stress, flooding, and vigor drops via cloud-masked Sentinel-2 multispectral imagery, PostGIS spatial analytics, and distributed TiTiler raster tiling."
+stack:
+  - "Sentinel-2 L2A (10m Multispectral)"
+  - "MapLibre GL JS + terra-draw"
+  - "FastAPI (Python 3.12)"
+  - "TiTiler (Dynamic COG Tiling)"
+  - "rioxarray & stackstac"
+  - "pystac-client (STAC API)"
+  - "PostgreSQL + PostGIS"
+  - "Redis + arq Geo-Workers"
+  - "scikit-learn (k-means clustering)"
+  - "Cloudflare R2 / AWS S3"
+  - "Next.js 14 / TypeScript"
+  - "Docker Compose"
+workflow:
+  - "Python"
+  - "FastAPI"
+  - "PostGIS"
+  - "MapLibre GL"
+  - "TiTiler"
+  - "Sentinel-2"
+  - "Redis"
+  - "Docker"
 role: "Co-Founder & COO — commercial strategy, enterprise outreach, product positioning"
 links:
   live: "https://acreon.zeropointintel.com"
 year: 2026
 featured: true
 order: 2
-image: "/images/crop_vigor_satellite.png"
+image: "/images/portfolio_overview.png"
 ---
 
-Acreon monitors supplier fields from space, giving procurement teams early
-warning on crop stress, flooding, and vigor decline before it shows up in
-harvest tonnage. It processes Sentinel-2 spectral bands for NDVI/NDRE vigor
-tracking, cross-references radar (SAR) for flood mapping that works through
-cloud cover, and closes the loop with field scouts who verify flagged
-anomalies on the ground — their observations recalibrate the model.
+<div style={{ margin: "1.5rem 0" }}>
+  {/* eslint-disable-next-line @next/next/no-img-element */}
+  <img 
+    src="/images/portfolio_overview.png" 
+    alt="Acreon Enterprise Sourcing Portfolio & Sentinel-2 Health Monitoring Interface" 
+    style={{ width: "100%", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 20px 40px -15px rgba(0,0,0,0.7)" }} 
+  />
+</div>
 
-The product's core positioning is what we call the "Acreon Firewall": we
-report risk signals and lead-time alerts, and explicitly refuse to issue
-agronomic prescriptions (fertilizer rates, pest diagnoses, yield guarantees)
-that competitors promise but can't actually justify from orbit. Every
-analytic ships with its capture date and valid-pixel percentage, so buyers
-know exactly how much to trust a given read.
+---
 
-Ground-truth is added by IRIS, our companion IoT sensor platform. Currently
-in active B2B outreach across Pakistan, Bangladesh, the UAE/Gulf, and
-Europe, alongside applications to agtech accelerators (QSTP, Hub71, Startup
-Qatar) for a Qatar market entry.
+## What Acreon Is
 
-{/* TODO: add 1-2 concrete outcomes once available — a pilot result, a signed LOI, or accelerator acceptance — real numbers only, no placeholders */}
+Acreon is an enterprise **B2B2X satellite supply-chain risk platform** engineered for global food conglomerates, agri-processors, and commodity buyers (such as rice mills, sugar refineries, and multinational brands like Nestlé and Matco Foods).
+
+It is fundamentally **not** a farmer-facing app, nor is it a generic NDVI gadget. It solves the enterprise procurement team's greatest operational nightmare: **supply shocks discovered too late**. 
+
+Traditionally, buyers learn that their contracted suppliers suffered severe crop loss (from drought, waterlogging, or disease) on the day of harvest — when it is too late to prevent contract defaults, factory downtime, or price spikes. Acreon transforms free, publicly accessible **European Space Agency (ESA) Sentinel-2 multispectral satellite imagery** into a **3 to 8 week early-warning advantage**, giving buyers the lead time needed to re-hedge procurement, dispatch field scouts, or reroute supply chains.
+
+---
+
+## The "Acreon Firewall": Observation Over Speculation
+
+The agricultural technology sector is crowded with tools making unverified claims — promising automated yield guarantees, prescription fertilizer recommendations, or remote pest diagnoses purely from orbit. 
+
+Acreon operates under a foundational architectural and legal principle known as the **Acreon Firewall**:
+
+> **"Acreon reports relative vigor anomalies and scouting priorities — never automated agronomic prescriptions."**
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│                       THE ACREON FIREWALL                   │
+├──────────────────────────────┬──────────────────────────────┤
+│  ✅ ACREON OUTPUTS           │  ❌ ACREON PROHIBITS         │
+├──────────────────────────────┼──────────────────────────────┤
+│ • "Vigor in Zone C dropped   │ • "Apply 45 kg N/ha here."   │
+│   18% vs. previous pass."    │   (Requires soil chemistry)  │
+│ • "Biomass tracking 3 weeks  │ • "Fungal leaf blight found."│
+│   behind 5-yr baseline."     │   (Requires pathology test)  │
+│ • "High risk across 14 paddy │ • "Guaranteed harvest will   │
+│   sourcing fields."          │   reach 4.2 t/ha."           │
+└──────────────────────────────┴──────────────────────────────┘
+```
+
+### Why This Boundary is Absolute:
+1. **Agronomic Liability:** Prescribing chemicals or fertilizer without ground soil tests, growth stage calibration, and licensed agronomists exposes platforms to product-label violations and legal liability.
+2. **Honesty by Construction:** A satellite pixel is a 10×10 meter reflection of electromagnetic light. An anomaly means: *"something is stressing this sector — go inspect it"* — never a manufactured diagnosis.
+3. **Mandatory Cloud Masking:** Unmasked satellite math silently corrupts numbers. Acreon enforces strict scene classification masking (SCL + `s2cloudless`) before computing any vegetation indices. Every reading ships with its explicit **capture date** and **valid-pixel percentage**.
+
+---
+
+## System Architecture
+
+Acreon is architected as a high-performance, asynchronous geospatial pipeline. Heavy satellite imagery operations are decoupled from client-facing REST APIs through distributed background queues and dynamic Cloud-Optimized GeoTIFF (COG) tile rendering.
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  Next.js 14 Frontend (MapLibre GL JS + terra-draw)             │
+│   • Vector AOI drawing / GeoJSON import                         │
+│   • Multi-field portfolio risk overview (triage by vigor drop)  │
+│   • Dynamic spectral index switcher (NDVI / NDRE / Zones)       │
+│   • Multi-pass vigor trajectory charts & telemetry footer       │
+└───────────────┬───────────────────────────┬─────────────────────┘
+                │ REST (Bearer Token)       │ XYZ Dynamic Tiles
+                ▼                           ▼
+┌──────────────────────────────┐   ┌──────────────────────────────┐
+│  FastAPI Application Core    │   │  TiTiler Tile Engine         │
+│   • /fields, /analyses       │   │   • Dynamic raster rendering │
+│   • /alerts, /scenes         │   │   • Colormaps & rescaling    │
+│   • Org isolation (multi-tenancy)│  └──────────────┬────────────────┘
+└───────┬───────────────┬──────┘                  │
+        │ enqueue       │ read                    │ reads COGs
+        ▼               ▼                         ▼
+┌──────────────┐  ┌──────────────────┐   ┌─────────────────────────┐
+│ Redis + arq  │─▶│ PostgreSQL       │   │ Object Storage (R2/S3)  │
+│ Geo-Workers  │  │   + PostGIS      │   │ Cached index COGs,      │
+│              │  │ fields, scenes,  │   │ analytical footprints,  │
+│              │  │ analyses, alerts │   │ exportable reports      │
+└──────┬───────┘  └──────────────────┘   └─────────────────────────┘
+       │ STAC search + windowed COG read
+       ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  Upstream Imagery: Earth Search (AWS Sentinel-2 L2A COGs)      │
+│                    Copernicus CDSE (Fallback / EU-Sovereign)    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## The Tech Stack
+
+### Frontend & Cartographic Interface
+* **Next.js 14 (App Router) & TypeScript:** Enterprise dashboard delivering server-side rendered portfolio summaries, strict TypeScript interfaces, and responsive layout primitives.
+* **MapLibre GL JS & terra-draw:** WebGL-accelerated map engine providing vector polygon drawing and editing for Areas of Interest (AOIs). Avoids commercial token lock-in (e.g., Mapbox) while delivering 60 FPS raster tile rendering.
+* **Tailwind CSS:** Custom dark-mode luxury enterprise design tokens with high-contrast cartographic visualization (`#00E5FF` cyan vector highlights).
+
+### Backend & Geospatial Core
+* **FastAPI (Python 3.12) & Pydantic v2:** Asynchronous REST API layer enforcing strict input validation, multi-tenant organization isolation (`org_id` scoped across all database queries), and role-based access control.
+* **PostgreSQL 16 & PostGIS:** Spatial database storing field geometries as `geometry(Polygon, 4326)`, spatial indexing (`GIST`), multi-field bounding queries, and polygonized management zone boundaries.
+* **pystac-client:** SpatioTemporal Asset Catalog (STAC) client executing spatial queries against AWS Earth Search and Copernicus Data Space Ecosystem (CDSE) to discover recent low-cloud Sentinel-2 scenes.
+* **rioxarray & stackstac:** Lazy, windowed Cloud-Optimized GeoTIFF (COG) byte-range reads. Bounded strictly to field coordinates, eliminating the need to download 500MB+ full satellite granules.
+* **scikit-learn & numpy:** Unsupervised spatial clustering (`k-means`, k=3) executing raster-to-vector polygonization for automated field management zone generation.
+
+### Tiling & Asynchronous Infrastructure
+* **TiTiler (`rio-tiler`):** Dynamic tile server reading processed index COGs directly from cloud storage, serving XYZ raster tiles with on-the-fly colormaps and dynamic dynamic stretch rescaling.
+* **arq + Redis:** Asynchronous background job queue running long-running STAC downloads, cloud-masking calculations, and automated daily alert scans (`scan_for_alerts()`).
+* **Cloudflare R2 / AWS S3:** High-throughput object storage housing generated Cloud-Optimized GeoTIFFs (COGs) and analytical exports.
+* **Docker Compose:** Containerized orchestration ensuring parity between local development and cloud production deployments.
+
+---
+
+## The Geospatial Processing Pipeline
+
+Band math is straightforward; **pipeline correctness is where real-world systems succeed or fail**. Acreon's worker executes a deterministic 7-step pipeline for every field analysis:
+
+```text
+STAC Search ──► Windowed Read ──► Cloud Mask (SCL) ──► Index Math ──► Stats ──► k-means Zones ──► Dynamic COG
+ (<20% cloud)    (B04,B05,B08,SCL)  (s2cloudless cross)   (NDVI / NDRE)   (p10..p90)    (k=3 vector)     (TiTiler)
+```
+
+### 1. Scene Discovery & Selection (`geo/stac.py`)
+Queries STAC endpoints over the field's bounding box for candidate Sentinel-2 Level-2A (surface reflectance) scenes over a rolling 30-day window. Automatically filters and selects the scene with the lowest cloud cover under 20% (or widens to 90 days during persistent monsoon events).
+
+### 2. Windowed COG Reads (`geo/read.py`)
+Rather than downloading full 100km×100km satellite granules, the worker performs windowed HTTP range reads targeting only the exact geographic bounding box of the field for the required spectral bands:
+* **B04 (Red — 665 nm)**
+* **B05 (Red Edge 1 — 705 nm)**
+* **B08 (Near-Infrared / NIR — 842 nm)**
+* **SCL (Scene Classification Layer — 20m)**
+
+*Multi-tile UTM coordinate reference system (CRS) reprojections are handled explicitly to eliminate boundary seam artifacts.*
+
+### 3. Cloud Masking & Validity Verification (`geo/mask.py`)
+The pipeline filters out corrupted pixels using the Scene Classification Layer (SCL), purging:
+* Cloud shadows (Class 3)
+* Medium/high cloud probability (Classes 8 & 9)
+* Thin cirrus (Class 10)
+* Snow/ice (Class 11)
+
+Masked arrays are cross-checked with `s2cloudless` cloud probability masks. A **validity percentage** (`valid_pixels / total_aoi_pixels`) is computed. If validity drops below 15%, the analysis is flagged as `low_validity` and management zones are suppressed to prevent misleading the buyer.
+
+### 4. Spectral Index Derivation (`services/indices.py`)
+Computed exclusively over valid, non-masked pixels:
+* **NDVI (Normalized Difference Vegetation Index):**
+  - Formula: `(B08_NIR - B04_Red) / (B08_NIR + B04_Red)`
+  - *General biomass, leaf area index, and cellular plant vigor.*
+* **NDRE (Normalized Difference Red Edge):**
+  - Formula: `(B08_NIR - B05_RedEdge) / (B08_NIR + B05_RedEdge)`
+  - *Chlorophyll absorption proxy; penetrates deep into dense, closed crop canopies (e.g., mature rice/maize) where standard NDVI saturates.*
+
+### 5. Statistical Telemetry
+Calculates mean, median, min, max, 10th percentile (p10), 90th percentile (p90), and valid pixel count across the field.
+
+### 6. Management Zone Clustering (`services/zones.py`)
+Applies k-means clustering (k = 3) over the masked raster to segment the field into three distinct operational performance zones:
+* **Zone 1 (Underperforming / Stressed):** Priority sector requiring immediate physical scouting.
+* **Zone 2 (Moderate Baseline):** Standard canopy performance.
+* **Zone 3 (Vigorous Canopy):** High biomass / optimal cellular vigor.
+
+The clusters are vectorized into GeoJSON polygons, reprojected, and stored in PostGIS.
+
+### 7. Tiling & Cloud-Optimized GeoTIFF Generation (`geo/tiling.py`)
+Writes the final floating-point index array as a Cloud-Optimized GeoTIFF (COG) with internal overview pyramids. TiTiler serves these as XYZ raster tiles (`/tiles/<analysis_id>/<z>/<x>/<y>.png`) directly into MapLibre GL JS with dynamic color ramp shaders.
+
+---
+
+## Key Platform Features
+
+* **Portfolio-Level Risk Oversight:** Buyers monitor hundreds of supplier fields simultaneously from a unified screen, triaged automatically by relative vigor drops rather than inspecting individual fields in isolation.
+* **Interactive Field Boundary Onboarding:** Field managers can draw custom polygonal AOIs with `terra-draw` or upload standard GeoJSON/KML files, instantly initiating automated historical scene backfills.
+* **Multi-Layer Cartographic Switcher:** Real-time toggling between Sentinel-2 True Color, NDVI Relative Vigor, NDRE Chlorophyll, and Vectorized Management Zones.
+* **Multi-Pass Vigor Trajectory Tracking:** Compares current vegetation performance against regional historical baselines across the crop cycle to detect subtle anomalies weeks before harvest.
+* **Ground-Truth Calibration Loop:** Designed to integrate with field scouting reports and companion **IRIS IoT soil sensor hardware** to calibrate satellite anomaly detections over time.

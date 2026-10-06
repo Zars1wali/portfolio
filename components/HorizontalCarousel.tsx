@@ -37,7 +37,7 @@ const FEATURED: CarouselProject[] = [
     summary:
       "Satellite-based supply-chain risk monitoring for food buyers — up to 8 weeks of lead time on crop stress, flooding, and vigor drops, built on Sentinel-2 imagery and SAR radar.",
     stack: ["Sentinel-2", "SAR Radar", "NDVI/NDRE", "Python", "Next.js"],
-    image: "/images/crop_vigor_satellite.png",
+    image: "/images/portfolio_overview.png",
     role: "Co-Founder & COO",
   },
   {
