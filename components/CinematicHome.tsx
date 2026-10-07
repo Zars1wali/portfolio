@@ -17,7 +17,7 @@ import SceneIndicator from "@/components/SceneIndicator";
 import HorizontalCarousel from "@/components/HorizontalCarousel";
 import MagneticButton from "@/components/MagneticButton";
 import CounterAnimation from "@/components/CounterAnimation";
-import ToolsIUse from "@/components/ToolsIUse";
+import ToolsIUse, { TechStackView } from "@/components/ToolsIUse";
 
 /* ─── Hero chip orbit data ────────────────────────────────────────────────── */
 interface HeroChip {
@@ -670,68 +670,9 @@ export default function CinematicHome() {
             ))}
           </div>
 
-          {/* Skills grid */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-            gap: "16px",
-          }}>
-            {skillGroups.map((group) => (
-              <div
-                key={group.label}
-                className="skill-card-reveal"
-                style={{
-                  padding: "20px",
-                  borderRadius: "16px",
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(0,240,255,0.12)",
-                  boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
-                  transition: "border-color 0.3s, background 0.3s",
-                }}
-              >
-                <p style={{
-                  fontFamily: "var(--font-jetbrains), monospace",
-                  fontSize: "11px",
-                  color: "var(--color-cyan)",
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  marginBottom: "14px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}>
-                  <span style={{
-                    width: "6px", height: "6px", borderRadius: "50%",
-                    background: "var(--color-cyan)",
-                    boxShadow: "0 0 6px var(--color-cyan)",
-                    display: "inline-block",
-                  }} />
-                  {group.label}
-                </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                  {group.skills.map((skill) => (
-                    <span
-                      key={skill}
-                      style={{
-                        fontFamily: "var(--font-jetbrains), monospace",
-                        fontSize: "12px",
-                        color: "#E0F7FA",
-                        background: "rgba(0,240,255,0.06)",
-                        padding: "4px 10px",
-                        borderRadius: "6px",
-                        border: "1px solid rgba(0,240,255,0.2)",
-                        boxShadow: "0 0 8px rgba(0,240,255,0.08)",
-                        textShadow: "0 0 10px rgba(0,240,255,0.25)",
-                        transition: "all 0.2s",
-                        cursor: "default",
-                      }}
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
+          {/* Inverted Pyramid Tech Stack Showcase */}
+          <div className="skill-card-reveal" style={{ width: "100%", marginTop: "10px" }}>
+            <TechStackView />
           </div>
         </div>
       </CinematicScene>
