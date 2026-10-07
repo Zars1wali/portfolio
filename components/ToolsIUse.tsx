@@ -712,35 +712,11 @@ function ToolCard({
   );
 }
 
-/* ── Main Component ──────────────────────────────────────────────────────── */
-export default function ToolsIUse() {
-  const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+/* ── Standalone Tech Stack Inverted Pyramid View ──────────────────────────── */
+export function TechStackView({ isModal = false, onClose }: { isModal?: boolean; onClose?: () => void }) {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [hoveredTool, setHoveredTool] = useState<ToolItem | null>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", onKey, { passive: true });
-    document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
-
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [open]);
-
-  // Group tools into inverted pyramid rows
   const getDisplayRows = (): ToolItem[][] => {
     if (activeTab === "all") {
       // 10, 8, 7, 5, 4, 2 = 36 items
@@ -755,17 +731,9 @@ export default function ToolsIUse() {
     }
 
     const filtered = ALL_TOOLS.filter((t) => t.categoryKey === activeTab);
-    // Dynamic mini-pyramid for single category
-    if (filtered.length <= 4) {
-      return [filtered];
-    }
-    if (filtered.length === 5) {
-      return [filtered.slice(0, 3), filtered.slice(3, 5)];
-    }
-    if (filtered.length === 6) {
-      return [filtered.slice(0, 4), filtered.slice(4, 6)];
-    }
-    // 10 items (Cybersecurity)
+    if (filtered.length <= 4) return [filtered];
+    if (filtered.length === 5) return [filtered.slice(0, 3), filtered.slice(3, 5)];
+    if (filtered.length === 6) return [filtered.slice(0, 4), filtered.slice(4, 6)];
     return [
       filtered.slice(0, 4),
       filtered.slice(4, 7),
@@ -775,6 +743,140 @@ export default function ToolsIUse() {
   };
 
   const rows = getDisplayRows();
+
+  return (
+    <div className={`tools-showcase-window ${isModal ? "in-modal" : "embedded"}`}>
+      {/* Ambient Nebula Glow Behind Pyramid */}
+      <div className="tools-nebula-glow" aria-hidden="true" />
+
+      {/* 3D Wireframe Globe */}
+      <WireframeGlobe />
+
+      {/* Watermark TECH STACK Background Typography */}
+      <div className="techstack-watermark" aria-hidden="true">
+        TECH STACK
+      </div>
+
+      {/* Top Header Row with Category Filters & Close Button */}
+      <header className="tools-top-bar">
+        <div className="tools-header-meta">
+          <span className="status-pulse-dot" />
+          <span className="tools-header-title">// tools_i_use</span>
+          <span className="tools-header-count">({ALL_TOOLS.length} tools)</span>
+        </div>
+
+        {/* Filter Pills */}
+        <nav className="tools-nav-pills" aria-label="Tool Categories">
+          {FILTER_CATEGORIES.map((cat) => {
+            const isActive = activeTab === cat.id;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setActiveTab(cat.id)}
+                className={`pill-btn ${isActive ? "active" : ""}`}
+                style={{
+                  "--pill-accent": cat.accent,
+                } as CSSProperties}
+              >
+                <span
+                  className="pill-dot"
+                  style={{ background: cat.accent }}
+                />
+                {cat.label} ({cat.count})
+              </button>
+            );
+          })}
+        </nav>
+
+        {isModal && onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close dialog"
+            className="tools-close-btn"
+          >
+            ✕
+          </button>
+        )}
+      </header>
+
+      {/* Center Stage: The Inverted Pyramid of Tech Cards */}
+      <main className="pyramid-stage">
+        <div className="pyramid-container">
+          {rows.map((row, rowIdx) => (
+            <div
+              key={rowIdx}
+              className="pyramid-row"
+              style={{
+                animationDelay: `${rowIdx * 45}ms`,
+              }}
+            >
+              {row.map((tool) => (
+                <ToolCard
+                  key={tool.id}
+                  tool={tool}
+                  onHover={setHoveredTool}
+                  onLeave={() => setHoveredTool(null)}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      </main>
+
+      {/* Bottom Interactive Recruiter HUD / Status Bar */}
+      <footer className="tools-status-bar">
+        {hoveredTool ? (
+          <div className="status-tool-info">
+            <span
+              className="status-badge"
+              style={{
+                color: hoveredTool.color,
+                borderColor: `${hoveredTool.color}55`,
+                background: `${hoveredTool.color}15`,
+              }}
+            >
+              {hoveredTool.category}
+            </span>
+            <strong className="status-name">{hoveredTool.name}</strong>
+            <span className="status-sep">—</span>
+            <span className="status-desc">{hoveredTool.description}</span>
+          </div>
+        ) : (
+          <div className="status-placeholder">
+            <span className="status-pulse-dot" />
+            <span>Hover or tap any tool to inspect architecture role, workflows &amp; systems context</span>
+          </div>
+        )}
+      </footer>
+    </div>
+  );
+}
+
+/* ── Main Component (Hero Trigger Button + Modal) ────────────────────────── */
+export default function ToolsIUse() {
+  const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey, { passive: true });
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   const modalContent = open ? (
     <div
@@ -787,111 +889,9 @@ export default function ToolsIUse() {
       <div
         role="document"
         onClick={(e) => e.stopPropagation()}
-        className="tools-showcase-window"
+        style={{ width: "min(1200px, 100%)" }}
       >
-        {/* Ambient Nebula Glow Behind Pyramid */}
-        <div className="tools-nebula-glow" aria-hidden="true" />
-
-        {/* 3D Wireframe Globe */}
-        <WireframeGlobe />
-
-        {/* Watermark TECH STACK Background Typography */}
-        <div className="techstack-watermark" aria-hidden="true">
-          TECH STACK
-        </div>
-
-        {/* Top Header Row with Category Filters & Close Button */}
-        <header className="tools-top-bar">
-          <div className="tools-header-meta">
-            <span className="status-pulse-dot" />
-            <span className="tools-header-title">// tools_i_use</span>
-            <span className="tools-header-count">({ALL_TOOLS.length} tools)</span>
-          </div>
-
-          {/* Filter Pills */}
-          <nav className="tools-nav-pills" aria-label="Tool Categories">
-            {FILTER_CATEGORIES.map((cat) => {
-              const isActive = activeTab === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => setActiveTab(cat.id)}
-                  className={`pill-btn ${isActive ? "active" : ""}`}
-                  style={{
-                    "--pill-accent": cat.accent,
-                  } as CSSProperties}
-                >
-                  <span
-                    className="pill-dot"
-                    style={{ background: cat.accent }}
-                  />
-                  {cat.label} ({cat.count})
-                </button>
-              );
-            })}
-          </nav>
-
-          <button
-            ref={closeRef}
-            type="button"
-            onClick={() => setOpen(false)}
-            aria-label="Close dialog"
-            className="tools-close-btn"
-          >
-            ✕
-          </button>
-        </header>
-
-        {/* Center Stage: The Inverted Pyramid of Tech Cards */}
-        <main className="pyramid-stage">
-          <div className="pyramid-container">
-            {rows.map((row, rowIdx) => (
-              <div
-                key={rowIdx}
-                className="pyramid-row"
-                style={{
-                  animationDelay: `${rowIdx * 45}ms`,
-                }}
-              >
-                {row.map((tool) => (
-                  <ToolCard
-                    key={tool.id}
-                    tool={tool}
-                    onHover={setHoveredTool}
-                    onLeave={() => setHoveredTool(null)}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-        </main>
-
-        {/* Bottom Interactive Recruiter HUD / Status Bar */}
-        <footer className="tools-status-bar">
-          {hoveredTool ? (
-            <div className="status-tool-info">
-              <span
-                className="status-badge"
-                style={{
-                  color: hoveredTool.color,
-                  borderColor: `${hoveredTool.color}55`,
-                  background: `${hoveredTool.color}15`,
-                }}
-              >
-                {hoveredTool.category}
-              </span>
-              <strong className="status-name">{hoveredTool.name}</strong>
-              <span className="status-sep">—</span>
-              <span className="status-desc">{hoveredTool.description}</span>
-            </div>
-          ) : (
-            <div className="status-placeholder">
-              <span className="status-pulse-dot" />
-              <span>Hover or tap any tool to inspect architecture role, workflows &amp; systems context</span>
-            </div>
-          )}
-        </footer>
+        <TechStackView isModal onClose={() => setOpen(false)} />
       </div>
     </div>
   ) : null;
@@ -900,7 +900,14 @@ export default function ToolsIUse() {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          const el = document.getElementById("scene-skills");
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth" });
+          } else {
+            setOpen(true);
+          }
+        }}
         aria-haspopup="dialog"
         className="tools-trigger"
         style={{
@@ -945,7 +952,7 @@ export default function ToolsIUse() {
         Tools I use
       </button>
 
-      {/* Render via Portal so it mounts cleanly into document.body */}
+      {/* Render via Portal so modal is free from parent transforms */}
       {mounted && typeof document !== "undefined" && modalContent
         ? createPortal(modalContent, document.body)
         : null}
@@ -989,9 +996,7 @@ export default function ToolsIUse() {
 
         .tools-showcase-window {
           position: relative;
-          width: min(1200px, 100%);
-          max-height: min(92vh, 880px);
-          height: auto;
+          width: 100%;
           display: flex;
           flex-direction: column;
           background: linear-gradient(180deg, #0b090f 0%, #07060a 100%);
@@ -1002,7 +1007,16 @@ export default function ToolsIUse() {
             0 0 50px -10px rgba(168, 124, 255, 0.22),
             inset 0 1px 0 rgba(255, 255, 255, 0.12);
           overflow: hidden;
+        }
+
+        .tools-showcase-window.in-modal {
+          max-height: min(92vh, 880px);
           animation: toolsCardScaleIn 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .tools-showcase-window.embedded {
+          min-height: 580px;
+          margin-top: 10px;
         }
 
         /* ── Ambient Glow & 3D Globe ── */
