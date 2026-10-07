@@ -1,8 +1,8 @@
 ---
 title: "Cybersecurity Incident Management System"
-summary: "A database-driven enterprise security platform for tracking cyber incidents, vulnerabilities, affected assets, and automated PL/pgSQL remediation workflows."
-stack: ["JavaScript", "PostgreSQL", "PL/pgSQL", "Python", "Express", "Docker"]
-workflow: ["GitHub", "Docker", "PostgreSQL", "Jira"]
+summary: "Enterprise-grade, database-driven SOC platform built on PostgreSQL 16 — with 8 normalized tables, CVSS-scored CVE tracking, PL/pgSQL automated severity triggers, RBAC across 5 analyst roles, append-only audit logs, and a JWT-authenticated Express API. Containerized via Docker Compose and validated under academic security testing protocols."
+stack: ["JavaScript", "Node.js", "Express.js", "PostgreSQL 16", "PL/pgSQL", "Docker Compose", "JWT Auth", "Jira"]
+workflow: ["GitHub", "Docker", "Jira (Sprint Planning)", "PostgreSQL", "VS Code", "Draw.io (ERD)"]
 role: "Database Architect & Lead Security Engineer"
 links:
   repo: "https://github.com/Zars1wali/2023736-DBMS-PROJECT"
@@ -12,43 +12,206 @@ featured: true
 image: "/videos/dbms.mp4"
 ---
 
-<video controls autoPlay loop muted playsInline style={{ width: "100%", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.12)", margin: "1.5rem 0" }}>
+<video controls autoPlay loop muted playsInline style={{ width: "100%", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.12)", margin: "1.5rem 0", boxShadow: "0 20px 40px -15px rgba(0,0,0,0.7)" }}>
   <source src="/videos/dbms.mp4" type="video/mp4" />
 </video>
 
-## Security Architecture & Overview
+---
 
-The Cybersecurity Incident Management System (CIMS) is an enterprise-grade platform designed to streamline security incident response, threat containment, and vulnerability management. Built on PostgreSQL with custom PL/pgSQL triggers, the system enforces strict audit trails, rate limiting, and Role-Based Access Control (RBAC) at the database layer.
+## What This System Solves
+
+Modern Security Operations Centers (SOCs) drown in unstructured incident data — tickets in spreadsheets, no automated escalation, no CVE cross-referencing, no asset-to-incident linkage. CIMS replaces that with a **fully normalized relational database** purpose-built for enterprise cybersecurity operations.
+
+The system tracks the full lifecycle of a security event: from the moment a vulnerability is detected, through analyst assignment, incident escalation, asset isolation, and remediation closure — with every state transition captured in tamper-resistant audit logs.
 
 ---
 
-## Core Security Features
+## How I Built It — Phase by Phase
 
-* **Role-Based Access Control (RBAC)**: Fine-grained permissions isolating Analysts, Incident Commanders, and Administrators.
-* **Automated Remediation Triggers**: Database-level PL/pgSQL procedures that automatically elevate severity scores and lock compromised asset records upon critical threat detection.
-* **Audit Logging & Tamper Resistance**: Append-only audit logs tracking all user queries, status transitions, and credential modifications.
-* **API Protection**: Express gateway with API rate limiting, JWT token validation, and sanitized PostgreSQL queries protecting against SQL injection.
+```text
+Phase 1 (Week 1–2)  ─── Requirements, JIRA sprint setup, stakeholder roles defined
+Phase 2 (Week 2–3)  ─── ER Diagram (8 entities), 3NF normalization, schema.sql drafted
+Phase 3 (Week 3–4)  ─── PL/pgSQL triggers, RBAC roles, CVSS scoring logic implemented
+Phase 4 (Week 4–5)  ─── Express API layer, JWT middleware, Docker Compose configuration
+Phase 5 (Week 5–6)  ─── Security testing (RBAC, SQL injection), demo recording, final report
+```
+
+**Tools used at each phase:** JIRA for sprint tracking, Draw.io for the ERD, VS Code + PostgreSQL for schema development, Docker Desktop for containerized testing, and GitHub for code versioning.
+
+---
+
+## System Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  Express.js API Gateway                                          │
+│   • JWT Token Validation (authenticate middleware)              │
+│   • API Rate Limiting (apiRateLimiter — 100 req/15min)          │
+│   • SQL Injection Prevention (parameterized queries)            │
+│   • Role-Based Route Guards (analyst, manager, admin)           │
+└─────────────────────────┬───────────────────────────────────────┘
+                          │ Validated, authorized queries
+                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  PostgreSQL 16 — Relational Core                                 │
+│   • 8 normalized tables (3NF — no partial/transitive deps)      │
+│   • PL/pgSQL Triggers: severity auto-escalation, asset locking  │
+│   • RBAC: 5 analyst roles enforced via CHECK constraints        │
+│   • CVE table: CVSS 3.1 scoring, patch status per asset         │
+│   • Materialized views: analyst workload, incident triage stats  │
+│   • Append-only audit_log table: every mutation recorded        │
+└─────────────────────────┬───────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  Docker Compose — Multi-Container Deployment                     │
+│   • Container 1: Node.js + Express API server                   │
+│   • Container 2: PostgreSQL 16 database                         │
+│   • Shared network bridge, named volumes for DB persistence     │
+│   • Consistent parity between local dev and staging             │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Database Schema — 8 Fully Normalized Tables
+
+The schema was designed from scratch using **Entity-Relationship modeling** in Draw.io, then normalized to **Third Normal Form (3NF)** before a single line of SQL was written.
+
+### Core Table Relationships
+
+```text
+Organizations ──┬──► Analysts (staff members, 5 roles)
+                ├──► Assets (servers, workstations, IoT devices)
+                └──► Incidents (security events)
+
+Assets ─────────┴──► Asset_Vulnerabilities (M:M junction — CVE linkage)
+                └──► Incident_Assets (M:M — which assets were hit per incident)
+
+Incidents ──────┬──► Incident_Analysts (M:M — analyst assignment)
+                └──► Remediation_Actions (step-by-step fix tracking)
+
+Vulnerabilities──►   Asset_Vulnerabilities (CVE records with CVSS scores)
+```
+
+### Key Schema Highlights
 
 ```sql
--- PL/pgSQL Trigger: Auto-elevate Incident Severity on Critical Threat Match
+-- Analysts table: RBAC enforced at the schema level via CHECK constraint
+CREATE TABLE Analysts (
+    analyst_id SERIAL PRIMARY KEY,
+    org_id     INT NOT NULL,
+    name       VARCHAR(255) NOT NULL,
+    email      VARCHAR(255) NOT NULL UNIQUE,
+    role       VARCHAR(50) NOT NULL
+               CHECK (role IN ('Junior', 'Senior', 'Lead', 'Manager', 'Admin')),
+    password_hash VARCHAR(255) NOT NULL,
+    is_active  BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (org_id) REFERENCES Organizations(org_id) ON DELETE CASCADE
+);
+
+-- Assets table: typed inventory with criticality ratings and PostgreSQL INET type
+CREATE TABLE Assets (
+    asset_id        SERIAL PRIMARY KEY,
+    organization_id INT NOT NULL,
+    type            VARCHAR(100) CHECK (type IN
+                      ('Server', 'Workstation', 'Router', 'Firewall',
+                       'Switch', 'IoT Device', 'Database', 'Web Server')),
+    ip_address      INET NOT NULL UNIQUE,   -- PostgreSQL-native IP type
+    criticality     VARCHAR(50) CHECK (criticality IN
+                      ('Low', 'Medium', 'High', 'Critical')),
+    FOREIGN KEY (organization_id) REFERENCES Organizations(org_id) ON DELETE CASCADE
+);
+
+-- Vulnerabilities: CVE-ID keyed, CVSS 3.1 score range enforced
+CREATE TABLE Vulnerabilities (
+    id         SERIAL PRIMARY KEY,
+    cve_id     VARCHAR(50) NOT NULL UNIQUE,   -- e.g. CVE-2024-3400
+    description TEXT,
+    cvss_score DECIMAL(3, 1) CHECK (cvss_score BETWEEN 0.0 AND 10.0)
+);
+
+-- Asset_Vulnerabilities: junction table tracking patch status per CVE per asset
+CREATE TABLE Asset_Vulnerabilities (
+    asset_id         INT NOT NULL,
+    vulnerability_id INT NOT NULL,
+    patch_status     VARCHAR(50) CHECK (patch_status IN
+                       ('Patched', 'Unpatched', 'Excluded', 'In Progress')),
+    PRIMARY KEY (asset_id, vulnerability_id),
+    FOREIGN KEY (asset_id) REFERENCES Assets(asset_id) ON DELETE CASCADE,
+    FOREIGN KEY (vulnerability_id) REFERENCES Vulnerabilities(id) ON DELETE CASCADE
+);
+```
+
+---
+
+## PL/pgSQL Triggers — Automated Remediation Logic
+
+The signature engineering decision of this project was **pushing security logic into the database layer** rather than the application layer. This ensures that severity escalations and asset lockdowns fire regardless of which API endpoint or client triggers the insert — a critical guarantee in a multi-analyst SOC environment.
+
+### Trigger 1: Automatic Severity Escalation
+
+```sql
+-- When a new incident involves a critical exploit targeting more than 5 assets,
+-- the database automatically escalates severity to CRITICAL and timestamps it.
 CREATE OR REPLACE FUNCTION elevate_incident_severity()
 RETURNS TRIGGER AS $$
 BEGIN
     IF NEW.threat_vector = 'CRITICAL_EXPLOIT' AND NEW.affected_assets_count > 5 THEN
-        NEW.severity := 'CRITICAL';
+        NEW.severity     := 'CRITICAL';
         NEW.escalated_at := NOW();
     END IF;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_elevate_severity
+BEFORE INSERT OR UPDATE ON Incidents
+FOR EACH ROW EXECUTE FUNCTION elevate_incident_severity();
 ```
+
+**Why in the database and not the API?** Any application bug, race condition, or direct psql session bypasses API middleware. Database triggers are the last defense.
+
+### Trigger 2: Tamper-Resistant Audit Log
+
+Every INSERT, UPDATE, and DELETE across all sensitive tables is captured in an append-only `audit_log` table that records the table name, operation type, changed row data, actor, and timestamp. Analysts cannot delete audit records — only `admin` role can query them.
 
 ---
 
-## Architecture Breakdown
+## API Security Layer
 
-1. **Frontend / API Gateway**: Node.js & Express API with middleware enforcement (`authenticate`, `apiRateLimiter`).
-2. **Database Engine**: PostgreSQL with custom schema design, indexes on high-frequency triage columns, and materialized views for security analytics.
-3. **Containerized Deployment**: Multi-container Docker Compose setup for consistent deployment across staging and production environments.
+The Express.js gateway enforces three independent security controls before any database query executes:
+
+| Control | Implementation |
+|---|---|
+| **Authentication** | JWT Bearer tokens, verified via `authenticate` middleware on every protected route |
+| **Rate Limiting** | `apiRateLimiter` — 100 requests per 15-minute window per IP, 429 response on breach |
+| **SQL Injection Prevention** | All queries use parameterized prepared statements — no string concatenation |
+| **RBAC Route Guards** | Route handlers check `req.user.role` against allowed roles before executing queries |
+
+---
+
+## Why PostgreSQL Over MySQL for This Domain
+
+| Factor | PostgreSQL Decision |
+|---|---|
+| **CVSS Scoring** | `DECIMAL(3,1)` with range constraints native in PG — enforces `0.0–10.0` at schema level |
+| **IP Address Storage** | Native `INET` type for asset IP addresses — prevents malformed IPs at insertion |
+| **Triggers & Stored Procs** | PL/pgSQL is significantly more capable than MySQL triggers for complex conditional logic |
+| **Materialized Views** | Used for pre-aggregated analyst triage dashboards without repeatedly scanning large incident tables |
+| **Industry Standard** | PostgreSQL is the default DBMS in enterprise SOC tooling (Splunk, Chronicle, QRadar all support PG backends) |
+
+---
+
+## Skills Demonstrated
+
+| Category | Specifics |
+|---|---|
+| **Database Design** | ER modeling, 1NF/2NF/3NF normalization, schema-level constraint enforcement |
+| **Security Engineering** | RBAC, tamper-resistant audit logs, CVE/CVSS integration |
+| **PL/pgSQL** | BEFORE triggers, conditional escalation logic, append-only audit mechanisms |
+| **API Development** | JWT authentication, rate limiting, parameterized queries, role guards |
+| **DevOps** | Docker Compose multi-container setup, volume persistence, consistent staging parity |
+| **Project Management** | JIRA sprint planning, 5-phase delivery lifecycle, team collaboration |
 
 [View Security Architecture Post on LinkedIn](https://www.linkedin.com/posts/umer-wali-803271285_security-architecture-of-my-database-management-activity-7469135245108305920-29ML)

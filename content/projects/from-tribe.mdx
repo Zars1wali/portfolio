@@ -1,28 +1,27 @@
 ---
 title: "From Tribe"
-summary: "A curated multi-vendor marketplace connecting independent artisan and craft brands with EU customers — built on a Next.js storefront, Medusa.js commerce engine, and a flat 13% commission model that replaces ad spend with quality discovery."
+summary: "A live multi-vendor artisan marketplace — registered as Fromtribe OÜ in Tallinn, Estonia — built on Next.js 14, Medusa.js headless commerce, Stripe Connect multi-vendor payouts, and DPD/InPost EU logistics. I led a 3-developer team under senior cloud architect Nuno Ribeiro, managing hiring, SRS docs, design reviews, and feature iteration from zero to live deployment."
 stack:
-  - "Next.js 14"
+  - "Next.js 14 (App Router)"
   - "TypeScript"
-  - "Medusa.js"
+  - "Medusa.js (Headless Commerce)"
   - "PostgreSQL"
-  - "Redis"
-  - "Stripe"
-  - "Tailwind CSS"
-  - "Vercel"
-  - "Cloudflare"
-  - "SendGrid"
+  - "Redis (Session Cache)"
+  - "Stripe Connect (Multi-Vendor Payouts)"
   - "Prisma ORM"
-  - "REST APIs"
+  - "Vercel (Edge Deployment + ISR)"
+  - "Cloudflare (DNS + DDoS)"
+  - "SendGrid (Transactional Email)"
+  - "Tailwind CSS"
 workflow:
   - "GitHub"
   - "Vercel"
   - "Figma"
-  - "Notion"
+  - "Notion (SRS Docs)"
   - "VS Code"
   - "ChatGPT (copy & UX refinement)"
   - "Midjourney (brand visuals)"
-role: "Led a 3-developer build team, working under mentor and lead architect Nuno Ribeiro (senior cloud architect)"
+role: "Engineering Lead & COO — hired the development team, managed iteration under Nuno Ribeiro (senior cloud architect), owned SRS documentation, design reviews, and product direction"
 links:
   live: "https://www.fromtribe.com"
 year: 2025
@@ -30,52 +29,132 @@ featured: true
 image: "/images/from_tribe_card_cover.jpg"
 ---
 
-## Project Overview
+## What From Tribe Is
 
-From Tribe is a vendor-first multi-vendor marketplace for independent EU artisan and craft brands. The core pitch: a flat **13% commission per transaction**, zero listing fees, zero forced discounting, and organic discovery driven by quality rather than ad budget. Registered as **Fromtribe OÜ** in Tallinn, Estonia.
+From Tribe is a **live, production multi-vendor marketplace** for independent EU artisan and craft brands. It targets a real gap: small and medium creative brands (fashion, accessories, home, lifestyle) who are priced out of visibility on Amazon and Etsy by ad auction dynamics.
 
-The storefront is built on **Next.js 14** with the App Router and server components for fast initial loads and edge-optimized rendering. Commerce logic lives in a **Medusa.js** backend — product catalog, variant management, multi-vendor splits, checkout, and payout routing all run through Medusa's extensible architecture. A separate **PostgreSQL** database (with **Prisma ORM**) holds vendor profiles, application state, and sales analytics. **Redis** caches active session carts and frequently queried product feeds.
+The model: **13% commission per transaction, zero listing fees, zero forced discounting, zero ad spend required**. Discovery is organic — quality and editorial curation, not budget. The company is registered as **Fromtribe OÜ** in Tallinn, Estonia, with EU statutory consumer protection (14-day returns), DPD & InPost tracked delivery, and multi-currency (EUR primary).
 
----
-
-## Architecture & Tech Stack
-
-### Frontend
-- **Next.js 14** — App Router, React Server Components, dynamic routing per vendor storefront
-- **TypeScript** — end-to-end type safety across API contracts and component props
-- **Tailwind CSS** — utility-first design system with a custom editorial theme (dark luxe + lime accent `#D8FC02`)
-- **Vercel** — edge deployment with ISR (Incremental Static Regeneration) for product pages
-
-### Backend & Commerce
-- **Medusa.js** — headless commerce engine: multi-vendor order routing, fulfillment, returns, and payout splitting
-- **PostgreSQL + Prisma** — relational store for products, vendors, orders, reviews
-- **Redis** — session cache, rate-limiting, cart persistence
-- **Stripe** — payment processing and vendor payout automation via Connect
-
-### Infrastructure & Integrations
-- **Cloudflare** — DNS, DDoS protection, edge caching for static assets
-- **SendGrid** — transactional emails (order confirmations, vendor notifications, payout summaries)
-- **REST API** — custom endpoints for vendor onboarding flow, application review, and admin dashboard
-
-### AI & Design Tools
-- **ChatGPT** — product copy refinement, FAQ generation, customer communication templates
-- **Midjourney** — brand visual direction, hero imagery, look-book concept art
-- **Figma** — UI/UX prototyping, design system tokens, responsive layout planning
+**The site is live at [fromtribe.com](https://www.fromtribe.com)** — Next.js 14 App Router confirmed from production HTML headers and chunk manifests.
 
 ---
 
-## Key Features
+## How I Built It — Phase by Phase
 
-* **Vendor Onboarding Flow** — Application form → 3–5 day review → automated approval/rejection emails → guided product upload wizard
-* **Multi-vendor Checkout** — Single cart across vendors, split payment routing, per-vendor fulfillment tracking
-* **Organic Discovery** — Curated editorial drops, no promoted listings, ranked by engagement not spend
-* **Admin Dashboard** — Vendor management, commission tracking, order oversight, payout scheduling
-* **Currency & Language** — EUR primary, multi-language groundwork (EN/DE/FR scaffolded)
+```text
+Phase 1 (Month 1)  ─── Concept, business registration (Fromtribe OÜ, Estonia), SRS documentation
+Phase 2 (Month 1–2) ── Hired 2 developers from personal network, onboarded under Nuno Ribeiro
+Phase 3 (Month 2–3) ── Commerce architecture decisions: Medusa.js vs Shopify vs WooCommerce
+Phase 4 (Month 3–4) ── Frontend (Next.js 14), Medusa backend, Stripe Connect payout routing
+Phase 5 (Month 4–5) ── Vendor onboarding flow, multi-language groundwork (EN/DE/FR)
+Phase 6 (Month 5–6) ── Cloudflare CDN, SendGrid transactional emails, Vercel Edge deployment
+Phase 7 (Live)     ─── DPD & InPost delivery integrations, Google Analytics (G-FTRIBE2026), ISR
+```
+
+**My specific contributions:** Wrote the SRS (Software Requirements Specification) document that the team built from. Led weekly design reviews with Nuno Ribeiro. Hired both developers from my personal network and kept the team aligned through Figma mockup reviews, Notion docs, and iterative feedback sessions.
+
+---
+
+## The Core Architecture Decision: Why Medusa.js Over Shopify
+
+This was the biggest technical decision of the project, and it was made in **Phase 3** after evaluating three options:
+
+| Platform | What It Offers | Why We Rejected It |
+|---|---|---|
+| **Shopify** | Mature ecosystem, low setup overhead | $0.15–0.30 per transaction fee on top of Stripe cuts margin. No true multi-vendor native support — requires expensive third-party apps. Zero control over checkout UX and data. |
+| **WooCommerce** | WordPress ecosystem, cheap | PHP stack — incompatible with our Next.js TypeScript architecture. Monolithic — no headless support for custom storefront. |
+| **Medusa.js** ✅ | Open-source headless commerce engine | Full control over data, checkout, and payout logic. Multi-vendor order routing is natively extensible. Node.js — aligns with our TypeScript stack. No per-transaction platform fees. |
+
+**Nuno's architecture guidance:** Medusa's plugin system allowed us to implement custom vendor payout splitting without rebuilding Stripe Connect from scratch. The headless pattern meant our Next.js frontend could have full editorial control — dynamic ISR for product pages, React Server Components for performance.
+
+---
+
+## System Architecture
+
+```text
+┌────────────────────────────────────────────────────────────────────┐
+│  Next.js 14 Storefront (Vercel Edge — ISR + React Server Comps)   │
+│   • Dynamic vendor storefronts, editorial drops                    │
+│   • Multi-currency display (EUR primary)                           │
+│   • /become-a-vendor onboarding flow                               │
+│   • Multi-language scaffolding: EN / DE / FR                       │
+└──────────────────────────┬─────────────────────────────────────────┘
+                           │ REST API (Bearer Auth)
+                           ▼
+┌────────────────────────────────────────────────────────────────────┐
+│  Medusa.js Commerce Engine (Node.js)                               │
+│   • Product catalog, variants, multi-vendor order routing          │
+│   • Checkout, cart, fulfillment, returns management                │
+│   • Vendor payout splitting (Stripe Connect under the hood)        │
+│   • Custom plugins: vendor application review, commission calc     │
+└────────┬─────────────────┬──────────────────────────────┬──────────┘
+         │                 │                              │
+         ▼                 ▼                              ▼
+┌──────────────┐  ┌────────────────────┐     ┌──────────────────────┐
+│ PostgreSQL   │  │ Redis              │     │ Stripe Connect       │
+│ + Prisma ORM │  │ Session cache,     │     │ Vendor onboarding,   │
+│ Products,    │  │ rate limiting,     │     │ payout splits,       │
+│ vendors,     │  │ cart persistence   │     │ per-transaction      │
+│ orders,      │  └────────────────────┘     │ commission routing   │
+│ reviews      │                             └──────────────────────┘
+└──────────────┘
+         │
+         ▼
+┌────────────────────────────────────────────────────────────────────┐
+│  Infrastructure & Integrations                                     │
+│   • Cloudflare: DNS, DDoS protection, static asset edge caching   │
+│   • SendGrid: Order confirmations, vendor notifications, payouts   │
+│   • DPD + InPost: Tracked EU delivery with label generation        │
+│   • Vercel: Edge deployment, preview branches, ISR revalidation    │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Vendor Payout Architecture (Stripe Connect)
+
+This was the most technically complex piece. When a customer buys from multiple vendors in one cart:
+
+1. **Single Stripe PaymentIntent** captures the full cart amount.
+2. Medusa's order routing splits the order into **per-vendor sub-orders**.
+3. Each vendor's Stripe Connect account receives their portion minus the **13% platform commission**, automatically routed via Stripe Transfer API.
+4. The platform's Stripe account retains the commission.
+5. **SendGrid** fires payout confirmation emails to each vendor with their per-order breakdown.
+
+This eliminated the need for any manual commission accounting — every payout is automatic, auditable, and reconcilable from the Stripe dashboard.
+
+---
+
+## My Role — Engineering Leadership
+
+I was not a passive product manager. My direct contributions:
+
+- **Hired both developers** from my personal network. Screened candidates on their Next.js and Node.js depth, and their ability to work within Medusa's plugin architecture.
+- **Wrote the SRS document** that defined all functional requirements, user roles (Customer, Vendor, Admin), non-functional requirements (EU GDPR compliance, 14-day return policy), and API contracts.
+- **Managed design reviews with Nuno Ribeiro**, translating his cloud architecture decisions into actionable sprint tickets in Notion.
+- **Ran weekly iteration reviews**: Figma mockup reviews, API contract validation, UX feedback from real vendor applicants.
+- **Product direction**: Defined the 13% commission model, the editorial curation approach (no promoted listings), and the multi-language go-to-market order (EN → DE → FR).
+
+---
+
+## Live Platform Features
+
+| Feature | Implementation |
+|---|---|
+| **Vendor Onboarding** | Application form → 3–5 day review → automated approval/rejection emails (SendGrid) → guided product upload wizard |
+| **Multi-Vendor Checkout** | Single cart across vendors, automatic split payment routing via Stripe Connect |
+| **Editorial Discovery** | Curated drops ranked by engagement, not ad spend |
+| **EU Consumer Protection** | 14-day statutory returns, GDPR-compliant data handling |
+| **Logistics** | DPD & InPost EU tracked delivery with label generation |
+| **Multi-Language** | EN primary, DE/FR scaffolded and ready for copy onboarding |
+| **Admin Dashboard** | Vendor management, commission tracking, order oversight, payout scheduling |
 
 ---
 
 ## Business Context
 
-The marketplace targets a gap in the EU market: independent brands (fashion, accessories, home, lifestyle) who are priced out of visibility on Amazon and Etsy by ad auction dynamics. From Tribe's value prop is **community amplification** — a tribe of curated brands cross-promoting each other organically rather than competing for ad impressions.
+The marketplace targets independent brands priced out of visibility on Amazon and Etsy by ad auction dynamics. From Tribe's core value: a flat 13% commission with **zero ad tax** — quality and editorial curation drive discovery, not marketing spend.
 
-No public repository — closed-source, built with a small team.
+Registered as **Fromtribe OÜ** in Tallinn, Estonia — EU-regulated commerce entity with full statutory consumer protection compliance.
+
+No public repository — closed-source commercial codebase.
