@@ -99,7 +99,9 @@ export default async function ProjectDetailPage({
     notFound();
   }
 
-  const hasLinks = meta.links?.repo || meta.links?.live;
+  const hasLinks = Boolean(
+    meta.links?.repo || meta.links?.live || meta.links?.docs
+  );
   const hasBody = content.trim().length > 0;
 
   return (
@@ -273,6 +275,9 @@ export default async function ProjectDetailPage({
             )}
             {meta.links?.live && (
               <LinkButton href={meta.links.live} label="Live Demo" />
+            )}
+            {meta.links?.docs && (
+              <LinkButton href={meta.links.docs} label="SRS Document" />
             )}
           </div>
         )}

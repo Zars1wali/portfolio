@@ -27,6 +27,7 @@ export interface ProjectMeta {
   links?: {
     repo?: string;
     live?: string;
+    docs?: string;
   };
   year: number;
   featured: boolean;
