@@ -77,7 +77,7 @@ const GLYPHS: Record<string, Glyph> = {
   },
 };
 
-/* ── Custom official brand SVG marks (not present in simple-icons) ───────── */
+/* ── Custom official brand SVG marks ─────────────────────────────────────── */
 interface BrandSvg {
   viewBox: string;
   paths: { d: string; fill: string }[];
@@ -125,112 +125,8 @@ const OPENAI_MARK: BrandSvg = {
   ],
 };
 
-/* ── Tool + category data ────────────────────────────────────────────────── */
-interface Tool {
-  name: string;
-  color: string;
-  icon?: SimpleIcon;
-  svg?: BrandSvg;
-  office?: boolean;
-  glyph?: string;
-}
-interface ToolCategory {
-  id: string;
-  title: string;
-  accent: string;
-  tools: Tool[];
-}
-
-const CYBER_RED = "#EF4444";
-const CYBER_SOFT = "#F87171";
-
-const CATEGORIES: ToolCategory[] = [
-  {
-    id: "ai",
-    title: "AI",
-    accent: "#8B7CF6",
-    tools: [
-      { name: "Google Antigravity", color: "#FFFFFF", svg: ANTIGRAVITY_MARK },
-      { name: "Claude", color: "#D97757", icon: siAnthropic },
-      { name: "ChatGPT", color: "#10A37F", svg: OPENAI_MARK },
-      { name: "KIMI", color: "#0058C6", icon: siKimi },
-      { name: "OpenRouter", color: siOpenrouter.hex, icon: siOpenrouter },
-      { name: "LangChain", color: "#FFFFFF", icon: siLangchain },
-    ],
-  },
-  {
-    id: "software",
-    title: "Software",
-    accent: "#3B82F6",
-    tools: [
-      { name: "Microsoft Office", color: "#F25022", office: true },
-      { name: "Google Chronicle", color: siGooglechronicle.hex, icon: siGooglechronicle },
-      { name: "PostgreSQL", color: "#336791", icon: siPostgresql },
-      { name: "pgAdmin", color: "#41A0C9", glyph: "database" },
-      { name: "Visual Studio", color: "#6c33af", svg: VISUAL_STUDIO_MARK },
-      { name: "TryHackMe", color: "#FFFFFF", icon: siTryhackme },
-    ],
-  },
-  {
-    id: "programming",
-    title: "Programming",
-    accent: "#34D399",
-    tools: [
-      { name: "C++", color: "#00599C", icon: siCplusplus },
-      { name: "Python", color: "#3776AB", icon: siPython },
-      { name: "MySQL", color: "#4479A1", icon: siMysql },
-      { name: "Linux CLI", color: "#FCC624", icon: siLinux },
-    ],
-  },
-  {
-    id: "webdev",
-    title: "Web Development",
-    accent: "#61DAFB",
-    tools: [
-      { name: "Next.js", color: "#FFFFFF", icon: siNextdotjs },
-      { name: "Express", color: "#FFFFFF", icon: siExpress },
-      { name: "React", color: "#61DAFB", icon: siReact },
-      { name: "Tailwind CSS", color: "#06B6D4", icon: siTailwindcss },
-      { name: "CSS3", color: "#1572B6", svg: CSS3_MARK },
-    ],
-  },
-  {
-    id: "cybersecurity",
-    title: "Cybersecurity",
-    accent: CYBER_RED,
-    tools: [
-      { name: "OSINT", color: CYBER_SOFT, glyph: "search" },
-      { name: "Network Security", color: CYBER_SOFT, glyph: "shield" },
-      { name: "Google Chronicle (SOAR)", color: siGooglechronicle.hex, icon: siGooglechronicle },
-      { name: "Malware Analysis", color: CYBER_SOFT, glyph: "bug" },
-      { name: "Kali Linux", color: "#557C94", icon: siKalilinux },
-      { name: "Nmap", color: "#22C55E", glyph: "target" },
-      { name: "Burp Suite", color: "#FF6633", icon: siBurpsuite },
-      { name: "NIST Frameworks", color: CYBER_SOFT, glyph: "checklist" },
-      { name: "MITRE ATT&CK", color: CYBER_RED, glyph: "shieldalert" },
-      { name: "Cisco Packet Tracer", color: "#1BA0D7", icon: siCisco },
-    ],
-  },
-  {
-    id: "productivity",
-    title: "Productivity",
-    accent: "#FBBF24",
-    tools: [
-      { name: "GitHub", color: "#FFFFFF", icon: siGithub },
-      { name: "Jira", color: "#0052CC", icon: siJira },
-      { name: "Asana", color: "#F06A6A", icon: siAsana },
-      { name: "Miro", color: "#FFD02F", icon: siMiro },
-      { name: "Notion", color: "#FFFFFF", icon: siNotion },
-    ],
-  },
-];
-
-const TOTAL_TOOLS_COUNT = CATEGORIES.reduce((acc, cat) => acc + cat.tools.length, 0);
-
-/* ── Microsoft 365 mark (2x2 official squares) ───────────────────────────── */
 const OFFICE_COLORS = ["#F25022", "#7FBA00", "#00A4EF", "#FFB900"];
-
-function OfficeMark({ size = 16 }: { size?: number }) {
+function OfficeMark({ size = 18 }: { size?: number }) {
   const cells = [
     [1, 1],
     [12, 1],
@@ -240,67 +136,579 @@ function OfficeMark({ size = 16 }: { size?: number }) {
   return (
     <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
       {cells.map(([x, y], i) => (
-        <rect key={i} x={x} y={y} width={11} height={11} rx={2.2} fill={OFFICE_COLORS[i]} />
+        <rect key={i} x={x} y={y} width={10.5} height={10.5} rx={2} fill={OFFICE_COLORS[i]} />
       ))}
     </svg>
   );
 }
 
-/* ── Icon tile (refined compact size: 34x34) ─────────────────────────────── */
-function ToolTile({ tool }: { tool: Tool }) {
+/* ── Tool interface ──────────────────────────────────────────────────────── */
+export interface ToolItem {
+  id: string;
+  name: string;
+  shortName: string;
+  category: "AI" | "Software" | "Programming" | "Web Development" | "Cybersecurity" | "Productivity";
+  categoryKey: string;
+  color: string;
+  description: string;
+  icon?: SimpleIcon;
+  svg?: BrandSvg;
+  office?: boolean;
+  glyph?: string;
+}
+
+const CYBER_RED = "#EF4444";
+const CYBER_SOFT = "#F87171";
+
+export const ALL_TOOLS: ToolItem[] = [
+  // Programming & Core Web (Top Row)
+  {
+    id: "python",
+    name: "Python",
+    shortName: "Python",
+    category: "Programming",
+    categoryKey: "programming",
+    color: "#3776AB",
+    description: "High-throughput data analytics, security automation & trading bots",
+    icon: siPython,
+  },
+  {
+    id: "cpp",
+    name: "C++",
+    shortName: "C++",
+    category: "Programming",
+    categoryKey: "programming",
+    color: "#00599C",
+    description: "Ultra-low latency HFT engine, polymorphic OOP & systems architecture",
+    icon: siCplusplus,
+  },
+  {
+    id: "nextjs",
+    name: "Next.js",
+    shortName: "Next.js",
+    category: "Web Development",
+    categoryKey: "webdev",
+    color: "#FFFFFF",
+    description: "Fullstack React App Router, SSG/SSR, and headless commerce storefronts",
+    icon: siNextdotjs,
+  },
+  {
+    id: "react",
+    name: "React",
+    shortName: "React",
+    category: "Web Development",
+    categoryKey: "webdev",
+    color: "#61DAFB",
+    description: "Reactive UI state trees, reusable component hierarchies & hooks",
+    icon: siReact,
+  },
+  {
+    id: "tailwind",
+    name: "Tailwind CSS",
+    shortName: "Tailwind",
+    category: "Web Development",
+    categoryKey: "webdev",
+    color: "#06B6D4",
+    description: "Utility-first modern styling, responsive layouts & custom design tokens",
+    icon: siTailwindcss,
+  },
+  {
+    id: "css3",
+    name: "CSS3",
+    shortName: "CSS3",
+    category: "Web Development",
+    categoryKey: "webdev",
+    color: "#1572B6",
+    description: "Fluid animations, dark glassmorphism, flexbox & grid design systems",
+    svg: CSS3_MARK,
+  },
+  {
+    id: "express",
+    name: "Express",
+    shortName: "Express",
+    category: "Web Development",
+    categoryKey: "webdev",
+    color: "#FFFFFF",
+    description: "Lightweight REST API routing, backend controllers & auth middleware",
+    icon: siExpress,
+  },
+  {
+    id: "postgres",
+    name: "PostgreSQL",
+    shortName: "PostgreSQL",
+    category: "Software",
+    categoryKey: "software",
+    color: "#336791",
+    description: "8-table normalized database, CVSS trigger engine & PL/pgSQL RBAC",
+    icon: siPostgresql,
+  },
+  {
+    id: "mysql",
+    name: "MySQL",
+    shortName: "MySQL",
+    category: "Programming",
+    categoryKey: "programming",
+    color: "#4479A1",
+    description: "Relational persistence, ACID transactions & foreign key cascading",
+    icon: siMysql,
+  },
+  {
+    id: "linux",
+    name: "Linux CLI",
+    shortName: "Linux CLI",
+    category: "Programming",
+    categoryKey: "programming",
+    color: "#FCC624",
+    description: "POSIX shell scripting, kernel telemetry & remote VPS deployment",
+    icon: siLinux,
+  },
+
+  // Security Operations & Forensics (Row 2)
+  {
+    id: "kali",
+    name: "Kali Linux",
+    shortName: "Kali Linux",
+    category: "Cybersecurity",
+    categoryKey: "cybersecurity",
+    color: "#557C94",
+    description: "Offensive security distributions, exploit payloads & forensic tooling",
+    icon: siKalilinux,
+  },
+  {
+    id: "burpsuite",
+    name: "Burp Suite",
+    shortName: "Burp Suite",
+    category: "Cybersecurity",
+    categoryKey: "cybersecurity",
+    color: "#FF6633",
+    description: "Web application penetration testing, API intercept proxy & fuzzing",
+    icon: siBurpsuite,
+  },
+  {
+    id: "nmap",
+    name: "Nmap",
+    shortName: "Nmap",
+    category: "Cybersecurity",
+    categoryKey: "cybersecurity",
+    color: "#22C55E",
+    description: "Host discovery, port mapping, NSE service vulnerability fingerprinting",
+    glyph: "target",
+  },
+  {
+    id: "tryhackme",
+    name: "TryHackMe",
+    shortName: "TryHackMe",
+    category: "Software",
+    categoryKey: "software",
+    color: "#FFFFFF",
+    description: "Hands-on cyber labs: privilege escalation, reverse engineering & SOC triage",
+    icon: siTryhackme,
+  },
+  {
+    id: "chronicle",
+    name: "Google Chronicle",
+    shortName: "Chronicle",
+    category: "Software",
+    categoryKey: "software",
+    color: siGooglechronicle.hex,
+    description: "Cloud-native SIEM, petabyte-scale log aggregation & YARA-L detection",
+    icon: siGooglechronicle,
+  },
+  {
+    id: "vs",
+    name: "Visual Studio",
+    shortName: "Visual Studio",
+    category: "Software",
+    categoryKey: "software",
+    color: "#854cc7",
+    description: "Native C++ tooling, MSVC debugger, memory profiling & CMake targets",
+    svg: VISUAL_STUDIO_MARK,
+  },
+  {
+    id: "pgadmin",
+    name: "pgAdmin",
+    shortName: "pgAdmin",
+    category: "Software",
+    categoryKey: "software",
+    color: "#41A0C9",
+    description: "Visual query plan inspection, index tuning & schema administration",
+    glyph: "database",
+  },
+  {
+    id: "cisco",
+    name: "Cisco Packet Tracer",
+    shortName: "Packet Tracer",
+    category: "Cybersecurity",
+    categoryKey: "cybersecurity",
+    color: "#1BA0D7",
+    description: "VLAN topology modeling, OSPF routing & switch port security config",
+    icon: siCisco,
+  },
+
+  // Advanced Security & Frameworks (Row 3)
+  {
+    id: "netsec",
+    name: "Network Security",
+    shortName: "NetSec",
+    category: "Cybersecurity",
+    categoryKey: "cybersecurity",
+    color: CYBER_SOFT,
+    description: "Zero-trust architecture, deep packet inspection & firewall rulesets",
+    glyph: "shield",
+  },
+  {
+    id: "osint",
+    name: "OSINT",
+    shortName: "OSINT",
+    category: "Cybersecurity",
+    categoryKey: "cybersecurity",
+    color: CYBER_SOFT,
+    description: "Open source threat intelligence, asset discovery & breach surveillance",
+    glyph: "search",
+  },
+  {
+    id: "malware",
+    name: "Malware Analysis",
+    shortName: "Malware",
+    category: "Cybersecurity",
+    categoryKey: "cybersecurity",
+    color: CYBER_SOFT,
+    description: "Static & dynamic analysis, disassembly, and behavioral sandboxing",
+    glyph: "bug",
+  },
+  {
+    id: "chronicle_soar",
+    name: "Chronicle SOAR",
+    shortName: "SOAR",
+    category: "Cybersecurity",
+    categoryKey: "cybersecurity",
+    color: siGooglechronicle.hex,
+    description: "Automated incident response playbooks, webhook ingest & triage routing",
+    icon: siGooglechronicle,
+  },
+  {
+    id: "mitre",
+    name: "MITRE ATT&CK",
+    shortName: "MITRE",
+    category: "Cybersecurity",
+    categoryKey: "cybersecurity",
+    color: CYBER_RED,
+    description: "Enterprise adversary TTP mapping, kill chain defense & threat modeling",
+    glyph: "shieldalert",
+  },
+  {
+    id: "nist",
+    name: "NIST Frameworks",
+    shortName: "NIST",
+    category: "Cybersecurity",
+    categoryKey: "cybersecurity",
+    color: CYBER_SOFT,
+    description: "Identify, Protect, Detect, Respond, Recover — governance & audit standards",
+    glyph: "checklist",
+  },
+  {
+    id: "msoffice",
+    name: "Microsoft Office",
+    shortName: "MS Office",
+    category: "Software",
+    categoryKey: "software",
+    color: "#F25022",
+    description: "Executive technical memos, security audits & project reporting",
+    office: true,
+  },
+
+  // Agentic AI & LLMs (Row 4)
+  {
+    id: "antigravity",
+    name: "Google Antigravity",
+    shortName: "Antigravity",
+    category: "AI",
+    categoryKey: "ai",
+    color: "#FFFFFF",
+    description: "Agentic AI development, autonomous coding workflows & systems pair-prog",
+    svg: ANTIGRAVITY_MARK,
+  },
+  {
+    id: "claude",
+    name: "Claude",
+    shortName: "Claude",
+    category: "AI",
+    categoryKey: "ai",
+    color: "#D97757",
+    description: "Advanced reasoning, code audits, architecture design & systems review",
+    icon: siAnthropic,
+  },
+  {
+    id: "chatgpt",
+    name: "ChatGPT",
+    shortName: "ChatGPT",
+    category: "AI",
+    categoryKey: "ai",
+    color: "#10A37F",
+    description: "Rapid algorithmic prototyping, threat synthesis & documentation",
+    svg: OPENAI_MARK,
+  },
+  {
+    id: "kimi",
+    name: "KIMI",
+    shortName: "KIMI",
+    category: "AI",
+    categoryKey: "ai",
+    color: "#0058C6",
+    description: "Ultra-long context document comprehension & research synthesis",
+    icon: siKimi,
+  },
+  {
+    id: "openrouter",
+    name: "OpenRouter",
+    shortName: "OpenRouter",
+    category: "AI",
+    categoryKey: "ai",
+    color: siOpenrouter.hex,
+    description: "Unified LLM API gateway, model routing, latency benchmarking & fallback",
+    icon: siOpenrouter,
+  },
+
+  // Orchestration & Collaboration (Row 5)
+  {
+    id: "langchain",
+    name: "LangChain",
+    shortName: "LangChain",
+    category: "AI",
+    categoryKey: "ai",
+    color: "#FFFFFF",
+    description: "RAG vector pipelines, embedding retrievers & structured LLM agent tools",
+    icon: siLangchain,
+  },
+  {
+    id: "github",
+    name: "GitHub",
+    shortName: "GitHub",
+    category: "Productivity",
+    categoryKey: "productivity",
+    color: "#FFFFFF",
+    description: "Git source control, PR peer review, automated actions & issue tracking",
+    icon: siGithub,
+  },
+  {
+    id: "jira",
+    name: "Jira",
+    shortName: "Jira",
+    category: "Productivity",
+    categoryKey: "productivity",
+    color: "#0052CC",
+    description: "Agile sprints, security bug ticketing, Kanban & roadmap coordination",
+    icon: siJira,
+  },
+  {
+    id: "asana",
+    name: "Asana",
+    shortName: "Asana",
+    category: "Productivity",
+    categoryKey: "productivity",
+    color: "#F06A6A",
+    description: "Cross-functional task delivery, release milestones & team coordination",
+    icon: siAsana,
+  },
+
+  // Collaboration & Strategy (Row 6)
+  {
+    id: "miro",
+    name: "Miro",
+    shortName: "Miro",
+    category: "Productivity",
+    categoryKey: "productivity",
+    color: "#FFD02F",
+    description: "System architecture diagrams, database ERD wireframing & sprint planning",
+    icon: siMiro,
+  },
+  {
+    id: "notion",
+    name: "Notion",
+    shortName: "Notion",
+    category: "Productivity",
+    categoryKey: "productivity",
+    color: "#FFFFFF",
+    description: "Engineering wikis, technical post-mortems & internal documentation",
+    icon: siNotion,
+  },
+];
+
+/* ── Filter Category definitions ─────────────────────────────────────────── */
+const FILTER_CATEGORIES = [
+  { id: "all", label: "All", count: 36, accent: "#8B5CF6" },
+  { id: "ai", label: "AI", count: 6, accent: "#8B7CF6" },
+  { id: "software", label: "Software", count: 6, accent: "#3B82F6" },
+  { id: "programming", label: "Programming", count: 4, accent: "#34D399" },
+  { id: "webdev", label: "Web Development", count: 5, accent: "#61DAFB" },
+  { id: "cybersecurity", label: "Cybersecurity", count: 10, accent: "#EF4444" },
+  { id: "productivity", label: "Productivity", count: 5, accent: "#FBBF24" },
+];
+
+/* ── Canvas 3D Wireframe Globe Component ─────────────────────────────────── */
+function WireframeGlobe() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animId: number;
+    let angle = 0;
+
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.resetTransform?.();
+      ctx.scale(dpr, dpr);
+    };
+
+    resize();
+    window.addEventListener("resize", resize);
+
+    const render = () => {
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      if (w === 0 || h === 0) {
+        animId = requestAnimationFrame(render);
+        return;
+      }
+      ctx.clearRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2 - 10;
+      const r = Math.min(w, h) * 0.44;
+
+      angle += 0.003;
+      const tilt = 0.28;
+
+      // Draw latitude circles
+      const latCount = 7;
+      for (let i = 1; i < latCount; i++) {
+        const phi = (i / latCount) * Math.PI - Math.PI / 2;
+        const latR = r * Math.cos(phi);
+        const latY = cy + r * Math.sin(phi) * Math.cos(tilt);
+        const ry = Math.max(1, latR * Math.sin(tilt));
+
+        ctx.beginPath();
+        ctx.ellipse(cx, latY, latR, ry, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(168, 124, 255, 0.11)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Draw rotating longitude ellipses
+      const lonCount = 8;
+      for (let i = 0; i < lonCount; i++) {
+        const theta = angle + (i * Math.PI) / lonCount;
+        const lonW = Math.abs(r * Math.sin(theta));
+        const isFacing = Math.cos(theta) > 0;
+
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, Math.max(1, lonW), r, tilt, 0, Math.PI * 2);
+        ctx.strokeStyle = isFacing
+          ? "rgba(194, 164, 255, 0.22)"
+          : "rgba(86, 232, 208, 0.08)";
+        ctx.lineWidth = isFacing ? 1.2 : 0.8;
+        ctx.stroke();
+      }
+
+      // Outer globe boundary halo
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(168, 124, 255, 0.22)";
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+
+      animId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
   return (
-    <span
-      aria-hidden
+    <canvas
+      ref={canvasRef}
+      className="wireframe-globe-canvas"
+      aria-hidden="true"
+    />
+  );
+}
+
+/* ── Individual Tool Squircle Card ───────────────────────────────────────── */
+function ToolCard({
+  tool,
+  onHover,
+  onLeave,
+}: {
+  tool: ToolItem;
+  onHover: (tool: ToolItem) => void;
+  onLeave: () => void;
+}) {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      className="tech-tile"
+      onMouseEnter={() => onHover(tool)}
+      onMouseLeave={onLeave}
+      onFocus={() => onHover(tool)}
+      onBlur={onLeave}
+      aria-label={`${tool.name} (${tool.category})`}
       style={{
-        flexShrink: 0,
-        width: "34px",
-        height: "34px",
-        borderRadius: "9px",
-        background: "rgba(255,255,255,0.05)",
-        border: "1px solid rgba(255,255,255,0.12)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+        "--tool-color": tool.color,
+      } as CSSProperties}
     >
-      {tool.office ? (
-        <OfficeMark size={16} />
-      ) : tool.svg ? (
-        <svg
-          viewBox={tool.svg.viewBox}
-          height="17"
-          style={{ maxWidth: "68%", maxHeight: "68%" }}
-          preserveAspectRatio="xMidYMid meet"
-        >
-          {tool.svg.paths.map((p) => (
-            <path key={p.d.slice(0, 32)} d={p.d} fill={p.fill} />
-          ))}
-        </svg>
-      ) : tool.icon ? (
-        <svg viewBox="0 0 24 24" width="16" height="16">
-          <path d={tool.icon.path} fill={tool.color} />
-        </svg>
-      ) : (
-        <svg
-          viewBox="0 0 24 24"
-          width="16"
-          height="16"
-          fill="none"
-          stroke={tool.color}
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          {GLYPHS[tool.glyph ?? "zap"].paths.map((d) => (
-            <path key={d} d={d} />
-          ))}
-          {GLYPHS[tool.glyph ?? "zap"].circles?.map(([cx, cy, r]) => (
-            <circle key={`${cx}${cy}${r}`} cx={cx} cy={cy} r={r} />
-          ))}
-        </svg>
-      )}
-    </span>
+      <div className="tech-tile-icon" aria-hidden="true">
+        {tool.office ? (
+          <OfficeMark size={18} />
+        ) : tool.svg ? (
+          <svg
+            viewBox={tool.svg.viewBox}
+            height="20"
+            style={{ maxWidth: "80%", maxHeight: "80%" }}
+            preserveAspectRatio="xMidYMid meet"
+          >
+            {tool.svg.paths.map((p, idx) => (
+              <path key={idx} d={p.d} fill={p.fill} />
+            ))}
+          </svg>
+        ) : tool.icon ? (
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path d={tool.icon.path} fill={tool.color} />
+          </svg>
+        ) : (
+          <svg
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="none"
+            stroke={tool.color}
+            strokeWidth="1.9"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            {GLYPHS[tool.glyph ?? "zap"].paths.map((d, i) => (
+              <path key={i} d={d} />
+            ))}
+            {GLYPHS[tool.glyph ?? "zap"].circles?.map(([cx, cy, r], i) => (
+              <circle key={i} cx={cx} cy={cy} r={r} />
+            ))}
+          </svg>
+        )}
+      </div>
+      <span className="tech-tile-name">{tool.shortName}</span>
+    </div>
   );
 }
 
@@ -308,7 +716,8 @@ function ToolTile({ tool }: { tool: Tool }) {
 export default function ToolsIUse() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState<string>("all");
+  const [hoveredTool, setHoveredTool] = useState<ToolItem | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -331,318 +740,158 @@ export default function ToolsIUse() {
     };
   }, [open]);
 
-  const displayedCategories =
-    selectedCategory === "all"
-      ? CATEGORIES
-      : CATEGORIES.filter((c) => c.id === selectedCategory);
+  // Group tools into inverted pyramid rows
+  const getDisplayRows = (): ToolItem[][] => {
+    if (activeTab === "all") {
+      // 10, 8, 7, 5, 4, 2 = 36 items
+      return [
+        ALL_TOOLS.slice(0, 10),
+        ALL_TOOLS.slice(10, 18),
+        ALL_TOOLS.slice(18, 25),
+        ALL_TOOLS.slice(25, 30),
+        ALL_TOOLS.slice(30, 34),
+        ALL_TOOLS.slice(34, 36),
+      ];
+    }
+
+    const filtered = ALL_TOOLS.filter((t) => t.categoryKey === activeTab);
+    // Dynamic mini-pyramid for single category
+    if (filtered.length <= 4) {
+      return [filtered];
+    }
+    if (filtered.length === 5) {
+      return [filtered.slice(0, 3), filtered.slice(3, 5)];
+    }
+    if (filtered.length === 6) {
+      return [filtered.slice(0, 4), filtered.slice(4, 6)];
+    }
+    // 10 items (Cybersecurity)
+    return [
+      filtered.slice(0, 4),
+      filtered.slice(4, 7),
+      filtered.slice(7, 9),
+      filtered.slice(9, 10),
+    ];
+  };
+
+  const rows = getDisplayRows();
 
   const modalContent = open ? (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Tools I use"
+      aria-label="Tech Stack and Tools"
       onClick={() => setOpen(false)}
       className="tools-overlay"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 99999,
-        background: "rgba(4, 7, 14, 0.85)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "clamp(12px, 3vw, 28px)",
-      }}
     >
       <div
         role="document"
         onClick={(e) => e.stopPropagation()}
-        className="tools-dialog-card"
-        style={{
-          position: "relative",
-          width: "min(1060px, 100%)",
-          maxHeight: "min(88vh, 840px)",
-          display: "flex",
-          flexDirection: "column",
-          background: "linear-gradient(165deg, #0b1220 0%, #070b13 100%)",
-          border: "1px solid rgba(86, 232, 208, 0.28)",
-          borderRadius: "18px",
-          boxShadow:
-            "0 24px 64px -20px rgba(0,0,0,0.8), 0 0 36px -16px rgba(86,232,208,0.35)",
-          overflow: "hidden",
-        }}
+        className="tools-showcase-window"
       >
-        {/* ── Pinned Header ── */}
-        <div
-          style={{
-            padding: "18px 24px 14px",
-            borderBottom: "1px solid rgba(255,255,255,0.07)",
-            background: "rgba(11, 18, 32, 0.75)",
-            backdropFilter: "blur(8px)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "14px",
-            flexShrink: 0,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <div
-              style={{
-                fontFamily: "var(--font-jetbrains), monospace",
-                fontSize: "13px",
-                letterSpacing: "0.08em",
-                color: "var(--color-cyan)",
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-              }}
-            >
-              <span
-                style={{
-                  width: "7px",
-                  height: "7px",
-                  borderRadius: "50%",
-                  background: "var(--color-cyan)",
-                  boxShadow: "0 0 10px var(--color-cyan)",
-                  display: "block",
-                }}
-              />
-              <span>{"// tools_i_use"}</span>
-              <span
-                style={{
-                  fontSize: "11px",
-                  color: "rgba(139,147,163,0.7)",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                ({TOTAL_TOOLS_COUNT} tools)
-              </span>
-            </div>
+        {/* Ambient Nebula Glow Behind Pyramid */}
+        <div className="tools-nebula-glow" aria-hidden="true" />
 
-            <button
-              ref={closeRef}
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="Close dialog"
-              className="tools-close-btn"
-              style={{
-                fontFamily: "var(--font-jetbrains), monospace",
-                fontSize: "13px",
-                lineHeight: 1,
-                color: "var(--color-mist)",
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                borderRadius: "8px",
-                padding: "8px 12px",
-                cursor: "pointer",
-                transition: "all 0.15s ease",
-              }}
-            >
-              ✕
-            </button>
+        {/* 3D Wireframe Globe */}
+        <WireframeGlobe />
+
+        {/* Watermark TECH STACK Background Typography */}
+        <div className="techstack-watermark" aria-hidden="true">
+          TECH STACK
+        </div>
+
+        {/* Top Header Row with Category Filters & Close Button */}
+        <header className="tools-top-bar">
+          <div className="tools-header-meta">
+            <span className="status-pulse-dot" />
+            <span className="tools-header-title">// tools_i_use</span>
+            <span className="tools-header-count">({ALL_TOOLS.length} tools)</span>
           </div>
 
-          {/* ── Category filter pills ── */}
-          <div
-            className="category-pill-row"
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "7px",
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setSelectedCategory("all")}
-              className={`pill-btn ${selectedCategory === "all" ? "active" : ""}`}
-              style={{
-                fontFamily: "var(--font-jetbrains), monospace",
-                fontSize: "11.5px",
-                padding: "5px 12px",
-                borderRadius: "999px",
-                cursor: "pointer",
-                border:
-                  selectedCategory === "all"
-                    ? "1px solid var(--color-cyan)"
-                    : "1px solid rgba(255,255,255,0.1)",
-                background:
-                  selectedCategory === "all"
-                    ? "rgba(86,232,208,0.14)"
-                    : "rgba(255,255,255,0.03)",
-                color:
-                  selectedCategory === "all"
-                    ? "var(--color-cyan)"
-                    : "var(--color-mist)",
-                transition: "all 0.15s ease",
-              }}
-            >
-              All ({TOTAL_TOOLS_COUNT})
-            </button>
-
-            {CATEGORIES.map((cat) => {
-              const isSelected = selectedCategory === cat.id;
+          {/* Filter Pills */}
+          <nav className="tools-nav-pills" aria-label="Tool Categories">
+            {FILTER_CATEGORIES.map((cat) => {
+              const isActive = activeTab === cat.id;
               return (
                 <button
                   key={cat.id}
                   type="button"
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`pill-btn ${isSelected ? "active" : ""}`}
+                  onClick={() => setActiveTab(cat.id)}
+                  className={`pill-btn ${isActive ? "active" : ""}`}
                   style={{
-                    fontFamily: "var(--font-jetbrains), monospace",
-                    fontSize: "11.5px",
-                    padding: "5px 11px",
-                    borderRadius: "999px",
-                    cursor: "pointer",
-                    border: isSelected
-                      ? `1px solid ${cat.accent}`
-                      : "1px solid rgba(255,255,255,0.1)",
-                    background: isSelected
-                      ? `color-mix(in srgb, ${cat.accent} 18%, transparent)`
-                      : "rgba(255,255,255,0.03)",
-                    color: isSelected ? cat.accent : "var(--color-mist)",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    transition: "all 0.15s ease",
-                  }}
+                    "--pill-accent": cat.accent,
+                  } as CSSProperties}
                 >
                   <span
-                    style={{
-                      width: "5px",
-                      height: "5px",
-                      borderRadius: "50%",
-                      background: cat.accent,
-                    }}
+                    className="pill-dot"
+                    style={{ background: cat.accent }}
                   />
-                  {cat.title} ({cat.tools.length})
+                  {cat.label} ({cat.count})
                 </button>
               );
             })}
-          </div>
-        </div>
+          </nav>
 
-        {/* ── Scrollable Content Area ── */}
-        <div
-          className="tools-scroll-content"
-          style={{
-            flex: 1,
-            overflowY: "auto",
-            overflowX: "hidden",
-            padding: "20px 24px 26px",
-            WebkitOverflowScrolling: "touch",
-            overscrollBehavior: "contain",
-          }}
-        >
-          {selectedCategory === "all" ? (
-            /* 3-column responsive layout for 'All' */
-            <div className="tools-grid-all">
-              {displayedCategories.map((cat) => (
-                <section
-                  key={cat.id}
-                  aria-label={cat.title}
-                  className="cat-section"
-                  style={{ "--accent": cat.accent } as CSSProperties}
-                >
-                  <div className="cat-head">
-                    <span
-                      style={{
-                        width: "6px",
-                        height: "6px",
-                        borderRadius: "50%",
-                        background: cat.accent,
-                        boxShadow: `0 0 8px ${cat.accent}`,
-                        display: "block",
-                      }}
-                    />
-                    <h3
-                      style={{
-                        fontFamily: "var(--font-jetbrains), monospace",
-                        fontSize: "11px",
-                        letterSpacing: "0.12em",
-                        textTransform: "uppercase",
-                        color: cat.accent,
-                        margin: 0,
-                      }}
-                    >
-                      {cat.title}
-                    </h3>
-                    <span className="cat-count">{cat.tools.length}</span>
-                  </div>
+          <button
+            ref={closeRef}
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="Close dialog"
+            className="tools-close-btn"
+          >
+            ✕
+          </button>
+        </header>
 
-                  <ul className="tools-list">
-                    {cat.tools.map((tool, i) => (
-                      <li
-                        key={tool.name}
-                        title={tool.name}
-                        className="tool-card"
-                        style={{ animationDelay: `${i * 15}ms` }}
-                      >
-                        <ToolTile tool={tool} />
-                        <span className="tool-name">{tool.name}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              ))}
-            </div>
-          ) : (
-            /* 2/3-column card grid when a specific category is selected */
-            <div
-              style={{
-                "--accent": displayedCategories[0]?.accent ?? "var(--color-cyan)",
-              } as CSSProperties}
-            >
-              <div className="cat-head" style={{ marginBottom: "18px" }}>
-                <span
-                  style={{
-                    width: "7px",
-                    height: "7px",
-                    borderRadius: "50%",
-                    background: displayedCategories[0]?.accent,
-                    boxShadow: `0 0 10px ${displayedCategories[0]?.accent}`,
-                    display: "block",
-                  }}
-                />
-                <h3
-                  style={{
-                    fontFamily: "var(--font-jetbrains), monospace",
-                    fontSize: "13px",
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    color: displayedCategories[0]?.accent,
-                    margin: 0,
-                  }}
-                >
-                  {displayedCategories[0]?.title}
-                </h3>
-                <span className="cat-count">
-                  {displayedCategories[0]?.tools.length} tools
-                </span>
-              </div>
-
-              <div className="tools-grid-single">
-                {displayedCategories[0]?.tools.map((tool, i) => (
-                  <div
-                    key={tool.name}
-                    className="tool-card"
-                    style={{ animationDelay: `${i * 20}ms` }}
-                  >
-                    <ToolTile tool={tool} />
-                    <span className="tool-name">{tool.name}</span>
-                  </div>
+        {/* Center Stage: The Inverted Pyramid of Tech Cards */}
+        <main className="pyramid-stage">
+          <div className="pyramid-container">
+            {rows.map((row, rowIdx) => (
+              <div
+                key={rowIdx}
+                className="pyramid-row"
+                style={{
+                  animationDelay: `${rowIdx * 45}ms`,
+                }}
+              >
+                {row.map((tool) => (
+                  <ToolCard
+                    key={tool.id}
+                    tool={tool}
+                    onHover={setHoveredTool}
+                    onLeave={() => setHoveredTool(null)}
+                  />
                 ))}
               </div>
+            ))}
+          </div>
+        </main>
+
+        {/* Bottom Interactive Recruiter HUD / Status Bar */}
+        <footer className="tools-status-bar">
+          {hoveredTool ? (
+            <div className="status-tool-info">
+              <span
+                className="status-badge"
+                style={{
+                  color: hoveredTool.color,
+                  borderColor: `${hoveredTool.color}55`,
+                  background: `${hoveredTool.color}15`,
+                }}
+              >
+                {hoveredTool.category}
+              </span>
+              <strong className="status-name">{hoveredTool.name}</strong>
+              <span className="status-sep">—</span>
+              <span className="status-desc">{hoveredTool.description}</span>
+            </div>
+          ) : (
+            <div className="status-placeholder">
+              <span className="status-pulse-dot" />
+              <span>Hover or tap any tool to inspect architecture role, workflows &amp; systems context</span>
             </div>
           )}
-        </div>
+        </footer>
       </div>
     </div>
   ) : null;
@@ -696,172 +945,410 @@ export default function ToolsIUse() {
         Tools I use
       </button>
 
-      {/* Render via Portal so it mounts to document.body, free from parent transforms */}
+      {/* Render via Portal so it mounts cleanly into document.body */}
       {mounted && typeof document !== "undefined" && modalContent
         ? createPortal(modalContent, document.body)
         : null}
 
-      <style>{`
+      <style jsx global>{`
+        /* ── Overlay Animation ── */
         @keyframes toolsOverlayFadeIn {
-          from { opacity: 0; }
-          to   { opacity: 1; }
+          from { opacity: 0; backdrop-filter: blur(0px); }
+          to   { opacity: 1; backdrop-filter: blur(14px); }
         }
         @keyframes toolsCardScaleIn {
-          from { opacity: 0; transform: scale(0.96) translateY(12px); }
+          from { opacity: 0; transform: scale(0.95) translateY(16px); }
           to   { opacity: 1; transform: scale(1) translateY(0); }
         }
-        @keyframes toolItemFadeIn {
-          from { opacity: 0; transform: translateY(6px); }
+        @keyframes rowSlideUp {
+          from { opacity: 0; transform: translateY(12px); }
           to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulseGlow {
+          0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
+          50%      { opacity: 0.85; transform: translate(-50%, -50%) scale(1.05); }
+        }
+        @keyframes statusBlink {
+          0%, 100% { opacity: 0.4; }
+          50%      { opacity: 1; }
         }
 
         .tools-overlay {
-          animation: toolsOverlayFadeIn 180ms ease-out both;
-        }
-        .tools-dialog-card {
-          animation: toolsCardScaleIn 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-        .tool-card {
-          animation: toolItemFadeIn 240ms ease-out both;
-        }
-
-        /* ── Close button hover ── */
-        .tools-close-btn:hover {
-          color: var(--color-cyan) !important;
-          border-color: rgba(86, 232, 208, 0.45) !important;
-          background: rgba(86, 232, 208, 0.08) !important;
-        }
-
-        /* ── Pill filter buttons hover ── */
-        .pill-btn:hover:not(.active) {
-          border-color: rgba(255, 255, 255, 0.25) !important;
-          color: var(--color-fog) !important;
-          background: rgba(255, 255, 255, 0.06) !important;
-        }
-
-        /* ── Category grid layout (All mode) ── */
-        .tools-grid-all {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 20px;
-          align-items: start;
-        }
-        @media (max-width: 880px) {
-          .tools-grid-all {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-          }
-        }
-        @media (max-width: 560px) {
-          .tools-grid-all {
-            grid-template-columns: 1fr;
-            gap: 16px;
-          }
-        }
-
-        /* ── Single category filtered grid ── */
-        .tools-grid-single {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 12px;
-        }
-        @media (max-width: 720px) {
-          .tools-grid-single {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-        @media (max-width: 480px) {
-          .tools-grid-single {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        .tools-list {
-          list-style: none;
-          margin: 0;
-          padding: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 7px;
-        }
-
-        /* ── Category header ── */
-        .cat-head {
-          position: relative;
+          position: fixed;
+          inset: 0;
+          z-index: 99999;
+          background: rgba(4, 7, 14, 0.88);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
           display: flex;
           align-items: center;
-          gap: 8px;
-          margin-bottom: 12px;
-          padding-bottom: 9px;
-        }
-        .cat-head::after {
-          content: "";
-          position: absolute;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          height: 1.5px;
-          border-radius: 2px;
-          background: linear-gradient(
-            90deg,
-            color-mix(in srgb, var(--accent) 75%, transparent) 0%,
-            color-mix(in srgb, var(--accent) 20%, transparent) 60%,
-            transparent 100%
-          );
-        }
-        .cat-count {
-          font-family: var(--font-jetbrains), monospace;
-          font-size: 10px;
-          color: rgba(139, 147, 163, 0.65);
-          margin-left: auto;
-          padding: 1px 6px;
-          border-radius: 6px;
-          border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+          justify-content: center;
+          padding: clamp(10px, 2.5vw, 24px);
+          animation: toolsOverlayFadeIn 220ms ease-out both;
         }
 
-        /* ── Tool card: sleek, compact, readable ── */
-        .tool-card {
+        .tools-showcase-window {
+          position: relative;
+          width: min(1200px, 100%);
+          max-height: min(92vh, 880px);
+          height: auto;
+          display: flex;
+          flex-direction: column;
+          background: linear-gradient(180deg, #0b090f 0%, #07060a 100%);
+          border: 1px solid rgba(168, 124, 255, 0.28);
+          border-radius: 24px;
+          box-shadow:
+            0 32px 80px -16px rgba(0, 0, 0, 0.9),
+            0 0 50px -10px rgba(168, 124, 255, 0.22),
+            inset 0 1px 0 rgba(255, 255, 255, 0.12);
+          overflow: hidden;
+          animation: toolsCardScaleIn 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        /* ── Ambient Glow & 3D Globe ── */
+        .tools-nebula-glow {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 80%;
+          height: 80%;
+          transform: translate(-50%, -50%);
+          background: radial-gradient(
+            circle at center,
+            rgba(168, 124, 255, 0.25) 0%,
+            rgba(86, 232, 208, 0.12) 35%,
+            transparent 70%
+          );
+          filter: blur(50px);
+          pointer-events: none;
+          z-index: 0;
+          animation: pulseGlow 6s ease-in-out infinite;
+        }
+
+        .wireframe-globe-canvas {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        .techstack-watermark {
+          position: absolute;
+          top: 48%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-family: var(--font-space-grotesk), var(--font-jetbrains), sans-serif;
+          font-size: clamp(40px, 9vw, 96px);
+          font-weight: 800;
+          letter-spacing: 0.18em;
+          color: rgba(255, 255, 255, 0.038);
+          text-transform: uppercase;
+          white-space: nowrap;
+          pointer-events: none;
+          user-select: none;
+          z-index: 1;
+        }
+
+        /* ── Header ── */
+        .tools-top-bar {
+          position: relative;
+          z-index: 10;
+          padding: 16px 24px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          background: rgba(11, 9, 15, 0.65);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 14px;
+          flex-shrink: 0;
+        }
+
+        .tools-header-meta {
+          font-family: var(--font-jetbrains), monospace;
+          font-size: 13px;
+          color: var(--color-cyan);
           display: flex;
           align-items: center;
           gap: 10px;
-          padding: 6px 10px;
-          background: rgba(255, 255, 255, 0.025);
-          border: 1px solid rgba(255, 255, 255, 0.07);
-          border-radius: 11px;
-          transition: transform 140ms ease, border-color 140ms ease,
-            box-shadow 140ms ease, background 140ms ease;
-        }
-        .tool-card:hover {
-          transform: translateY(-2px);
-          background: rgba(255, 255, 255, 0.055);
-          border-color: color-mix(in srgb, var(--accent) 55%, rgba(255, 255, 255, 0.15));
-          box-shadow: 0 8px 18px -10px color-mix(in srgb, var(--accent) 50%, transparent);
-        }
-        .tool-name {
-          font-size: 12.5px;
-          line-height: 1.25;
-          font-weight: 500;
-          color: var(--color-fog);
-          word-break: break-word;
+          letter-spacing: 0.06em;
         }
 
-        /* ── Custom sleek scrollbar ── */
-        .tools-scroll-content {
-          scrollbar-width: thin;
-          scrollbar-color: rgba(139, 147, 163, 0.3) transparent;
+        .status-pulse-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: var(--color-cyan);
+          box-shadow: 0 0 10px var(--color-cyan);
+          display: inline-block;
+          animation: statusBlink 2s ease-in-out infinite;
         }
-        .tools-scroll-content::-webkit-scrollbar {
-          width: 6px;
+
+        .tools-header-count {
+          font-size: 11px;
+          color: rgba(139, 147, 163, 0.7);
         }
-        .tools-scroll-content::-webkit-scrollbar-track {
-          background: transparent;
+
+        .tools-nav-pills {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
         }
-        .tools-scroll-content::-webkit-scrollbar-thumb {
-          background: rgba(139, 147, 163, 0.25);
-          border-radius: 6px;
+
+        .pill-btn {
+          font-family: var(--font-jetbrains), monospace;
+          font-size: 11px;
+          padding: 5px 11px;
+          border-radius: 999px;
+          cursor: pointer;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.03);
+          color: var(--color-mist);
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          transition: all 0.18s ease;
         }
-        .tools-scroll-content:hover::-webkit-scrollbar-thumb {
-          background: rgba(86, 232, 208, 0.5);
+
+        .pill-dot {
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+        }
+
+        .pill-btn:hover {
+          border-color: rgba(255, 255, 255, 0.25);
+          color: #FFFFFF;
+          background: rgba(255, 255, 255, 0.06);
+        }
+
+        .pill-btn.active {
+          border-color: var(--pill-accent, var(--color-cyan));
+          color: var(--pill-accent, var(--color-cyan));
+          background: color-mix(in srgb, var(--pill-accent, var(--color-cyan)) 16%, transparent);
+          box-shadow: 0 0 12px color-mix(in srgb, var(--pill-accent, var(--color-cyan)) 25%, transparent);
+        }
+
+        .tools-close-btn {
+          font-family: var(--font-jetbrains), monospace;
+          font-size: 13px;
+          line-height: 1;
+          color: var(--color-mist);
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 8px;
+          padding: 8px 12px;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+
+        .tools-close-btn:hover {
+          color: #FFFFFF;
+          border-color: rgba(168, 124, 255, 0.6);
+          background: rgba(168, 124, 255, 0.12);
+        }
+
+        /* ── Stage & Inverted Pyramid ── */
+        .pyramid-stage {
+          position: relative;
+          z-index: 5;
+          flex: 1;
+          overflow-y: auto;
+          overflow-x: hidden;
+          padding: clamp(20px, 3.5vh, 36px) 20px clamp(14px, 2vh, 24px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          WebkitOverflowScrolling: touch;
+        }
+
+        .pyramid-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: clamp(8px, 1.2vw, 13px);
+          position: relative;
+          z-index: 5;
+          max-width: 100%;
+        }
+
+        .pyramid-row {
+          display: flex;
+          justify-content: center;
+          gap: clamp(6px, 0.9vw, 12px);
+          flex-wrap: wrap;
+          animation: rowSlideUp 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        /* ── Squircle Tech Cards ── */
+        .tech-tile {
+          width: clamp(60px, 5.2vw, 75px);
+          height: clamp(64px, 5.6vw, 79px);
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.045);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.11);
+          box-shadow:
+            0 8px 24px -4px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          padding: 8px 4px;
+          cursor: pointer;
+          transition:
+            transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+            background 0.2s ease,
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
+          position: relative;
+          z-index: 5;
+          user-select: none;
+          outline: none;
+        }
+
+        .tech-tile:hover,
+        .tech-tile:focus-visible {
+          transform: translateY(-6px) scale(1.12);
+          background: rgba(255, 255, 255, 0.11);
+          border-color: var(--tool-color, #a87cff);
+          box-shadow:
+            0 16px 36px -4px rgba(0, 0, 0, 0.85),
+            0 0 24px color-mix(in srgb, var(--tool-color, #a87cff) 45%, transparent),
+            inset 0 1px 0 rgba(255, 255, 255, 0.25);
+          z-index: 20;
+        }
+
+        .tech-tile-icon {
+          width: 26px;
+          height: 26px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.2s ease;
+        }
+
+        .tech-tile:hover .tech-tile-icon,
+        .tech-tile:focus-visible .tech-tile-icon {
+          transform: scale(1.1);
+        }
+
+        .tech-tile-name {
+          font-family: var(--font-jetbrains), monospace;
+          font-size: clamp(9px, 0.72vw, 10.5px);
+          font-weight: 500;
+          letter-spacing: -0.01em;
+          color: rgba(235, 240, 255, 0.8);
+          text-align: center;
+          line-height: 1.15;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 90%;
+          transition: color 0.2s ease;
+        }
+
+        .tech-tile:hover .tech-tile-name,
+        .tech-tile:focus-visible .tech-tile-name {
+          color: #FFFFFF;
+        }
+
+        /* ── Status HUD / Bottom Bar ── */
+        .tools-status-bar {
+          position: relative;
+          z-index: 10;
+          padding: 14px 24px;
+          border-top: 1px solid rgba(255, 255, 255, 0.08);
+          background: rgba(11, 9, 15, 0.75);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 48px;
+          flex-shrink: 0;
+        }
+
+        .status-tool-info {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+          justify-content: center;
+          font-family: var(--font-jetbrains), monospace;
+          font-size: 12px;
+          animation: rowSlideUp 180ms ease-out both;
+        }
+
+        .status-badge {
+          font-size: 10px;
+          padding: 2px 7px;
+          border-radius: 4px;
+          border: 1px solid;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+
+        .status-name {
+          color: #FFFFFF;
+          font-weight: 600;
+        }
+
+        .status-sep {
+          color: rgba(255, 255, 255, 0.3);
+        }
+
+        .status-desc {
+          color: var(--color-mist);
+        }
+
+        .status-placeholder {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-family: var(--font-jetbrains), monospace;
+          font-size: 11.5px;
+          color: rgba(139, 147, 163, 0.75);
+        }
+
+        @media (max-width: 768px) {
+          .tools-top-bar {
+            padding: 12px 16px;
+          }
+          .tools-nav-pills {
+            order: 3;
+            width: 100%;
+          }
+          .pyramid-stage {
+            padding: 16px 10px;
+          }
+          .tech-tile {
+            width: 58px;
+            height: 62px;
+            border-radius: 13px;
+          }
+          .tech-tile-icon {
+            width: 22px;
+            height: 22px;
+          }
+          .tech-tile-name {
+            font-size: 8.5px;
+          }
+          .techstack-watermark {
+            font-size: 32px;
+          }
+          .tools-status-bar {
+            padding: 10px 14px;
+            font-size: 11px;
+          }
         }
       `}</style>
     </>
