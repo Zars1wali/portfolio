@@ -2,7 +2,16 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
 import { getLabSlugs, getLabContent } from "@/lib/content";
+
+const mdxComponents = {
+  table: (props: React.TableHTMLAttributes<HTMLTableElement>) => (
+    <div className="table-wrapper">
+      <table {...props} />
+    </div>
+  ),
+};
 
 /* ── Static generation ──────────────────────────────────────────────────── */
 export async function generateStaticParams() {
@@ -196,7 +205,15 @@ export default async function LabDetailPage({
           }}
         >
           <div className="prose">
-            <MDXRemote source={content} />
+            <MDXRemote
+              source={content}
+              options={{
+                mdxOptions: {
+                  remarkPlugins: [remarkGfm],
+                },
+              }}
+              components={mdxComponents}
+            />
           </div>
         </div>
       )}

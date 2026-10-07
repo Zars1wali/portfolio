@@ -231,5 +231,98 @@
     border-top: 1px solid rgba(255,255,255,0.08);
     margin: 2rem 0;
   }
+
+  /* ── MDX Table Styling ─────────────────────────────────────────────────── */
+  .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin: 1.75rem 0;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: rgba(8, 12, 20, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.65), 0 0 20px -8px rgba(86, 232, 208, 0.06);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  }
+
+  .table-wrapper::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .table-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .table-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+  }
+
+  .prose table {
+    width: 100%;
+    min-width: 520px;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13.5px;
+    line-height: 1.6;
+    text-align: left;
+    margin: 0;
+  }
+
+  .prose thead {
+    background: rgba(255, 255, 255, 0.035);
+  }
+
+  .prose th {
+    padding: 13px 18px;
+    font-family: var(--font-jetbrains), monospace;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-cyan);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+  }
+
+  .prose td {
+    padding: 14px 18px;
+    color: var(--color-mist);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+    vertical-align: top;
+    transition: color 0.15s ease;
+  }
+
+  .prose tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .prose tbody tr {
+    transition: background-color 0.15s ease;
+  }
+
+  .prose tbody tr:hover {
+    background-color: rgba(86, 232, 208, 0.035);
+  }
+
+  .prose tbody tr:hover td {
+    color: var(--color-fog);
+  }
+
+  .prose td strong {
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .prose td code {
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--color-fog);
+  }
 }
 

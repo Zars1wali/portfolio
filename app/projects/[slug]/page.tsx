@@ -2,11 +2,22 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
 import { getProjectSlugs, getProjectContent } from "@/lib/content";
 import PolymarketLiveDashboard from "@/components/PolymarketLiveDashboard";
 import RabitaLiveDemo from "@/components/RabitaLiveDemo";
 import RabtaArchitectureDiagram from "@/components/RabtaArchitectureDiagram";
 import RabtaFAQAccordion from "@/components/RabtaFAQAccordion";
+
+const mdxComponents = {
+  RabtaArchitectureDiagram,
+  RabtaFAQAccordion,
+  table: (props: React.TableHTMLAttributes<HTMLTableElement>) => (
+    <div className="table-wrapper">
+      <table {...props} />
+    </div>
+  ),
+};
 
 /* ── Static generation ──────────────────────────────────────────────────── */
 export async function generateStaticParams() {
@@ -298,7 +309,15 @@ export default async function ProjectDetailPage({
           {slug === "polymarket-arbitrage-bot" && <PolymarketLiveDashboard />}
           {slug === "rabita-ai" && <RabitaLiveDemo />}
           <div className="prose">
-            <MDXRemote source={content} components={{ RabtaArchitectureDiagram, RabtaFAQAccordion }} />
+            <MDXRemote
+              source={content}
+              options={{
+                mdxOptions: {
+                  remarkPlugins: [remarkGfm],
+                },
+              }}
+              components={mdxComponents}
+            />
           </div>
         </div>
       )}
