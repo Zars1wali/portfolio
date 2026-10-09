@@ -228,6 +228,72 @@ export default function RabtaFAQAccordion() {
         </div>
       ),
     },
+    {
+      question: "7. Zero Hallucinations Under the Hood: How does Rabita AI's multi-tiered retrieval system actually work?",
+      renderAnswer: () => (
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <p style={{ margin: 0, fontSize: "14.5px", lineHeight: "1.75", color: "var(--color-cloud)" }}>
+            Rabta AI uses a <strong>hybrid multi-tiered retrieval system</strong> combining SQL keyword matching, dense vector embeddings, and in-prompt dynamic context injection. Because Rabta operates in high-stakes WhatsApp commerce, retrieval cannot rely on standard naive RAG—it has to guarantee exact model numbers, verify stock status, eliminate prompt hallucinations, and prevent product photo cross-contamination.
+          </p>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "4px" }}>
+            <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.07)", borderRadius: "10px", padding: "12px 14px" }}>
+              <h4 style={{ margin: "0 0 6px", color: "var(--color-cyan)", fontSize: "14px", fontWeight: 600 }}>
+                Tier 1: Real-Time In-Prompt Context Retriever
+              </h4>
+              <p style={{ margin: 0, fontSize: "13.5px", lineHeight: "1.65", color: "var(--color-mist)" }}>
+                Before the AI begins generating any message, it automatically pulls core store data directly into its active memory. This includes the business address, daily price confirmation status, store hours, and baseline catalog items so the AI has immediate awareness of essential facts without needing extra lookup steps.
+              </p>
+            </div>
+
+            <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.07)", borderRadius: "10px", padding: "12px 14px" }}>
+              <h4 style={{ margin: "0 0 6px", color: "var(--color-cyan)", fontSize: "14px", fontWeight: 600 }}>
+                Tier 2: The Hybrid Knowledge Base Retriever (Core RAG)
+              </h4>
+              <p style={{ margin: "0 0 10px", fontSize: "13.5px", lineHeight: "1.65", color: "var(--color-mist)" }}>
+                When a customer asks for detailed inventory or item specifications, this core search engine searches the inventory database using a multi-step verification process:
+              </p>
+              
+              <div style={{ paddingLeft: "12px", borderLeft: "2px solid rgba(0, 240, 255, 0.3)", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <p style={{ margin: 0, fontSize: "13px", lineHeight: "1.6" }}>
+                  <strong style={{ color: "var(--color-fog)" }}>• SQL Pre-Filtering:</strong> Filters the catalog at the database level to remove out-of-stock items and narrow the search by requested category and specifications before any scoring begins.
+                </p>
+                <p style={{ margin: 0, fontSize: "13px", lineHeight: "1.6" }}>
+                  <strong style={{ color: "var(--color-fog)" }}>• Lexical / Token Overlap Scoring (Text Score):</strong> Checks how closely the customer&apos;s exact words match the product titles and descriptions in the catalog, giving higher weight to title matches.
+                </p>
+                <p style={{ margin: 0, fontSize: "13px", lineHeight: "1.6" }}>
+                  <strong style={{ color: "var(--color-fog)" }}>• Dense Semantic Vector Search (Semantic Score):</strong> Converts the overall meaning of the customer&apos;s request into a numerical representation and compares it against stored product descriptions to find conceptual matches.
+                </p>
+                <p style={{ margin: 0, fontSize: "13px", lineHeight: "1.6" }}>
+                  <strong style={{ color: "var(--color-fog)" }}>• Hybrid Ranker Fusion:</strong> Combines the keyword match score and the semantic meaning score into one final combined score to rank the candidates from highest to lowest match.
+                </p>
+                <p style={{ margin: 0, fontSize: "13px", lineHeight: "1.6" }}>
+                  <strong style={{ color: "var(--color-fog)" }}>• Why 60% Text / 40% Semantic?</strong> Commercial sales require strict accuracy on exact product names and numbers. Giving 60% weight to exact text prevents the AI from substituting a different product based only on conceptual similarity, while the 40% semantic weight allows it to understand descriptive requests.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.07)", borderRadius: "10px", padding: "12px 14px" }}>
+              <h4 style={{ margin: "0 0 6px", color: "var(--color-cyan)", fontSize: "14px", fontWeight: 600 }}>
+                Tier 3: Multimodal Image Retriever
+              </h4>
+              <p style={{ margin: 0, fontSize: "13.5px", lineHeight: "1.65", color: "var(--color-mist)" }}>
+                When a customer sends a picture, this retriever reads the visual elements of the image and searches the catalog&apos;s visual database for matching items. It also runs a visual verification check before sending any picture to the buyer to make sure the image directly matches the item being discussed.
+              </p>
+            </div>
+
+            <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.07)", borderRadius: "10px", padding: "12px 14px" }}>
+              <h4 style={{ margin: "0 0 6px", color: "var(--color-cyan)", fontSize: "14px", fontWeight: 600 }}>
+                Tier 4: Dynamic State &amp; Business Policy Retrievers
+              </h4>
+              <p style={{ margin: 0, fontSize: "13.5px", lineHeight: "1.65", color: "var(--color-mist)" }}>
+                Retrieves operational business rules and conversation states from the database. This includes verified payment account numbers, QR codes, previous messages from the same customer, and flags that indicate whether human staff has taken over the conversation.
+              </p>
+            </div>
+          </div>
+        </div>
+      ),
+    },
   ];
 
   return (
