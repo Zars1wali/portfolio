@@ -19,7 +19,7 @@
     "react-dom": "19.2.8",
     "remark-gfm": "^4.0.1",
     "simple-icons": "^16.28.0",
-    "three": "^0.143.0"
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
